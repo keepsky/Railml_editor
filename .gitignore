@@ -1,3 +1,5 @@
+RailmlEditor/obj/
+RailmlEditor/bin/
 RailmlEditor/obj/Debug/net10.0-windows/apphost.exe
 RailmlEditor/obj/Debug/net10.0-windows/GeneratedInternalTypeHelper.g.cs
 RailmlEditor/obj/Debug/net10.0-windows/MainWindow.baml
@@ -22,3 +24,15 @@ RailmlEditor/obj/Debug/net10.0-windows/refint/RailmlEditor.dll
 RailmlEditor/bin/Debug/net10.0-windows/RailmlEditor.dll
 RailmlEditor/bin/Debug/net10.0-windows/RailmlEditor.exe
 RailmlEditor/bin/Debug/net10.0-windows/RailmlEditor.pdb
+RailmlEditor/obj/RailmlEditor_acd1y3j2_wpftmp.csproj.nuget.dgspec.json
+RailmlEditor/obj/RailmlEditor_acd1y3j2_wpftmp.csproj.nuget.g.props
+RailmlEditor/obj/RailmlEditor_acd1y3j2_wpftmp.csproj.nuget.g.targets
+RailmlEditor/obj/Debug/net10.0-windows/MainWindow.baml
+RailmlEditor/obj/Debug/net10.0-windows/MainWindow.g.cs
+RailmlEditor/obj/Debug/net10.0-windows/RailmlEditor_acd1y3j2_wpftmp.AssemblyInfo.cs
+RailmlEditor/obj/Debug/net10.0-windows/RailmlEditor_acd1y3j2_wpftmp.AssemblyInfoInputs.cache
+RailmlEditor/obj/Debug/net10.0-windows/RailmlEditor_acd1y3j2_wpftmp.assets.cache
+RailmlEditor/obj/Debug/net10.0-windows/RailmlEditor_acd1y3j2_wpftmp.GeneratedMSBuildEditorConfig.editorconfig
+RailmlEditor/obj/Debug/net10.0-windows/RailmlEditor_acd1y3j2_wpftmp.GlobalUsings.g.cs
+RailmlEditor/obj/Debug/net10.0-windows/RailmlEditor_acd1y3j2_wpftmp.sourcelink.json
+RailmlEditor/obj/Debug/net10.0-windows/RailmlEditor_MarkupCompile.cache

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RailmlEditor")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+603d61d2da4e998555f469ef12d313cf786f9319")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b899a4e002b88a654bd9ec9ffa18ce7183f7654b")]
 [assembly: System.Reflection.AssemblyProductAttribute("RailmlEditor")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RailmlEditor")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

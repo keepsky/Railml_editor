@@ -20,6 +20,30 @@ namespace RailmlEditor.Models
     {
         [XmlElement(ElementName = "tracks")]
         public Tracks Tracks { get; set; }
+
+        [XmlElement(ElementName = "signals")]
+        public Signals Signals { get; set; }
+    }
+
+    public class Signals
+    {
+        [XmlElement(ElementName = "signal")]
+        public List<Signal> SignalList { get; set; } = new List<Signal>();
+    }
+
+    public class Signal
+    {
+        [XmlAttribute(AttributeName = "id")]
+        public string Id { get; set; }
+
+        [XmlAttribute(AttributeName = "pos")]
+        public double Pos { get; set; }
+
+        // Visual Coordinates
+        [XmlIgnore]
+        public double X { get; set; }
+        [XmlIgnore]
+        public double Y { get; set; }
     }
 
     public class Tracks
