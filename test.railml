@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<railml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" version="2.5" xmlns="http://www.railml.org/schemas/2013">
+  <infrastructure>
+    <tracks>
+      <track id="Tr01" name="Generated Track">
+        <trackTopology>
+          <trackBegin pos="0" />
+          <trackEnd pos="0" />
+          <connections />
+        </trackTopology>
+      </track>
+      <track id="Tr2" name="Generated Track">
+        <trackTopology>
+          <trackBegin pos="0" />
+          <trackEnd pos="0" />
+          <connections />
+        </trackTopology>
+      </track>
+    </tracks>
+    <signals>
+      <signal id="Sig4" pos="0" />
+    </signals>
+  </infrastructure>
+</railml>

@@ -17,13 +17,70 @@ namespace RailmlEditor
             this.DataContext = _viewModel;
         }
 
+        private Point _toolboxDragStart;
+
         private void Toolbox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            _toolboxDragStart = e.GetPosition(null);
+        }
+
+        private void Toolbox_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed && sender is Button button)
+            {
+                Point currentPos = e.GetPosition(null);
+                if (Math.Abs(currentPos.X - _toolboxDragStart.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                    Math.Abs(currentPos.Y - _toolboxDragStart.Y) > SystemParameters.MinimumVerticalDragDistance)
+                {
+                    string type = button.Content.ToString();
+                    DragDrop.DoDragDrop(button, type, DragDropEffects.Copy);
+                }
+            }
+        }
+
+        private void Toolbox_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button)
             {
-                // Drag Data: Simple String for now, could be an Enum or Complex Object
                 string type = button.Content.ToString();
-                DragDrop.DoDragDrop(button, type, DragDropEffects.Copy);
+                Point defaultPos = new Point(100, 100);
+
+                BaseElementViewModel newElement = null;
+
+                if (type == "Track")
+                {
+                    newElement = new TrackViewModel
+                    {
+                        Id = $"Tr{_viewModel.Elements.Count + 1}",
+                        X = defaultPos.X, 
+                        Y = defaultPos.Y,
+                        Length = 100 
+                    };
+                }
+                else if (type == "Switch")
+                {
+                    newElement = new SwitchViewModel
+                    {
+                        Id = $"Sw{_viewModel.Elements.Count + 1}",
+                        X = defaultPos.X,
+                        Y = defaultPos.Y
+                    };
+                }
+                else if (type == "Signal")
+                {
+                    newElement = new SignalViewModel
+                    {
+                        Id = $"Sig{_viewModel.Elements.Count + 1}",
+                        X = defaultPos.X,
+                        Y = defaultPos.Y
+                    };
+                }
+
+                if (newElement != null)
+                {
+                    _viewModel.Elements.Add(newElement);
+                    _viewModel.SelectedElement = newElement; 
+                }
             }
         }
 

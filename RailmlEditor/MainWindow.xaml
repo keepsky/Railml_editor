@@ -46,9 +46,18 @@
             <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="0,0,1,0" Background="#F0F0F0">
                 <StackPanel Margin="10">
                     <TextBlock Text="Toolbox" FontWeight="Bold" Margin="0,0,0,10"/>
-                    <Button Content="Track" Margin="0,5" PreviewMouseLeftButtonDown="Toolbox_PreviewMouseLeftButtonDown"/>
-                    <Button Content="Switch" Margin="0,5" PreviewMouseLeftButtonDown="Toolbox_PreviewMouseLeftButtonDown"/>
-                    <Button Content="Signal" Margin="0,5" PreviewMouseLeftButtonDown="Toolbox_PreviewMouseLeftButtonDown"/>
+                    <Button Content="Track" Margin="0,5" 
+                            PreviewMouseLeftButtonDown="Toolbox_PreviewMouseLeftButtonDown"
+                            PreviewMouseMove="Toolbox_PreviewMouseMove"
+                            Click="Toolbox_Click"/>
+                    <Button Content="Switch" Margin="0,5" 
+                            PreviewMouseLeftButtonDown="Toolbox_PreviewMouseLeftButtonDown"
+                            PreviewMouseMove="Toolbox_PreviewMouseMove"
+                            Click="Toolbox_Click"/>
+                    <Button Content="Signal" Margin="0,5" 
+                            PreviewMouseLeftButtonDown="Toolbox_PreviewMouseLeftButtonDown"
+                            PreviewMouseMove="Toolbox_PreviewMouseMove"
+                            Click="Toolbox_Click"/>
                 </StackPanel>
             </Border>
 
