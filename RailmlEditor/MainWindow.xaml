@@ -6,6 +6,19 @@
         xmlns:local="clr-namespace:RailmlEditor"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+    <Window.Resources>
+        <!-- Data Templates for Visual Elements -->
+        <DataTemplate DataType="{x:Type local:ViewModels.TrackViewModel}">
+            <Rectangle Width="{Binding Length}" Height="10" Fill="Black" Stroke="Gray" StrokeThickness="1"/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:ViewModels.SwitchViewModel}">
+            <Polygon Points="0,0 40,0 20,20 0,0" Fill="Orange" Stroke="Black" StrokeThickness="1"/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:ViewModels.SignalViewModel}">
+            <Ellipse Width="15" Height="15" Fill="Red" Stroke="DarkRed" StrokeThickness="1"/>
+        </DataTemplate>
+    </Window.Resources>
+
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
@@ -33,24 +46,62 @@
             <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="0,0,1,0" Background="#F0F0F0">
                 <StackPanel Margin="10">
                     <TextBlock Text="Toolbox" FontWeight="Bold" Margin="0,0,0,10"/>
-                    <Button Content="Track" Margin="0,5"/>
-                    <Button Content="Switch" Margin="0,5"/>
-                    <Button Content="Signal" Margin="0,5"/>
+                    <Button Content="Track" Margin="0,5" PreviewMouseLeftButtonDown="Toolbox_PreviewMouseLeftButtonDown"/>
+                    <Button Content="Switch" Margin="0,5" PreviewMouseLeftButtonDown="Toolbox_PreviewMouseLeftButtonDown"/>
+                    <Button Content="Signal" Margin="0,5" PreviewMouseLeftButtonDown="Toolbox_PreviewMouseLeftButtonDown"/>
                 </StackPanel>
             </Border>
 
-            <!-- Main Canvas -->
+            <!-- Main Canvas Area -->
             <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                <Canvas x:Name="MainCanvas" Background="White" Width="2000" Height="2000">
-                    <!-- Grid Lines or background can go here -->
-                </Canvas>
+                <ItemsControl x:Name="MainDesigner" 
+                              ItemsSource="{Binding Elements}" 
+                              Background="White" Width="2000" Height="2000"
+                              AllowDrop="True"
+                              Drop="MainDesigner_Drop">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                            <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                            <Style.Triggers>
+                                <!-- Basic selection visual cue (optional, for now just logic) -->
+                            </Style.Triggers>
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <ContentPresenter Content="{Binding}">
+                                <ContentPresenter.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" 
+                                                  Command="{Binding DataContext.SelectCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                  CommandParameter="{Binding}"/>
+                                </ContentPresenter.InputBindings>
+                            </ContentPresenter>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </ScrollViewer>
 
             <!-- Properties Panel -->
             <Border Grid.Column="2" BorderBrush="Gray" BorderThickness="1,0,0,0" Background="#F0F0F0">
                 <StackPanel Margin="10">
                     <TextBlock Text="Properties" FontWeight="Bold" Margin="0,0,0,10"/>
-                    <TextBlock Text="Select an item to view properties." Foreground="Gray"/>
+                    <!-- Simple Property Grid for now -->
+                    <Grid DataContext="{Binding SelectedElement}">
+                        <StackPanel>
+                            <TextBlock Text="ID:"/>
+                            <TextBox Text="{Binding Id}"/>
+                            <TextBlock Text="X:"/>
+                            <TextBox Text="{Binding X}"/>
+                            <TextBlock Text="Y:"/>
+                            <TextBox Text="{Binding Y}"/>
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
             </Border>
         </Grid>
