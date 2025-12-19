@@ -9,6 +9,7 @@ namespace RailmlEditor.ViewModels
         private double _x;
         private double _y;
         private string _id;
+        private bool _isSelected;
 
         public double X
         {
@@ -26,6 +27,12 @@ namespace RailmlEditor.ViewModels
         {
             get => _id;
             set => SetProperty(ref _id, value);
+        }
+
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set => SetProperty(ref _isSelected, value);
         }
 
         public abstract string TypeName { get; }

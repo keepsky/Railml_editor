@@ -62,7 +62,13 @@
             </Border>
 
             <!-- Main Canvas Area -->
-            <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <Grid Grid.Column="1" x:Name="MainGrid" Background="Transparent"
+                  MouseDown="MainGrid_MouseDown" 
+                  MouseMove="MainGrid_MouseMove" 
+                  MouseUp="MainGrid_MouseUp"
+                  Focusable="True"
+                  KeyDown="MainGrid_KeyDown">
+                <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                 <ItemsControl x:Name="MainDesigner" 
                               ItemsSource="{Binding Elements}" 
                               Background="White" Width="2000" Height="2000"
@@ -77,6 +83,7 @@
                         <Style TargetType="ContentPresenter">
                             <Setter Property="Canvas.Left" Value="{Binding X}"/>
                             <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                            <Setter Property="Opacity" Value="{Binding IsSelected, Converter={local:BoolToOpacityConverter}}"/> 
                             <EventSetter Event="PreviewMouseDown" Handler="Item_MouseDown"/>
                             <EventSetter Event="PreviewMouseMove" Handler="Item_MouseMove"/>
                             <EventSetter Event="PreviewMouseUp" Handler="Item_MouseUp"/>
@@ -89,6 +96,10 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
+            <Canvas x:Name="OverlayCanvas" IsHitTestVisible="False">
+                <Rectangle x:Name="SelectionBox" Stroke="#007ACC" StrokeDashArray="2 2" StrokeThickness="1" Fill="#33007ACC" Visibility="Collapsed"/>
+            </Canvas>
+            </Grid>
 
             <!-- Properties Panel -->
             <Border Grid.Column="2" BorderBrush="Gray" BorderThickness="1,0,0,0" Background="#F0F0F0">

@@ -18,7 +18,7 @@
       </track>
     </tracks>
     <signals>
-      <signal id="Sig4" pos="0" />
+      <signal id="Sig3" pos="0" />
     </signals>
   </infrastructure>
 </railml>

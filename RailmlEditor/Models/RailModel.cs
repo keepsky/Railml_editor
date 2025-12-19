@@ -40,9 +40,9 @@ namespace RailmlEditor.Models
         public double Pos { get; set; }
 
         // Visual Coordinates
-        [XmlIgnore]
+        [XmlAttribute]
         public double X { get; set; }
-        [XmlIgnore]
+        [XmlAttribute]
         public double Y { get; set; }
     }
 
@@ -85,9 +85,9 @@ namespace RailmlEditor.Models
         public string Id { get; set; }
         
         // Visual Coordinates (Extension, not part of strict RailML but needed for Editor)
-        [XmlIgnore]
+        [XmlAttribute]
         public double X { get; set; }
-        [XmlIgnore]
+        [XmlAttribute]
         public double Y { get; set; }
     }
 
