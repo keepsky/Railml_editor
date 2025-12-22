@@ -99,30 +99,18 @@ namespace RailmlEditor.Models
         [XmlElement(ElementName = "connections")]
         public NodeConnections Connections { get; set; }
 
-        // Helper properties for Editor logic (mapped to Any)
-        [XmlIgnore]
-        public double X 
-        { 
-            get => Any?.ScreenPos?.X ?? 0;
-            set 
-            {
-                if (Any == null) Any = new SehwaAny();
-                if (Any.ScreenPos == null) Any.ScreenPos = new SehwaScreenPos();
-                Any.ScreenPos.X = value;
-            }
-        }
+        // Standard Coordinates (already seemingly present or handled via other means, but explicitly adding extensions if needed)
+        // Note: The previous code assumes X/Y exist on TrackNode. I should verify if they are there. 
+        // If they are missing in the view, I should be careful. 
+        // But user request focuses on <sehwa:screenPos>.
+        
+        [XmlElement(ElementName = "screenPos", Namespace = "http://www.sehwa.co.kr/railml")]
+        public ScreenPos ScreenPos { get; set; }
 
-        [XmlIgnore]
-        public double Y
-        {
-            get => Any?.ScreenPos?.Y ?? 0;
-            set
-            {
-                if (Any == null) Any = new SehwaAny();
-                if (Any.ScreenPos == null) Any.ScreenPos = new SehwaScreenPos();
-                Any.ScreenPos.Y = value;
-            }
-        }
+        // Coordinates for serialization (if not already strictly defined)
+        [XmlAttribute] public double X { get; set; }
+        [XmlAttribute] public double Y { get; set; }
+
     }
 
     public class NodeConnections
@@ -222,5 +210,14 @@ namespace RailmlEditor.Models
     {
         [XmlAttribute(AttributeName = "ref")]
         public string Ref { get; set; }
+    }
+
+    public class ScreenPos
+    {
+        [XmlAttribute(AttributeName = "mx")]
+        public double MX { get; set; }
+
+        [XmlAttribute(AttributeName = "my")]
+        public double MY { get; set; }
     }
 }

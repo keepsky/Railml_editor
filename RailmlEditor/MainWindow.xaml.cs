@@ -85,6 +85,18 @@ namespace RailmlEditor
                         Dir = "up"
                     };
                 }
+                else if (type == "CurvedTrack")
+                {
+                    newElement = new CurvedTrackViewModel
+                    {
+                        Id = $"CurvedTr{_viewModel.Elements.Count + 1}",
+                        X = defaultPos.X,
+                        Y = defaultPos.Y,
+                        Length = 100, 
+                        MX = defaultPos.X + 50,
+                        MY = defaultPos.Y + 50 
+                    };
+                }
 
                 if (newElement != null)
                 {
@@ -141,7 +153,42 @@ namespace RailmlEditor
 
                     foreach (var element in _viewModel.Elements)
                     {
-                        if (element is TrackViewModel track)
+                        if (element is CurvedTrackViewModel curve)
+                        {
+                             double dx1 = curve.MX - curve.X;
+                             double dy1 = curve.MY - curve.Y;
+                             double lenSq1 = dx1*dx1 + dy1*dy1;
+                             double t1 = lenSq1 > 0 ? Math.Max(0, Math.Min(1, ((dropPosition.X - curve.X)*dx1 + (dropPosition.Y - curve.Y)*dy1) / lenSq1)) : 0;
+                             double dist1 = Math.Sqrt(Math.Pow(dropPosition.X - (curve.X + t1*dx1), 2) + Math.Pow(dropPosition.Y - (curve.Y + t1*dy1), 2));
+
+                             double dx2 = curve.X2 - curve.MX;
+                             double dy2 = curve.Y2 - curve.MY;
+                             double lenSq2 = dx2*dx2 + dy2*dy2;
+                             double t2 = lenSq2 > 0 ? Math.Max(0, Math.Min(1, ((dropPosition.X - curve.MX)*dx2 + (dropPosition.Y - curve.MY)*dy2) / lenSq2)) : 0;
+                             double dist2 = Math.Sqrt(Math.Pow(dropPosition.X - (curve.MX + t2*dx2), 2) + Math.Pow(dropPosition.Y - (curve.MY + t2*dy2), 2));
+
+                             if (dist1 < dist2) 
+                             {
+                                 if (dist1 < 20 && dist1 < minDistance)
+                                 {
+                                     minDistance = dist1;
+                                     closestTrack = curve;
+                                     snapPoint = new Point(curve.X + t1*dx1, curve.Y + t1*dy1);
+                                     snapPos = t1 * Math.Sqrt(lenSq1);
+                                 }
+                             }
+                             else
+                             {
+                                 if (dist2 < 20 && dist2 < minDistance)
+                                 {
+                                     minDistance = dist2;
+                                     closestTrack = curve;
+                                     snapPoint = new Point(curve.MX + t2*dx2, curve.MY + t2*dy2);
+                                     snapPos = Math.Sqrt(lenSq1) + t2 * Math.Sqrt(lenSq2);
+                                 }
+                             }
+                        }
+                        else if (element is TrackViewModel track)
                         {
                             // Calculate Distance from Point to Line Segment
                             double dx = track.X2 - track.X;
@@ -195,7 +242,6 @@ namespace RailmlEditor
 
         private bool _isDragging = false;
         private Point _startPoint;
-        private Point _originalElementPos;
         private FrameworkElement _draggedControl;
 
         // Selection & Panning State
@@ -203,8 +249,6 @@ namespace RailmlEditor
         private Point _selectionStartPoint;
         private bool _isPanning = false;
         private Point _panStartPoint;
-        private double _panHStart;
-        private double _panVStart;
 
         private void MainGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -237,11 +281,9 @@ namespace RailmlEditor
             }
             else if (e.ChangedButton == MouseButton.Middle)
             {
-                // Start Panning
+                // Start Panning (Global Move)
                 _isPanning = true;
-                _panStartPoint = e.GetPosition(MainGrid);
-                _panHStart = MainScrollViewer.HorizontalOffset;
-                _panVStart = MainScrollViewer.VerticalOffset;
+                _panStartPoint = e.GetPosition(MainGrid); // Initial point, acts as "Last Point"
                 
                 MainGrid.Focus();
                 MainGrid.CaptureMouse();
@@ -268,11 +310,38 @@ namespace RailmlEditor
             else if (_isPanning)
             {
                 var curPos = e.GetPosition(MainGrid);
-                var deltaX = _panStartPoint.X - curPos.X;
-                var deltaY = _panStartPoint.Y - curPos.Y;
+                var deltaX = curPos.X - _panStartPoint.X;
+                var deltaY = curPos.Y - _panStartPoint.Y;
 
-                MainScrollViewer.ScrollToHorizontalOffset(_panHStart + deltaX);
-                MainScrollViewer.ScrollToVerticalOffset(_panVStart + deltaY);
+                if (Math.Abs(deltaX) >= 10 || Math.Abs(deltaY) >= 10)
+                {
+                    double snapX = Math.Round(deltaX / 10.0) * 10.0;
+                    double snapY = Math.Round(deltaY / 10.0) * 10.0;
+
+                    if (snapX != 0 || snapY != 0)
+                    {
+                        foreach (var element in _viewModel.Elements)
+                        {
+                            element.X += snapX;
+                            element.Y += snapY;
+
+                            if (element is TrackViewModel track)
+                            {
+                                track.X2 += snapX;
+                                track.Y2 += snapY;
+
+                                if (track is CurvedTrackViewModel curved)
+                                {
+                                    curved.MX += snapX;
+                                    curved.MY += snapY;
+                                }
+                            }
+                        }
+                        // Update "Last Point" by the snapped amount to avoid drift
+                        _panStartPoint.X += snapX;
+                        _panStartPoint.Y += snapY;
+                    }
+                }
             }
         }
 
@@ -413,7 +482,42 @@ namespace RailmlEditor
 
                         foreach (var el in _viewModel.Elements)
                         {
-                            if (el is TrackViewModel track)
+                            if (el is CurvedTrackViewModel curve)
+                            {
+                                 double dx1 = curve.MX - curve.X;
+                                 double dy1 = curve.MY - curve.Y;
+                                 double lenSq1 = dx1*dx1 + dy1*dy1;
+                                 double t1 = lenSq1 > 0 ? Math.Max(0, Math.Min(1, ((currentPos.X - curve.X)*dx1 + (currentPos.Y - curve.Y)*dy1) / lenSq1)) : 0;
+                                 double dist1 = Math.Sqrt(Math.Pow(currentPos.X - (curve.X + t1*dx1), 2) + Math.Pow(currentPos.Y - (curve.Y + t1*dy1), 2));
+
+                                 double dx2 = curve.X2 - curve.MX;
+                                 double dy2 = curve.Y2 - curve.MY;
+                                 double lenSq2 = dx2*dx2 + dy2*dy2;
+                                 double t2 = lenSq2 > 0 ? Math.Max(0, Math.Min(1, ((currentPos.X - curve.MX)*dx2 + (currentPos.Y - curve.MY)*dy2) / lenSq2)) : 0;
+                                 double dist2 = Math.Sqrt(Math.Pow(currentPos.X - (curve.MX + t2*dx2), 2) + Math.Pow(currentPos.Y - (curve.MY + t2*dy2), 2));
+    
+                                 if (dist1 < dist2) 
+                                 {
+                                     if (dist1 < 20 && dist1 < minDistance)
+                                     {
+                                         minDistance = dist1;
+                                         closestTrack = curve;
+                                         snapPoint = new Point(curve.X + t1*dx1, curve.Y + t1*dy1);
+                                         snapPos = t1 * Math.Sqrt(lenSq1);
+                                     }
+                                 }
+                                 else
+                                 {
+                                     if (dist2 < 20 && dist2 < minDistance)
+                                     {
+                                         minDistance = dist2;
+                                         closestTrack = curve;
+                                         snapPoint = new Point(curve.MX + t2*dx2, curve.MY + t2*dy2);
+                                         snapPos = Math.Sqrt(lenSq1) + t2 * Math.Sqrt(lenSq2);
+                                     }
+                                 }
+                            }
+                            else if (el is TrackViewModel track)
                             {
                                 double dx = track.X2 - track.X;
                                 double dy = track.Y2 - track.Y;
@@ -475,6 +579,12 @@ namespace RailmlEditor
                                  {
                                      trackVm.X2 += snapX;
                                      trackVm.Y2 += snapY;
+
+                                     if (trackVm is CurvedTrackViewModel curved)
+                                     {
+                                         curved.MX += snapX;
+                                         curved.MY += snapY;
+                                     }
 
                                      // Move Attached TCBs
                                      foreach (var el in _viewModel.Elements)
@@ -552,6 +662,30 @@ namespace RailmlEditor
                     }
                 }
             }
+        }
+
+        private void MidThumb_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
+        {
+             if (sender is FrameworkElement thumb && thumb.DataContext is CurvedTrackViewModel curved)
+             {
+                 _thumbAccX += e.HorizontalChange;
+                 _thumbAccY += e.VerticalChange;
+
+                 if (Math.Abs(_thumbAccX) >= 10 || Math.Abs(_thumbAccY) >= 10)
+                 {
+                     double snapX = Math.Round(_thumbAccX / 10.0) * 10.0;
+                     double snapY = Math.Round(_thumbAccY / 10.0) * 10.0;
+
+                     if (snapX != 0 || snapY != 0)
+                     {
+                          curved.MX += snapX;
+                          curved.MY += snapY;
+
+                         _thumbAccX -= snapX;
+                         _thumbAccY -= snapY;
+                     }
+                 }
+             }
         }
 
         private void Item_MouseUp(object sender, MouseButtonEventArgs e)

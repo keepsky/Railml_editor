@@ -37,7 +37,10 @@ namespace RailmlEditor.Services
                             Id = $"{element.Id}_begin",
                             Pos = 0,
                             X = element.X, 
-                            Y = element.Y 
+                            Y = element.Y,
+                            ScreenPos = element is CurvedTrackViewModel ctv 
+                                ? new ScreenPos { MX = ctv.MX, MY = ctv.MY } 
+                                : null
                         },
                         TrackEnd = new TrackNode 
                         { 
@@ -297,12 +300,25 @@ namespace RailmlEditor.Services
                 {
                     foreach (var track in railml.Infrastructure.Tracks.TrackList)
                     {
-                        var trackVm = new TrackViewModel
+                        TrackViewModel trackVm;
+                        
+                        if (track.TrackTopology?.TrackBegin?.ScreenPos != null)
                         {
-                            Id = track.Id,
-                            X = track.TrackTopology?.TrackBegin?.X ?? 0,
-                            Y = track.TrackTopology?.TrackBegin?.Y ?? 0,
-                        };
+                            var ctv = new CurvedTrackViewModel
+                            {
+                                MX = track.TrackTopology.TrackBegin.ScreenPos.MX,
+                                MY = track.TrackTopology.TrackBegin.ScreenPos.MY
+                            };
+                            trackVm = ctv;
+                        }
+                        else
+                        {
+                            trackVm = new TrackViewModel();
+                        }
+
+                        trackVm.Id = track.Id;
+                        trackVm.X = track.TrackTopology?.TrackBegin?.X ?? 0;
+                        trackVm.Y = track.TrackTopology?.TrackBegin?.Y ?? 0;
                         
                         // Set X2, Y2 from TrackEnd
                         if (track.TrackTopology?.TrackEnd != null)
@@ -317,6 +333,62 @@ namespace RailmlEditor.Services
                         }
 
                         viewModel.Elements.Add(trackVm);
+
+                        // Load TCBs attached to this track
+                        if (track.TrainDetectionElements?.TrackCircuitBorders != null)
+                        {
+                            foreach(var tcb in track.TrainDetectionElements.TrackCircuitBorders)
+                            {
+                                var tcbVm = new TcbViewModel
+                                {
+                                    Id = tcb.Id,
+                                    ParentTrackId = track.Id,
+                                    PositionOnTrack = tcb.Pos,
+                                    Dir = tcb.Dir,
+                                    // Calculate approx X/Y? 
+                                    // We don't save TCB X/Y in XML (only Pos).
+                                    // Ideally we should recalculate X/Y based on Pos and Track.
+                                    // For now, place at Track Start as fallback or recalculate.
+                                    X = trackVm.X - 5, // Placeholder
+                                    Y = trackVm.Y - 5  // Placeholder
+                                };
+                                // Re-calculate position
+                                if (trackVm is CurvedTrackViewModel curve)
+                                {
+                                    double dist1 = Math.Sqrt(Math.Pow(curve.MX - curve.X, 2) + Math.Pow(curve.MY - curve.Y, 2));
+                                    double dist2 = Math.Sqrt(Math.Pow(curve.X2 - curve.MX, 2) + Math.Pow(curve.Y2 - curve.MY, 2));
+                                    
+                                    if (tcb.Pos <= dist1)
+                                    {
+                                        double t = (dist1 > 0) ? tcb.Pos / dist1 : 0;
+                                        tcbVm.X = curve.X + t * (curve.MX - curve.X) - 5;
+                                        tcbVm.Y = curve.Y + t * (curve.MY - curve.Y) - 5;
+                                    }
+                                    else
+                                    {
+                                        double remaining = tcb.Pos - dist1;
+                                        double t = (dist2 > 0) ? remaining / dist2 : 0;
+                                        tcbVm.X = curve.MX + t * (curve.X2 - curve.MX) - 5;
+                                        tcbVm.Y = curve.MY + t * (curve.Y2 - curve.MY) - 5;
+                                    }
+                                }
+                                else
+                                {
+                                    double dx = trackVm.X2 - trackVm.X;
+                                    double dy = trackVm.Y2 - trackVm.Y;
+                                    double lengthSq = dx * dx + dy * dy;
+                                    if (lengthSq > 0)
+                                    {
+                                        double length = Math.Sqrt(lengthSq);
+                                        double t = tcb.Pos / length; // Normalized
+                                        tcbVm.X = trackVm.X + t * dx - 5;
+                                        tcbVm.Y = trackVm.Y + t * dy - 5;
+                                    }
+                                }
+
+                                viewModel.Elements.Add(tcbVm);
+                            }
+                        }
                     }
                 }
 

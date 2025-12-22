@@ -97,7 +97,7 @@ namespace RailmlEditor.ViewModels
 
         // Length is now derived or updates X2?
         // Let's make Length read-only derived, or if set, it updates X2 (assuming horizontal extension).
-        public double Length
+        public virtual double Length
         {
             get => System.Math.Sqrt(System.Math.Pow(X2 - X, 2) + System.Math.Pow(Y2 - Y, 2));
             set
