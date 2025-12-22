@@ -6,15 +6,17 @@
         <trackTopology>
           <trackBegin pos="0" id="Tr01_begin">
             <any>
-              <sehwa:screenPos x="120" y="220" />
+              <sehwa:screenPos x="70" y="260" />
             </any>
           </trackBegin>
-          <trackEnd pos="200" id="Tr01_end">
+          <trackEnd pos="80" id="Tr01_end">
             <any>
-              <sehwa:screenPos x="320" y="220" />
+              <sehwa:screenPos x="150" y="260" />
             </any>
             <connections>
-              <connection id="conn_Tr01_end_to_Tr2_begin" ref="Tr2_begin" />
+              <switch id="sw_Tr01_end" ref="Tr2_begin">
+                <connection id="switch_conn_sw_Tr01_end_1" ref="Tr3_begin" />
+              </switch>
             </connections>
           </trackEnd>
           <connections />
@@ -24,19 +26,16 @@
         <trackTopology>
           <trackBegin pos="0" id="Tr2_begin">
             <any>
-              <sehwa:screenPos x="320" y="220" />
+              <sehwa:screenPos x="150" y="260" />
             </any>
             <connections>
               <connection id="conn_Tr2_begin_to_Tr01_end" ref="Tr01_end" />
             </connections>
           </trackBegin>
-          <trackEnd pos="94.33981132056604" id="Tr2_end">
+          <trackEnd pos="100" id="Tr2_end">
             <any>
-              <sehwa:screenPos x="400" y="170" />
+              <sehwa:screenPos x="250" y="260" />
             </any>
-            <connections>
-              <connection id="conn_Tr2_end_to_Tr3_begin" ref="Tr3_begin" />
-            </connections>
           </trackEnd>
           <connections />
         </trackTopology>
@@ -45,15 +44,15 @@
         <trackTopology>
           <trackBegin pos="0" id="Tr3_begin">
             <any>
-              <sehwa:screenPos x="400" y="170" />
+              <sehwa:screenPos x="150" y="260" />
             </any>
             <connections>
-              <connection id="conn_Tr3_begin_to_Tr2_end" ref="Tr2_end" />
+              <connection id="conn_Tr3_begin_to_Tr01_end" ref="Tr01_end" />
             </connections>
           </trackBegin>
-          <trackEnd pos="100" id="Tr3_end">
+          <trackEnd pos="111.80339887498948" id="Tr3_end">
             <any>
-              <sehwa:screenPos x="500" y="170" />
+              <sehwa:screenPos x="250" y="210" />
             </any>
           </trackEnd>
           <connections />

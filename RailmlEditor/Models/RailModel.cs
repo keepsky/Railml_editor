@@ -121,6 +121,9 @@ namespace RailmlEditor.Models
 
     public class NodeConnections
     {
+        [XmlElement(ElementName = "switch")]
+        public List<Switch> Switches { get; set; } = new List<Switch>();
+
         [XmlElement(ElementName = "connection")]
         public List<Connection> ConnectionList { get; set; } = new List<Connection>();
     }
@@ -132,6 +135,12 @@ namespace RailmlEditor.Models
 
         [XmlAttribute(AttributeName = "ref")]
         public string Ref { get; set; }
+
+        [XmlAttribute(AttributeName = "orientation")]
+        public string Orientation { get; set; }
+
+        [XmlAttribute(AttributeName = "course")]
+        public string Course { get; set; }
     }
 
     public class SehwaAny
@@ -160,7 +169,10 @@ namespace RailmlEditor.Models
         [XmlAttribute(AttributeName = "id")]
         public string Id { get; set; }
 
-        [XmlAttribute(AttributeName = "pos")]
-        public double Pos { get; set; }
+        [XmlAttribute(AttributeName = "ref")]
+        public string Ref { get; set; }
+
+        [XmlElement(ElementName = "connection")]
+        public List<Connection> ConnectionList { get; set; } = new List<Connection>();
     }
 }

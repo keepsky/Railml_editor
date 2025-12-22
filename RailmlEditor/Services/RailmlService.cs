@@ -81,25 +81,70 @@ namespace RailmlEditor.Services
             // Check for overlaps (Distance < 1.0 for tolerance)
             foreach(var nodeA in allNodes)
             {
+                var overlappingNodes = new System.Collections.Generic.List<TrackNode>();
                 foreach(var nodeB in allNodes)
                 {
                     if(nodeA == nodeB) continue;
 
+                    // Ensure we only connect Begin-End or End-Begin
+                    bool isBeginA = nodeA.Id.EndsWith("_begin");
+                    bool isBeginB = nodeB.Id.EndsWith("_begin");
+                    if (isBeginA == isBeginB) continue; 
+
                     double dist = Math.Sqrt(Math.Pow(nodeA.X - nodeB.X, 2) + Math.Pow(nodeA.Y - nodeB.Y, 2));
                     if(dist < 1.0)
                     {
-                        // Overlap detected!
-                        if(nodeA.Connections == null) nodeA.Connections = new NodeConnections();
-                        
-                        // Check if connection already exists
-                        if(!nodeA.Connections.ConnectionList.Any(c => c.Ref == nodeB.Id))
-                        {
-                            nodeA.Connections.ConnectionList.Add(new Connection 
-                            { 
-                                Id = $"conn_{nodeA.Id}_to_{nodeB.Id}",
-                                Ref = nodeB.Id 
-                            });
-                        }
+                        overlappingNodes.Add(nodeB);
+                    }
+                }
+
+                if (overlappingNodes.Count > 0)
+                {
+                    if (nodeA.Connections == null) nodeA.Connections = new NodeConnections();
+                    
+                    bool isTrackEnd = nodeA.Id != null && nodeA.Id.EndsWith("_end");
+
+                    if (!isTrackEnd || overlappingNodes.Count == 1)
+                    {
+                         // Not a switch, or only single connection. Add all as direct connections.
+                         foreach (var nodeB in overlappingNodes)
+                         {
+                             if(!nodeA.Connections.ConnectionList.Any(c => c.Ref == nodeB.Id))
+                             {
+                                 nodeA.Connections.ConnectionList.Add(new Connection 
+                                 { 
+                                     Id = $"conn_{nodeA.Id}_to_{nodeB.Id}",
+                                     Ref = nodeB.Id 
+                                 });
+                             }
+                         }
+                    }
+                    else
+                    {
+                        // Multiple connections AND it is a TrackEnd -> Switch
+                        // Ensure we don't have duplicate switches
+                         if (nodeA.Connections.Switches.Count == 0)
+                         {
+                             var firstNode = overlappingNodes[0];
+                             var switchObj = new Switch
+                             {
+                                 Id = $"sw_{nodeA.Id}",
+                                 Ref = firstNode.Id
+                             };
+
+                             // Add remaining nodes as connections inside the switch
+                             for (int i = 1; i < overlappingNodes.Count; i++)
+                             {
+                                 var nextNode = overlappingNodes[i];
+                                 switchObj.ConnectionList.Add(new Connection
+                                 {
+                                     Id = $"switch_conn_{switchObj.Id}_{i}",
+                                     Ref = nextNode.Id
+                                 });
+                             }
+                             
+                             nodeA.Connections.Switches.Add(switchObj);
+                         }
                     }
                 }
             }

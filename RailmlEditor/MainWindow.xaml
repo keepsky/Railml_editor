@@ -68,7 +68,7 @@
                      </Thumb.RenderTransform>
                      <Thumb.Template>
                          <ControlTemplate>
-                             <Ellipse Width="12" Height="12" Fill="Red" Stroke="White" StrokeThickness="1"/>
+                             <Ellipse Width="12" Height="12" Fill="Blue" Stroke="White" StrokeThickness="1"/>
                          </ControlTemplate>
                      </Thumb.Template>
                  </Thumb>
