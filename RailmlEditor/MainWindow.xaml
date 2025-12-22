@@ -93,6 +93,26 @@
             <MenuItem Header="Edit" />
             <MenuItem Header="View" />
         </Menu>
+        
+        <ToolBarTray DockPanel.Dock="Top">
+            <ToolBar>
+                <Button Click="Toolbox_Click" ToolTip="Track">
+                    <!-- Track Icon using Rectangle -->
+                    <Rectangle Width="30" Height="6" Fill="White" Stroke="Black" StrokeThickness="1" RadiusX="3" RadiusY="3"/>
+                    <Button.Tag>Track</Button.Tag>
+                </Button>
+                <Button Click="Toolbox_Click" ToolTip="Switch">
+                    <!-- Switch Icon using Polygon -->
+                     <Polygon Points="0,0 20,0 10,10 0,0" Fill="Orange" Stroke="Black" StrokeThickness="1" Stretch="Uniform" Width="20" Height="20"/>
+                     <Button.Tag>Switch</Button.Tag>
+                </Button>
+                <Button Click="Toolbox_Click" ToolTip="Signal">
+                    <!-- Signal Icon using Ellipse -->
+                    <Ellipse Width="15" Height="15" Fill="Red" Stroke="DarkRed" StrokeThickness="1"/>
+                    <Button.Tag>Signal</Button.Tag>
+                </Button>
+            </ToolBar>
+        </ToolBarTray>
 
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem Content="Ready"/>
@@ -100,72 +120,13 @@
 
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="250" MinWidth="150"/>
+                <ColumnDefinition Width="5"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="250"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Toolbox -->
+             <!-- Properties Panel (Moved to Left) -->
             <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="0,0,1,0" Background="#F0F0F0">
-                <StackPanel Margin="10">
-                    <TextBlock Text="Toolbox" FontWeight="Bold" Margin="0,0,0,10"/>
-                    <Button Content="Track" Margin="0,5" 
-                            PreviewMouseLeftButtonDown="Toolbox_PreviewMouseLeftButtonDown"
-                            PreviewMouseMove="Toolbox_PreviewMouseMove"
-                            Click="Toolbox_Click"/>
-                    <Button Content="Switch" Margin="0,5" 
-                            PreviewMouseLeftButtonDown="Toolbox_PreviewMouseLeftButtonDown"
-                            PreviewMouseMove="Toolbox_PreviewMouseMove"
-                            Click="Toolbox_Click"/>
-                    <Button Content="Signal" Margin="0,5" 
-                            PreviewMouseLeftButtonDown="Toolbox_PreviewMouseLeftButtonDown"
-                            PreviewMouseMove="Toolbox_PreviewMouseMove"
-                            Click="Toolbox_Click"/>
-                </StackPanel>
-            </Border>
-
-            <!-- Main Canvas Area -->
-            <Grid Grid.Column="1" x:Name="MainGrid" Background="Transparent"
-                  MouseDown="MainGrid_MouseDown" 
-                  MouseMove="MainGrid_MouseMove" 
-                  MouseUp="MainGrid_MouseUp"
-                  Focusable="True"
-                  KeyDown="MainGrid_KeyDown">
-                <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                <ItemsControl x:Name="MainDesigner" 
-                              ItemsSource="{Binding Elements}" 
-                              Background="White" Width="2000" Height="2000"
-                              AllowDrop="True"
-                              Drop="MainDesigner_Drop">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <Canvas/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemContainerStyle>
-                        <Style TargetType="ContentPresenter">
-                            <Setter Property="Canvas.Left" Value="{Binding X}"/>
-                            <Setter Property="Canvas.Top" Value="{Binding Y}"/>
-                            <Setter Property="Opacity" Value="{Binding IsSelected, Converter={local:BoolToOpacityConverter}}"/> 
-                            <EventSetter Event="MouseDown" Handler="Item_MouseDown"/>
-                            <EventSetter Event="MouseMove" Handler="Item_MouseMove"/>
-                            <EventSetter Event="MouseUp" Handler="Item_MouseUp"/>
-                        </Style>
-                    </ItemsControl.ItemContainerStyle>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <ContentPresenter Content="{Binding}"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
-            <Canvas x:Name="OverlayCanvas" IsHitTestVisible="False">
-                <Rectangle x:Name="SelectionBox" Stroke="#007ACC" StrokeDashArray="2 2" StrokeThickness="1" Fill="#33007ACC" Visibility="Collapsed"/>
-            </Canvas>
-            </Grid>
-
-            <!-- Properties Panel -->
-            <Border Grid.Column="2" BorderBrush="Gray" BorderThickness="1,0,0,0" Background="#F0F0F0">
                 <StackPanel Margin="10">
                     <TextBlock Text="Properties" FontWeight="Bold" Margin="0,0,0,10"/>
                     <!-- Simple Property Grid for now -->
@@ -223,6 +184,51 @@
                     </ContentControl>
                 </StackPanel>
             </Border>
+
+            <!-- Grid Splitter -->
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="LightGray"/>
+
+            <!-- Main Canvas Area -->
+            <Grid Grid.Column="2" x:Name="MainGrid" Background="Transparent"
+                  MouseDown="MainGrid_MouseDown" 
+                  MouseMove="MainGrid_MouseMove" 
+                  MouseUp="MainGrid_MouseUp"
+                  Focusable="True"
+                  KeyDown="MainGrid_KeyDown">
+                <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="MainDesigner" 
+                              ItemsSource="{Binding Elements}" 
+                              Background="White" Width="2000" Height="2000"
+                              AllowDrop="True"
+                              Drop="MainDesigner_Drop">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                            <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                            <Setter Property="Opacity" Value="{Binding IsSelected, Converter={local:BoolToOpacityConverter}}"/> 
+                            <EventSetter Event="MouseDown" Handler="Item_MouseDown"/>
+                            <EventSetter Event="MouseMove" Handler="Item_MouseMove"/>
+                            <EventSetter Event="MouseUp" Handler="Item_MouseUp"/>
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <ContentPresenter Content="{Binding}"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            <Canvas x:Name="OverlayCanvas" IsHitTestVisible="False">
+                <Rectangle x:Name="SelectionBox" Stroke="#007ACC" StrokeDashArray="2 2" StrokeThickness="1" Fill="#33007ACC" Visibility="Collapsed"/>
+            </Canvas>
+            </Grid>
+
+
         </Grid>
     </DockPanel>
 </Window>

@@ -32,7 +32,7 @@ namespace RailmlEditor
                 if (Math.Abs(currentPos.X - _toolboxDragStart.X) > SystemParameters.MinimumHorizontalDragDistance ||
                     Math.Abs(currentPos.Y - _toolboxDragStart.Y) > SystemParameters.MinimumVerticalDragDistance)
                 {
-                    string type = button.Content.ToString();
+                    string type = button.Tag.ToString();
                     DragDrop.DoDragDrop(button, type, DragDropEffects.Copy);
                 }
             }
@@ -42,7 +42,7 @@ namespace RailmlEditor
         {
             if (sender is Button button)
             {
-                string type = button.Content.ToString();
+                string type = button.Tag.ToString();
                 Point defaultPos = new Point(100, 100);
 
                 BaseElementViewModel newElement = null;
