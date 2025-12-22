@@ -7,9 +7,72 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Window.Resources>
+        <local:DiffConverter x:Key="DiffConverter"/>
+        <local:AngleConverter x:Key="AngleConverter"/>
+        <local:AddConverter x:Key="AddConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        
         <!-- Data Templates for Visual Elements -->
         <DataTemplate DataType="{x:Type local:ViewModels.TrackViewModel}">
-            <Rectangle Width="{Binding Length}" Height="10" Fill="Black" Stroke="Gray" StrokeThickness="1"/>
+            <Canvas>
+                 <!-- Track Visual (Rotated Rectangle) -->
+                 <!-- Use native RadiusX/Y to prevent distortion. Width = Length + 10 (5px each side). Offset X=-5. -->
+                 <Rectangle Height="10" Fill="White" Stroke="Black" StrokeThickness="1" RadiusX="5" RadiusY="5">
+                     <Rectangle.Width>
+                         <Binding Path="Length" Converter="{StaticResource AddConverter}" ConverterParameter="10"/>
+                     </Rectangle.Width>
+                     <Rectangle.RenderTransform>
+                         <TransformGroup>
+                             <TranslateTransform X="-5" Y="-5"/>
+                             <RotateTransform>
+                                 <RotateTransform.Angle>
+                                     <MultiBinding Converter="{StaticResource AngleConverter}">
+                                         <Binding Path="X"/>
+                                         <Binding Path="Y"/>
+                                         <Binding Path="X2"/>
+                                         <Binding Path="Y2"/>
+                                     </MultiBinding>
+                                 </RotateTransform.Angle>
+                             </RotateTransform>
+                         </TransformGroup>
+                     </Rectangle.RenderTransform>
+                 </Rectangle>
+
+                 <!-- Start Thumb -->
+                 <Thumb DragDelta="StartThumb_DragDelta" DragStarted="Thumb_DragStarted" Canvas.Left="-6" Canvas.Top="-6"
+                        Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
+                     <Thumb.Template>
+                         <ControlTemplate>
+                             <Ellipse Width="12" Height="12" Fill="Red" Stroke="White" StrokeThickness="1"/>
+                         </ControlTemplate>
+                     </Thumb.Template>
+                 </Thumb>
+                 
+                 <!-- End Thumb -->
+                 <Thumb DragDelta="EndThumb_DragDelta" DragStarted="Thumb_DragStarted"
+                        Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
+                    <Canvas.Left>
+                         <MultiBinding Converter="{StaticResource DiffConverter}">
+                             <Binding Path="X2"/>
+                             <Binding Path="X"/>
+                         </MultiBinding>
+                    </Canvas.Left>
+                    <Canvas.Top>
+                         <MultiBinding Converter="{StaticResource DiffConverter}">
+                             <Binding Path="Y2"/>
+                             <Binding Path="Y"/>
+                         </MultiBinding>
+                    </Canvas.Top>
+                     <Thumb.RenderTransform>
+                        <TranslateTransform X="-6" Y="-6"/>
+                     </Thumb.RenderTransform>
+                     <Thumb.Template>
+                         <ControlTemplate>
+                             <Ellipse Width="12" Height="12" Fill="Red" Stroke="White" StrokeThickness="1"/>
+                         </ControlTemplate>
+                     </Thumb.Template>
+                 </Thumb>
+            </Canvas>
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:ViewModels.SwitchViewModel}">
             <Polygon Points="0,0 40,0 20,20 0,0" Fill="Orange" Stroke="Black" StrokeThickness="1"/>
@@ -84,9 +147,9 @@
                             <Setter Property="Canvas.Left" Value="{Binding X}"/>
                             <Setter Property="Canvas.Top" Value="{Binding Y}"/>
                             <Setter Property="Opacity" Value="{Binding IsSelected, Converter={local:BoolToOpacityConverter}}"/> 
-                            <EventSetter Event="PreviewMouseDown" Handler="Item_MouseDown"/>
-                            <EventSetter Event="PreviewMouseMove" Handler="Item_MouseMove"/>
-                            <EventSetter Event="PreviewMouseUp" Handler="Item_MouseUp"/>
+                            <EventSetter Event="MouseDown" Handler="Item_MouseDown"/>
+                            <EventSetter Event="MouseMove" Handler="Item_MouseMove"/>
+                            <EventSetter Event="MouseUp" Handler="Item_MouseUp"/>
                         </Style>
                     </ItemsControl.ItemContainerStyle>
                     <ItemsControl.ItemTemplate>
@@ -106,16 +169,58 @@
                 <StackPanel Margin="10">
                     <TextBlock Text="Properties" FontWeight="Bold" Margin="0,0,0,10"/>
                     <!-- Simple Property Grid for now -->
-                    <Grid DataContext="{Binding SelectedElement}">
-                        <StackPanel>
-                            <TextBlock Text="ID:"/>
-                            <TextBox Text="{Binding Id}"/>
-                            <TextBlock Text="X:"/>
-                            <TextBox Text="{Binding X}"/>
-                            <TextBlock Text="Y:"/>
-                            <TextBox Text="{Binding Y}"/>
-                        </StackPanel>
-                    </Grid>
+                    <ContentControl Content="{Binding SelectedElement}">
+                        <ContentControl.Resources>
+                            <!-- Track Properties -->
+                            <DataTemplate DataType="{x:Type local:ViewModels.TrackViewModel}">
+                                <StackPanel>
+                                    <TextBlock Text="Type: Track" FontWeight="Bold" Margin="0,0,0,5"/>
+                                    <TextBlock Text="ID:"/>
+                                    <TextBox Text="{Binding Id, UpdateSourceTrigger=PropertyChanged}"/>
+                                    
+                                    <Separator Margin="0,10"/>
+                                    <TextBlock Text="Start Point (Begin)" FontWeight="SemiBold"/>
+                                    <TextBlock Text="X:"/>
+                                    <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBlock Text="Y:"/>
+                                    <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}"/>
+                                    
+                                    <Separator Margin="0,10"/>
+                                    <TextBlock Text="End Point (End)" FontWeight="SemiBold"/>
+                                    <TextBlock Text="X2:"/>
+                                    <TextBox Text="{Binding X2, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBlock Text="Y2:"/>
+                                    <TextBox Text="{Binding Y2, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                            </DataTemplate>
+
+                            <!-- Switch Properties -->
+                            <DataTemplate DataType="{x:Type local:ViewModels.SwitchViewModel}">
+                                <StackPanel>
+                                    <TextBlock Text="Type: Switch" FontWeight="Bold" Margin="0,0,0,5"/>
+                                    <TextBlock Text="ID:"/>
+                                    <TextBox Text="{Binding Id, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBlock Text="X:"/>
+                                    <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBlock Text="Y:"/>
+                                    <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                            </DataTemplate>
+
+                            <!-- Signal Properties -->
+                            <DataTemplate DataType="{x:Type local:ViewModels.SignalViewModel}">
+                                <StackPanel>
+                                    <TextBlock Text="Type: Signal" FontWeight="Bold" Margin="0,0,0,5"/>
+                                    <TextBlock Text="ID:"/>
+                                    <TextBox Text="{Binding Id, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBlock Text="X:"/>
+                                    <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBlock Text="Y:"/>
+                                    <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ContentControl.Resources>
+                    </ContentControl>
                 </StackPanel>
             </Border>
         </Grid>

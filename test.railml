@@ -1,24 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<railml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" version="2.5" xmlns="http://www.railml.org/schemas/2013">
+<railml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:sehwa="http://www.sehwa.co.kr/railml" version="2.5" xmlns="http://www.railml.org/schemas/2013">
   <infrastructure>
     <tracks>
       <track id="Tr01" name="Generated Track">
         <trackTopology>
-          <trackBegin pos="0" />
-          <trackEnd pos="0" />
+          <trackBegin pos="0" id="Tr01_begin">
+            <any>
+              <sehwa:screenPos x="120" y="220" />
+            </any>
+          </trackBegin>
+          <trackEnd pos="200" id="Tr01_end">
+            <any>
+              <sehwa:screenPos x="320" y="220" />
+            </any>
+            <connections>
+              <connection id="conn_Tr01_end_to_Tr2_begin" ref="Tr2_begin" />
+            </connections>
+          </trackEnd>
           <connections />
         </trackTopology>
       </track>
       <track id="Tr2" name="Generated Track">
         <trackTopology>
-          <trackBegin pos="0" />
-          <trackEnd pos="0" />
+          <trackBegin pos="0" id="Tr2_begin">
+            <any>
+              <sehwa:screenPos x="320" y="220" />
+            </any>
+            <connections>
+              <connection id="conn_Tr2_begin_to_Tr01_end" ref="Tr01_end" />
+            </connections>
+          </trackBegin>
+          <trackEnd pos="94.33981132056604" id="Tr2_end">
+            <any>
+              <sehwa:screenPos x="400" y="170" />
+            </any>
+            <connections>
+              <connection id="conn_Tr2_end_to_Tr3_begin" ref="Tr3_begin" />
+            </connections>
+          </trackEnd>
+          <connections />
+        </trackTopology>
+      </track>
+      <track id="Tr3" name="Generated Track">
+        <trackTopology>
+          <trackBegin pos="0" id="Tr3_begin">
+            <any>
+              <sehwa:screenPos x="400" y="170" />
+            </any>
+            <connections>
+              <connection id="conn_Tr3_begin_to_Tr2_end" ref="Tr2_end" />
+            </connections>
+          </trackBegin>
+          <trackEnd pos="100" id="Tr3_end">
+            <any>
+              <sehwa:screenPos x="500" y="170" />
+            </any>
+          </trackEnd>
           <connections />
         </trackTopology>
       </track>
     </tracks>
-    <signals>
-      <signal id="Sig3" pos="0" />
-    </signals>
+    <signals />
   </infrastructure>
 </railml>

@@ -350,13 +350,75 @@ namespace RailmlEditor
                              {
                                  element.X += snapX;
                                  element.Y += snapY;
+
+                                 if (element is TrackViewModel trackVm)
+                                 {
+                                     trackVm.X2 += snapX;
+                                     trackVm.Y2 += snapY;
+                                 }
                              }
                         }
                         
-                        // Reset start point to current "snapped" visual location? 
-                        // Or rather, increment start point by the amount we consumed.
+                        // Increment start point by the amount we consumed.
                          _startPoint.X += snapX;
                          _startPoint.Y += snapY;
+                    }
+                }
+            }
+        }
+
+        private double _thumbAccX;
+        private double _thumbAccY;
+
+        private void Thumb_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
+        {
+            _thumbAccX = 0;
+            _thumbAccY = 0;
+        }
+
+        private void StartThumb_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
+        {
+            if (sender is FrameworkElement thumb && thumb.DataContext is TrackViewModel track)
+            {
+                _thumbAccX += e.HorizontalChange;
+                _thumbAccY += e.VerticalChange;
+
+                if (Math.Abs(_thumbAccX) >= 10 || Math.Abs(_thumbAccY) >= 10)
+                {
+                    double snapX = Math.Round(_thumbAccX / 10.0) * 10.0;
+                    double snapY = Math.Round(_thumbAccY / 10.0) * 10.0;
+
+                    if (snapX != 0 || snapY != 0)
+                    {
+                        track.X += snapX;
+                        track.Y += snapY;
+                        
+                        _thumbAccX -= snapX;
+                        _thumbAccY -= snapY;
+                    }
+                }
+            }
+        }
+
+        private void EndThumb_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
+        {
+             if (sender is FrameworkElement thumb && thumb.DataContext is TrackViewModel track)
+            {
+                _thumbAccX += e.HorizontalChange;
+                _thumbAccY += e.VerticalChange;
+
+                if (Math.Abs(_thumbAccX) >= 10 || Math.Abs(_thumbAccY) >= 10)
+                {
+                    double snapX = Math.Round(_thumbAccX / 10.0) * 10.0;
+                    double snapY = Math.Round(_thumbAccY / 10.0) * 10.0;
+
+                    if (snapX != 0 || snapY != 0)
+                    {
+                         track.X2 += snapX;
+                         track.Y2 += snapY;
+
+                        _thumbAccX -= snapX;
+                        _thumbAccY -= snapY;
                     }
                 }
             }

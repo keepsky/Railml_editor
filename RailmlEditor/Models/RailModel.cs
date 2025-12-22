@@ -14,6 +14,9 @@ namespace RailmlEditor.Models
 
         [XmlElement(ElementName = "infrastructure")]
         public Infrastructure Infrastructure { get; set; }
+
+        [XmlNamespaceDeclarations]
+        public XmlSerializerNamespaces Namespaces { get; set; } = new XmlSerializerNamespaces();
     }
 
     public class Infrastructure
@@ -84,10 +87,65 @@ namespace RailmlEditor.Models
         [XmlAttribute(AttributeName = "id")]
         public string Id { get; set; }
         
-        // Visual Coordinates (Extension, not part of strict RailML but needed for Editor)
-        [XmlAttribute]
+        [XmlElement("any")]
+        public SehwaAny Any { get; set; }
+
+        [XmlElement(ElementName = "connections")]
+        public NodeConnections Connections { get; set; }
+
+        // Helper properties for Editor logic (mapped to Any)
+        [XmlIgnore]
+        public double X 
+        { 
+            get => Any?.ScreenPos?.X ?? 0;
+            set 
+            {
+                if (Any == null) Any = new SehwaAny();
+                if (Any.ScreenPos == null) Any.ScreenPos = new SehwaScreenPos();
+                Any.ScreenPos.X = value;
+            }
+        }
+
+        [XmlIgnore]
+        public double Y
+        {
+            get => Any?.ScreenPos?.Y ?? 0;
+            set
+            {
+                if (Any == null) Any = new SehwaAny();
+                if (Any.ScreenPos == null) Any.ScreenPos = new SehwaScreenPos();
+                Any.ScreenPos.Y = value;
+            }
+        }
+    }
+
+    public class NodeConnections
+    {
+        [XmlElement(ElementName = "connection")]
+        public List<Connection> ConnectionList { get; set; } = new List<Connection>();
+    }
+
+    public class Connection
+    {
+        [XmlAttribute(AttributeName = "id")]
+        public string Id { get; set; }
+
+        [XmlAttribute(AttributeName = "ref")]
+        public string Ref { get; set; }
+    }
+
+    public class SehwaAny
+    {
+        [XmlElement("screenPos", Namespace = "http://www.sehwa.co.kr/railml")]
+        public SehwaScreenPos ScreenPos { get; set; }
+    }
+
+    public class SehwaScreenPos
+    {
+        [XmlAttribute("x")]
         public double X { get; set; }
-        [XmlAttribute]
+
+        [XmlAttribute("y")]
         public double Y { get; set; }
     }
 

@@ -11,13 +11,13 @@ namespace RailmlEditor.ViewModels
         private string _id;
         private bool _isSelected;
 
-        public double X
+        public virtual double X
         {
             get => _x;
             set => SetProperty(ref _x, value);
         }
 
-        public double Y
+        public virtual double Y
         {
             get => _y;
             set => SetProperty(ref _y, value);
@@ -42,11 +42,71 @@ namespace RailmlEditor.ViewModels
     {
         public override string TypeName => "Track";
         
-        private double _length;
+        public override double X
+        {
+            get => base.X;
+            set
+            {
+                if (base.X != value)
+                {
+                    base.X = value;
+                    OnPropertyChanged(nameof(Length));
+                }
+            }
+        }
+
+        public override double Y
+        {
+            get => base.Y;
+            set
+            {
+                if (base.Y != value)
+                {
+                    base.Y = value;
+                    OnPropertyChanged(nameof(Length));
+                }
+            }
+        }
+
+        // End Point relative to X,Y? No, let's store absolute properties.
+        private double _x2;
+        public double X2
+        {
+            get => _x2;
+            set 
+            {
+                if (SetProperty(ref _x2, value))
+                {
+                    OnPropertyChanged(nameof(Length));
+                }
+            }
+        }
+
+        private double _y2;
+        public double Y2
+        {
+            get => _y2;
+            set 
+            {
+                if (SetProperty(ref _y2, value))
+                {
+                    OnPropertyChanged(nameof(Length));
+                }
+            }
+        }
+
+        // Length is now derived or updates X2?
+        // Let's make Length read-only derived, or if set, it updates X2 (assuming horizontal extension).
         public double Length
         {
-            get => _length;
-            set => SetProperty(ref _length, value);
+            get => System.Math.Sqrt(System.Math.Pow(X2 - X, 2) + System.Math.Pow(Y2 - Y, 2));
+            set
+            {
+                // If setting length, assume extending horizontally from X
+                X2 = X + value;
+                Y2 = Y;
+                OnPropertyChanged(nameof(Length));
+            }
         }
     }
 

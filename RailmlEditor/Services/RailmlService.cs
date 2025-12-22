@@ -19,6 +19,8 @@ namespace RailmlEditor.Services
                     Signals = new Signals()
                 }
             };
+            railml.Namespaces.Add("sehwa", "http://www.sehwa.co.kr/railml");
+
 
             // Map ViewModels to Data Models
             foreach (var element in viewModel.Elements)
@@ -31,9 +33,20 @@ namespace RailmlEditor.Services
                         Name = "Generated Track",
                         TrackTopology = new TrackTopology
                         {
-                            TrackBegin = new TrackNode { X = trackVm.X, Y = trackVm.Y },
-                            TrackEnd = new TrackNode { X = trackVm.X + trackVm.Length, Y = trackVm.Y },
-                             // Simplified connection for now
+                            TrackBegin = new TrackNode 
+                            { 
+                                Id = $"{trackVm.Id}_begin",
+                                Pos = 0,
+                                X = trackVm.X, 
+                                Y = trackVm.Y 
+                            },
+                            TrackEnd = new TrackNode 
+                            { 
+                                Id = $"{trackVm.Id}_end", 
+                                Pos = trackVm.Length, // Should be actual length
+                                X = trackVm.X2, 
+                                Y = trackVm.Y2 
+                            },
                              Connections = new Connections() 
                         }
                     };
@@ -41,12 +54,7 @@ namespace RailmlEditor.Services
                 }
                 else if (element is SwitchViewModel switchVm)
                 {
-                    // Switches are usually child of Connection, but for flattened save we might need complex logic.
-                    // For now, let's treat them as simplified if possible or add to a "Dummy" list if RailModel permitted recursion.
-                    // Actually, RailML puts switches inside <connections> of a track.
-                    // To simplify for this prototype: We will skip saving Switches/Signals correctly nested 
-                    // and just save Tracks to prove concept, OR add them to the first track found.
-                    // BETTER APPROACH: Add visual coordinates to TrackNode so we can restore them.
+                     // ... switch logic ...
                 }
                 else if (element is SignalViewModel signalVm)
                 {
@@ -59,6 +67,43 @@ namespace RailmlEditor.Services
                     railml.Infrastructure.Signals.SignalList.Add(signal);
                 }
             }
+
+            // Auto-Generate Connections based on Overlap
+            var allNodes = new System.Collections.Generic.List<TrackNode>();
+            
+            // Collect all nodes
+            foreach(var track in railml.Infrastructure.Tracks.TrackList)
+            {
+                if(track.TrackTopology?.TrackBegin != null) allNodes.Add(track.TrackTopology.TrackBegin);
+                if(track.TrackTopology?.TrackEnd != null) allNodes.Add(track.TrackTopology.TrackEnd);
+            }
+
+            // Check for overlaps (Distance < 1.0 for tolerance)
+            foreach(var nodeA in allNodes)
+            {
+                foreach(var nodeB in allNodes)
+                {
+                    if(nodeA == nodeB) continue;
+
+                    double dist = Math.Sqrt(Math.Pow(nodeA.X - nodeB.X, 2) + Math.Pow(nodeA.Y - nodeB.Y, 2));
+                    if(dist < 1.0)
+                    {
+                        // Overlap detected!
+                        if(nodeA.Connections == null) nodeA.Connections = new NodeConnections();
+                        
+                        // Check if connection already exists
+                        if(!nodeA.Connections.ConnectionList.Any(c => c.Ref == nodeB.Id))
+                        {
+                            nodeA.Connections.ConnectionList.Add(new Connection 
+                            { 
+                                Id = $"conn_{nodeA.Id}_to_{nodeB.Id}",
+                                Ref = nodeB.Id 
+                            });
+                        }
+                    }
+                }
+            }
+
 
             // Serialize
             XmlSerializer serializer = new XmlSerializer(typeof(Railml));
@@ -86,13 +131,18 @@ namespace RailmlEditor.Services
                             Id = track.Id,
                             X = track.TrackTopology?.TrackBegin?.X ?? 0,
                             Y = track.TrackTopology?.TrackBegin?.Y ?? 0,
-                            Length = 100 // Estimate from topology later
                         };
                         
-                        // Calculate Length from End - Begin
+                        // Set X2, Y2 from TrackEnd
                         if (track.TrackTopology?.TrackEnd != null)
                         {
-                            trackVm.Length = track.TrackTopology.TrackEnd.X - trackVm.X;
+                            trackVm.X2 = track.TrackTopology.TrackEnd.X;
+                            trackVm.Y2 = track.TrackTopology.TrackEnd.Y;
+                        }
+                        else
+                        {
+                            // Default length 100 if no end specified
+                            trackVm.Length = 100; 
                         }
 
                         viewModel.Elements.Add(trackVm);
