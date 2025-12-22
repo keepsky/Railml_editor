@@ -26,6 +26,9 @@ namespace RailmlEditor.Models
 
         [XmlElement(ElementName = "signals")]
         public Signals Signals { get; set; }
+
+        [XmlElement(ElementName = "tvdSections")]
+        public TvdSections TvdSections { get; set; }
     }
 
     public class Signals
@@ -65,6 +68,9 @@ namespace RailmlEditor.Models
 
         [XmlElement(ElementName = "trackTopology")]
         public TrackTopology TrackTopology { get; set; }
+
+        [XmlElement(ElementName = "trainDetectionElements")]
+        public TrainDetectionElements TrainDetectionElements { get; set; }
     }
 
     public class TrackTopology
@@ -174,5 +180,47 @@ namespace RailmlEditor.Models
 
         [XmlElement(ElementName = "connection")]
         public List<Connection> ConnectionList { get; set; } = new List<Connection>();
+    }
+
+    public class TrainDetectionElements
+    {
+        [XmlElement(ElementName = "trackCircuitBorder")]
+        public List<TrackCircuitBorder> TrackCircuitBorders { get; set; } = new List<TrackCircuitBorder>();
+    }
+
+    public class TrackCircuitBorder
+    {
+        [XmlAttribute(AttributeName = "id")]
+        public string Id { get; set; }
+
+        [XmlAttribute(AttributeName = "pos")]
+        public double Pos { get; set; }
+
+        [XmlAttribute(AttributeName = "dir")]
+        public string Dir { get; set; }
+    }
+
+    public class TvdSections
+    {
+        [XmlElement(ElementName = "tvdSection")]
+        public List<TvdSection> TvdSectionList { get; set; } = new List<TvdSection>();
+    }
+
+    public class TvdSection
+    {
+        [XmlAttribute(AttributeName = "id")]
+        public string Id { get; set; }
+
+        [XmlAttribute(AttributeName = "name")]
+        public string Name { get; set; }
+
+        [XmlElement(ElementName = "border")]
+        public List<BorderRef> Borders { get; set; } = new List<BorderRef>();
+    }
+
+    public class BorderRef
+    {
+        [XmlAttribute(AttributeName = "ref")]
+        public string Ref { get; set; }
     }
 }

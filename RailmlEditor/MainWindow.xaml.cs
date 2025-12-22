@@ -75,6 +75,16 @@ namespace RailmlEditor
                         Y = defaultPos.Y
                     };
                 }
+                else if (type == "TCB")
+                {
+                    newElement = new TcbViewModel
+                    {
+                        Id = $"tcb_{_viewModel.Elements.Count + 1}",
+                        X = defaultPos.X,
+                        Y = defaultPos.Y,
+                        Dir = "up"
+                    };
+                }
 
                 if (newElement != null)
                 {
@@ -120,6 +130,59 @@ namespace RailmlEditor
                         X = dropPosition.X,
                         Y = dropPosition.Y
                     };
+                }
+                else if (type == "TCB")
+                {
+                    // Find Snap Track
+                    TrackViewModel closestTrack = null;
+                    double minDistance = double.MaxValue;
+                    Point snapPoint = new Point();
+                    double snapPos = 0;
+
+                    foreach (var element in _viewModel.Elements)
+                    {
+                        if (element is TrackViewModel track)
+                        {
+                            // Calculate Distance from Point to Line Segment
+                            double dx = track.X2 - track.X;
+                            double dy = track.Y2 - track.Y;
+                            double lengthSq = dx * dx + dy * dy;
+
+                            if (lengthSq == 0) continue;
+
+                            double t = ((dropPosition.X - track.X) * dx + (dropPosition.Y - track.Y) * dy) / lengthSq;
+                            t = Math.Max(0, Math.Min(1, t));
+
+                            double px = track.X + t * dx;
+                            double py = track.Y + t * dy;
+
+                            double dist = Math.Sqrt(Math.Pow(dropPosition.X - px, 2) + Math.Pow(dropPosition.Y - py, 2));
+
+                            if (dist < 20) // Snapping threshold
+                            {
+                                if (dist < minDistance)
+                                {
+                                    minDistance = dist;
+                                    closestTrack = track;
+                                    snapPoint = new Point(px, py);
+                                    snapPos = t * Math.Sqrt(lengthSq);
+                                }
+                            }
+                        }
+                    }
+
+                    if (closestTrack != null)
+                    {
+                        newElement = new TcbViewModel
+                        {
+                            Id = $"tcb_{_viewModel.Elements.Count + 1}",
+                            ParentTrackId = closestTrack.Id,
+                            PositionOnTrack = snapPos,
+                            X = snapPoint.X - 5, // Center the 10px dot
+                            Y = snapPoint.Y - 5,
+                            Dir = "up"
+                        };
+                    }
                 }
 
                 if (newElement != null)
@@ -337,6 +400,63 @@ namespace RailmlEditor
                 // No, resetting start point is bad for snapping.
                 
                 // Alternative: Only update if delta > 10.
+                // 1. TCB Snapping (Continuous, no grid snap)
+                foreach(var element in _viewModel.Elements)
+                {
+                    if (element.IsSelected && element is TcbViewModel tcb)
+                    {
+                         // Find Snap Track
+                        TrackViewModel closestTrack = null;
+                        double minDistance = double.MaxValue;
+                        Point snapPoint = new Point();
+                        double snapPos = 0;
+
+                        foreach (var el in _viewModel.Elements)
+                        {
+                            if (el is TrackViewModel track)
+                            {
+                                double dx = track.X2 - track.X;
+                                double dy = track.Y2 - track.Y;
+                                double lengthSq = dx * dx + dy * dy;
+                                if (lengthSq == 0) continue;
+
+                                double t = ((currentPos.X - track.X) * dx + (currentPos.Y - track.Y) * dy) / lengthSq;
+                                t = Math.Max(0, Math.Min(1, t));
+
+                                double px = track.X + t * dx;
+                                double py = track.Y + t * dy;
+                                double dist = Math.Sqrt(Math.Pow(currentPos.X - px, 2) + Math.Pow(currentPos.Y - py, 2));
+
+                                if (dist < 20)
+                                {
+                                    if (dist < minDistance)
+                                    {
+                                        minDistance = dist;
+                                        closestTrack = track;
+                                        snapPoint = new Point(px, py);
+                                        snapPos = t * Math.Sqrt(lengthSq);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (closestTrack != null)
+                        {
+                            tcb.ParentTrackId = closestTrack.Id;
+                            tcb.PositionOnTrack = snapPos;
+                            tcb.X = snapPoint.X - 5; 
+                            tcb.Y = snapPoint.Y - 5;
+                        }
+                        else
+                        {
+                             // Free move if not snapped
+                             tcb.X = currentPos.X - 5;
+                             tcb.Y = currentPos.Y - 5;
+                             tcb.ParentTrackId = null; // Detached
+                        }
+                    }
+                }
+
                 if (Math.Abs(deltaX) >= 10 || Math.Abs(deltaY) >= 10)
                 {
                     double snapX = Math.Round(deltaX / 10.0) * 10.0;
@@ -346,7 +466,7 @@ namespace RailmlEditor
                     {
                         foreach (var element in _viewModel.Elements)
                         {
-                             if (element.IsSelected)
+                             if (element.IsSelected && !(element is TcbViewModel))
                              {
                                  element.X += snapX;
                                  element.Y += snapY;
@@ -355,6 +475,16 @@ namespace RailmlEditor
                                  {
                                      trackVm.X2 += snapX;
                                      trackVm.Y2 += snapY;
+
+                                     // Move Attached TCBs
+                                     foreach (var el in _viewModel.Elements)
+                                     {
+                                         if (el is TcbViewModel tcb && tcb.ParentTrackId == trackVm.Id && !tcb.IsSelected)
+                                         {
+                                             tcb.X += snapX;
+                                             tcb.Y += snapY;
+                                         }
+                                     }
                                  }
                              }
                         }

@@ -122,6 +122,32 @@ namespace RailmlEditor.ViewModels
         // Type, Aspect etc.
     }
 
+    public class TcbViewModel : BaseElementViewModel
+    {
+        public override string TypeName => "Track Circuit Border";
+        
+        private string _parentTrackId;
+        public string ParentTrackId
+        {
+            get => _parentTrackId;
+            set => SetProperty(ref _parentTrackId, value);
+        }
+
+        private double _positionOnTrack;
+        public double PositionOnTrack
+        {
+            get => _positionOnTrack;
+            set => SetProperty(ref _positionOnTrack, value);
+        }
+
+        private string _dir = "up";
+        public string Dir
+        {
+            get => _dir;
+            set => SetProperty(ref _dir, value);
+        }
+    }
+
     public class MainViewModel : ObservableObject
     {
         public ObservableCollection<BaseElementViewModel> Elements { get; } = new ObservableCollection<BaseElementViewModel>();

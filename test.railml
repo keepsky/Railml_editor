@@ -9,9 +9,9 @@
               <sehwa:screenPos x="70" y="260" />
             </any>
           </trackBegin>
-          <trackEnd pos="80" id="Tr01_end">
+          <trackEnd pos="100" id="Tr01_end">
             <any>
-              <sehwa:screenPos x="150" y="260" />
+              <sehwa:screenPos x="170" y="260" />
             </any>
             <connections>
               <switch id="sw_Tr01_end" ref="Tr2_begin">
@@ -21,44 +21,69 @@
           </trackEnd>
           <connections />
         </trackTopology>
+        <trainDetectionElements>
+          <trackCircuitBorder id="tcb_5" pos="50" dir="up" />
+        </trainDetectionElements>
       </track>
       <track id="Tr2" name="Generated Track">
         <trackTopology>
           <trackBegin pos="0" id="Tr2_begin">
             <any>
-              <sehwa:screenPos x="150" y="260" />
+              <sehwa:screenPos x="170" y="260" />
             </any>
             <connections>
               <connection id="conn_Tr2_begin_to_Tr01_end" ref="Tr01_end" />
             </connections>
           </trackBegin>
-          <trackEnd pos="100" id="Tr2_end">
-            <any>
-              <sehwa:screenPos x="250" y="260" />
-            </any>
-          </trackEnd>
-          <connections />
-        </trackTopology>
-      </track>
-      <track id="Tr3" name="Generated Track">
-        <trackTopology>
-          <trackBegin pos="0" id="Tr3_begin">
-            <any>
-              <sehwa:screenPos x="150" y="260" />
-            </any>
-            <connections>
-              <connection id="conn_Tr3_begin_to_Tr01_end" ref="Tr01_end" />
-            </connections>
-          </trackBegin>
-          <trackEnd pos="111.80339887498948" id="Tr3_end">
+          <trackEnd pos="94.33981132056604" id="Tr2_end">
             <any>
               <sehwa:screenPos x="250" y="210" />
             </any>
           </trackEnd>
           <connections />
         </trackTopology>
+        <trainDetectionElements>
+          <trackCircuitBorder id="tcb_4" pos="65.80466839079483" dir="up" />
+        </trainDetectionElements>
+      </track>
+      <track id="Tr3" name="Generated Track">
+        <trackTopology>
+          <trackBegin pos="0" id="Tr3_begin">
+            <any>
+              <sehwa:screenPos x="170" y="260" />
+            </any>
+            <connections>
+              <connection id="conn_Tr3_begin_to_Tr01_end" ref="Tr01_end" />
+            </connections>
+          </trackBegin>
+          <trackEnd pos="100" id="Tr3_end">
+            <any>
+              <sehwa:screenPos x="270" y="260" />
+            </any>
+          </trackEnd>
+          <connections />
+        </trackTopology>
+        <trainDetectionElements>
+          <trackCircuitBorder id="tcb_6" pos="55.00000000000001" dir="up" />
+        </trainDetectionElements>
       </track>
     </tracks>
     <signals />
+    <tvdSections>
+      <tvdSection id="tvd_Switch_1T" name="1T">
+        <border ref="tcb_5" />
+      </tvdSection>
+      <tvdSection id="tvd_Switch_2T" name="2T">
+        <border ref="tcb_5" />
+        <border ref="tcb_4" />
+        <border ref="tcb_6" />
+      </tvdSection>
+      <tvdSection id="tvd_Switch_3T" name="3T">
+        <border ref="tcb_4" />
+      </tvdSection>
+      <tvdSection id="tvd_Switch_4T" name="4T">
+        <border ref="tcb_6" />
+      </tvdSection>
+    </tvdSections>
   </infrastructure>
 </railml>

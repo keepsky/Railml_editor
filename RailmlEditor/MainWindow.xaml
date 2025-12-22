@@ -80,6 +80,9 @@
         <DataTemplate DataType="{x:Type local:ViewModels.SignalViewModel}">
             <Ellipse Width="15" Height="15" Fill="Red" Stroke="DarkRed" StrokeThickness="1"/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type local:ViewModels.TcbViewModel}">
+            <Ellipse Width="10" Height="10" Fill="Black"/>
+        </DataTemplate>
     </Window.Resources>
 
     <DockPanel>
@@ -110,6 +113,10 @@
                     <!-- Signal Icon using Ellipse -->
                     <Ellipse Width="15" Height="15" Fill="Red" Stroke="DarkRed" StrokeThickness="1"/>
                     <Button.Tag>Signal</Button.Tag>
+                </Button>
+                <Button Click="Toolbox_Click" ToolTip="Track Circuit Border">
+                    <Ellipse Width="10" Height="10" Fill="Black"/>
+                    <Button.Tag>TCB</Button.Tag>
                 </Button>
             </ToolBar>
         </ToolBarTray>
@@ -178,6 +185,21 @@
                                     <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}"/>
                                     <TextBlock Text="Y:"/>
                                     <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                            </DataTemplate>
+
+                            <!-- TCB Properties -->
+                            <DataTemplate DataType="{x:Type local:ViewModels.TcbViewModel}">
+                                <StackPanel>
+                                    <TextBlock Text="Type: TCB" FontWeight="Bold" Margin="0,0,0,5"/>
+                                    <TextBlock Text="ID:"/>
+                                    <TextBox Text="{Binding Id, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBlock Text="Track ID:"/>
+                                    <TextBox Text="{Binding ParentTrackId, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBlock Text="Pos:"/>
+                                    <TextBox Text="{Binding PositionOnTrack, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBlock Text="Dir:"/>
+                                    <TextBox Text="{Binding Dir, UpdateSourceTrigger=PropertyChanged}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ContentControl.Resources>
