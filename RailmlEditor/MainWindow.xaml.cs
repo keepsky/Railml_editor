@@ -75,16 +75,6 @@ namespace RailmlEditor
                         Y = defaultPos.Y
                     };
                 }
-                else if (type == "TCB")
-                {
-                    newElement = new TcbViewModel
-                    {
-                        Id = $"tcb_{_viewModel.Elements.Count + 1}",
-                        X = defaultPos.X,
-                        Y = defaultPos.Y,
-                        Dir = "up"
-                    };
-                }
                 else if (type == "CurvedTrack")
                 {
                     newElement = new CurvedTrackViewModel
@@ -142,94 +132,6 @@ namespace RailmlEditor
                         X = dropPosition.X,
                         Y = dropPosition.Y
                     };
-                }
-                else if (type == "TCB")
-                {
-                    // Find Snap Track
-                    TrackViewModel closestTrack = null;
-                    double minDistance = double.MaxValue;
-                    Point snapPoint = new Point();
-                    double snapPos = 0;
-
-                    foreach (var element in _viewModel.Elements)
-                    {
-                        if (element is CurvedTrackViewModel curve)
-                        {
-                             double dx1 = curve.MX - curve.X;
-                             double dy1 = curve.MY - curve.Y;
-                             double lenSq1 = dx1*dx1 + dy1*dy1;
-                             double t1 = lenSq1 > 0 ? Math.Max(0, Math.Min(1, ((dropPosition.X - curve.X)*dx1 + (dropPosition.Y - curve.Y)*dy1) / lenSq1)) : 0;
-                             double dist1 = Math.Sqrt(Math.Pow(dropPosition.X - (curve.X + t1*dx1), 2) + Math.Pow(dropPosition.Y - (curve.Y + t1*dy1), 2));
-
-                             double dx2 = curve.X2 - curve.MX;
-                             double dy2 = curve.Y2 - curve.MY;
-                             double lenSq2 = dx2*dx2 + dy2*dy2;
-                             double t2 = lenSq2 > 0 ? Math.Max(0, Math.Min(1, ((dropPosition.X - curve.MX)*dx2 + (dropPosition.Y - curve.MY)*dy2) / lenSq2)) : 0;
-                             double dist2 = Math.Sqrt(Math.Pow(dropPosition.X - (curve.MX + t2*dx2), 2) + Math.Pow(dropPosition.Y - (curve.MY + t2*dy2), 2));
-
-                             if (dist1 < dist2) 
-                             {
-                                 if (dist1 < 20 && dist1 < minDistance)
-                                 {
-                                     minDistance = dist1;
-                                     closestTrack = curve;
-                                     snapPoint = new Point(curve.X + t1*dx1, curve.Y + t1*dy1);
-                                     snapPos = t1 * Math.Sqrt(lenSq1);
-                                 }
-                             }
-                             else
-                             {
-                                 if (dist2 < 20 && dist2 < minDistance)
-                                 {
-                                     minDistance = dist2;
-                                     closestTrack = curve;
-                                     snapPoint = new Point(curve.MX + t2*dx2, curve.MY + t2*dy2);
-                                     snapPos = Math.Sqrt(lenSq1) + t2 * Math.Sqrt(lenSq2);
-                                 }
-                             }
-                        }
-                        else if (element is TrackViewModel track)
-                        {
-                            // Calculate Distance from Point to Line Segment
-                            double dx = track.X2 - track.X;
-                            double dy = track.Y2 - track.Y;
-                            double lengthSq = dx * dx + dy * dy;
-
-                            if (lengthSq == 0) continue;
-
-                            double t = ((dropPosition.X - track.X) * dx + (dropPosition.Y - track.Y) * dy) / lengthSq;
-                            t = Math.Max(0, Math.Min(1, t));
-
-                            double px = track.X + t * dx;
-                            double py = track.Y + t * dy;
-
-                            double dist = Math.Sqrt(Math.Pow(dropPosition.X - px, 2) + Math.Pow(dropPosition.Y - py, 2));
-
-                            if (dist < 20) // Snapping threshold
-                            {
-                                if (dist < minDistance)
-                                {
-                                    minDistance = dist;
-                                    closestTrack = track;
-                                    snapPoint = new Point(px, py);
-                                    snapPos = t * Math.Sqrt(lengthSq);
-                                }
-                            }
-                        }
-                    }
-
-                    if (closestTrack != null)
-                    {
-                        newElement = new TcbViewModel
-                        {
-                            Id = $"tcb_{_viewModel.Elements.Count + 1}",
-                            ParentTrackId = closestTrack.Id,
-                            PositionOnTrack = snapPos,
-                            X = snapPoint.X - 5, // Center the 10px dot
-                            Y = snapPoint.Y - 5,
-                            Dir = "up"
-                        };
-                    }
                 }
 
                 if (newElement != null)
@@ -469,134 +371,32 @@ namespace RailmlEditor
                 // No, resetting start point is bad for snapping.
                 
                 // Alternative: Only update if delta > 10.
-                // 1. TCB Snapping (Continuous, no grid snap)
-                foreach(var element in _viewModel.Elements)
-                {
-                    if (element.IsSelected && element is TcbViewModel tcb)
-                    {
-                         // Find Snap Track
-                        TrackViewModel closestTrack = null;
-                        double minDistance = double.MaxValue;
-                        Point snapPoint = new Point();
-                        double snapPos = 0;
-
-                        foreach (var el in _viewModel.Elements)
-                        {
-                            if (el is CurvedTrackViewModel curve)
-                            {
-                                 double dx1 = curve.MX - curve.X;
-                                 double dy1 = curve.MY - curve.Y;
-                                 double lenSq1 = dx1*dx1 + dy1*dy1;
-                                 double t1 = lenSq1 > 0 ? Math.Max(0, Math.Min(1, ((currentPos.X - curve.X)*dx1 + (currentPos.Y - curve.Y)*dy1) / lenSq1)) : 0;
-                                 double dist1 = Math.Sqrt(Math.Pow(currentPos.X - (curve.X + t1*dx1), 2) + Math.Pow(currentPos.Y - (curve.Y + t1*dy1), 2));
-
-                                 double dx2 = curve.X2 - curve.MX;
-                                 double dy2 = curve.Y2 - curve.MY;
-                                 double lenSq2 = dx2*dx2 + dy2*dy2;
-                                 double t2 = lenSq2 > 0 ? Math.Max(0, Math.Min(1, ((currentPos.X - curve.MX)*dx2 + (currentPos.Y - curve.MY)*dy2) / lenSq2)) : 0;
-                                 double dist2 = Math.Sqrt(Math.Pow(currentPos.X - (curve.MX + t2*dx2), 2) + Math.Pow(currentPos.Y - (curve.MY + t2*dy2), 2));
-    
-                                 if (dist1 < dist2) 
-                                 {
-                                     if (dist1 < 20 && dist1 < minDistance)
-                                     {
-                                         minDistance = dist1;
-                                         closestTrack = curve;
-                                         snapPoint = new Point(curve.X + t1*dx1, curve.Y + t1*dy1);
-                                         snapPos = t1 * Math.Sqrt(lenSq1);
-                                     }
-                                 }
-                                 else
-                                 {
-                                     if (dist2 < 20 && dist2 < minDistance)
-                                     {
-                                         minDistance = dist2;
-                                         closestTrack = curve;
-                                         snapPoint = new Point(curve.MX + t2*dx2, curve.MY + t2*dy2);
-                                         snapPos = Math.Sqrt(lenSq1) + t2 * Math.Sqrt(lenSq2);
-                                     }
-                                 }
-                            }
-                            else if (el is TrackViewModel track)
-                            {
-                                double dx = track.X2 - track.X;
-                                double dy = track.Y2 - track.Y;
-                                double lengthSq = dx * dx + dy * dy;
-                                if (lengthSq == 0) continue;
-
-                                double t = ((currentPos.X - track.X) * dx + (currentPos.Y - track.Y) * dy) / lengthSq;
-                                t = Math.Max(0, Math.Min(1, t));
-
-                                double px = track.X + t * dx;
-                                double py = track.Y + t * dy;
-                                double dist = Math.Sqrt(Math.Pow(currentPos.X - px, 2) + Math.Pow(currentPos.Y - py, 2));
-
-                                if (dist < 20)
-                                {
-                                    if (dist < minDistance)
-                                    {
-                                        minDistance = dist;
-                                        closestTrack = track;
-                                        snapPoint = new Point(px, py);
-                                        snapPos = t * Math.Sqrt(lengthSq);
-                                    }
-                                }
-                            }
-                        }
-
-                        if (closestTrack != null)
-                        {
-                            tcb.ParentTrackId = closestTrack.Id;
-                            tcb.PositionOnTrack = snapPos;
-                            tcb.X = snapPoint.X - 5; 
-                            tcb.Y = snapPoint.Y - 5;
-                        }
-                        else
-                        {
-                             // Free move if not snapped
-                             tcb.X = currentPos.X - 5;
-                             tcb.Y = currentPos.Y - 5;
-                             tcb.ParentTrackId = null; // Detached
-                        }
-                    }
-                }
-
                 if (Math.Abs(deltaX) >= 10 || Math.Abs(deltaY) >= 10)
                 {
                     double snapX = Math.Round(deltaX / 10.0) * 10.0;
                     double snapY = Math.Round(deltaY / 10.0) * 10.0;
-                    
+
                     if (snapX != 0 || snapY != 0)
                     {
                         foreach (var element in _viewModel.Elements)
                         {
-                             if (element.IsSelected && !(element is TcbViewModel))
-                             {
-                                 element.X += snapX;
-                                 element.Y += snapY;
+                            if (element.IsSelected)
+                            {
+                                element.X += snapX;
+                                element.Y += snapY;
 
-                                 if (element is TrackViewModel trackVm)
-                                 {
-                                     trackVm.X2 += snapX;
-                                     trackVm.Y2 += snapY;
+                                if (element is TrackViewModel trackVm)
+                                {
+                                    trackVm.X2 += snapX;
+                                    trackVm.Y2 += snapY;
 
-                                     if (trackVm is CurvedTrackViewModel curved)
-                                     {
-                                         curved.MX += snapX;
-                                         curved.MY += snapY;
-                                     }
-
-                                     // Move Attached TCBs
-                                     foreach (var el in _viewModel.Elements)
-                                     {
-                                         if (el is TcbViewModel tcb && tcb.ParentTrackId == trackVm.Id && !tcb.IsSelected)
-                                         {
-                                             tcb.X += snapX;
-                                             tcb.Y += snapY;
-                                         }
-                                     }
-                                 }
-                             }
+                                    if (trackVm is CurvedTrackViewModel curved)
+                                    {
+                                        curved.MX += snapX;
+                                        curved.MY += snapY;
+                                    }
+                                }
+                            }
                         }
                         
                         // Increment start point by the amount we consumed.

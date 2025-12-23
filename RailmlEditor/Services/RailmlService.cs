@@ -16,8 +16,7 @@ namespace RailmlEditor.Services
                 Infrastructure = new Infrastructure
                 {
                     Tracks = new Tracks(),
-                    Signals = new Signals(),
-                    TvdSections = new TvdSections()
+                    Signals = new Signals()
                 }
             };
             railml.Namespaces.Add("sehwa", "http://www.sehwa.co.kr/railml");
@@ -49,9 +48,7 @@ namespace RailmlEditor.Services
                             X = element.X2, 
                             Y = element.Y2 
                         },
-                         Connections = new Connections() 
-                    },
-                    TrainDetectionElements = new TrainDetectionElements()
+                     }
                 };
                 railml.Infrastructure.Tracks.TrackList.Add(track);
                 trackMap[element.Id] = track;
@@ -64,19 +61,6 @@ namespace RailmlEditor.Services
                 {
                     var signal = new Signal { Id = signalVm.Id, X = signalVm.X, Y = signalVm.Y };
                     railml.Infrastructure.Signals.SignalList.Add(signal);
-                }
-                else if (element is TcbViewModel tcbVm)
-                {
-                    if (trackMap.ContainsKey(tcbVm.ParentTrackId))
-                    {
-                        var track = trackMap[tcbVm.ParentTrackId];
-                        track.TrainDetectionElements.TrackCircuitBorders.Add(new TrackCircuitBorder
-                        {
-                            Id = tcbVm.Id,
-                            Pos = tcbVm.PositionOnTrack,
-                            Dir = tcbVm.Dir
-                        });
-                    }
                 }
             }
 
@@ -146,8 +130,6 @@ namespace RailmlEditor.Services
                 }
             }
 
-            // 4. Auto-Generate TVD Sections
-            GenerateTvdSections(railml);
 
             // Serialize
             XmlSerializer serializer = new XmlSerializer(typeof(Railml));
@@ -157,135 +139,6 @@ namespace RailmlEditor.Services
             }
         }
 
-        private void GenerateTvdSections(Railml railml)
-        {
-            // Prepare Segments
-            // Key: TrackId, Value: List of Segments (StartTcb, EndTcb, StartPos, EndPos)
-            var trackSegments = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<Segment>>();
-
-            foreach (var track in railml.Infrastructure.Tracks.TrackList)
-            {
-                var tcbs = track.TrainDetectionElements.TrackCircuitBorders.OrderBy(t => t.Pos).ToList();
-                var segments = new System.Collections.Generic.List<Segment>();
-                double currentPos = 0;
-                TrackCircuitBorder lastTcb = null;
-
-                foreach (var tcb in tcbs)
-                {
-                    segments.Add(new Segment { TrackId = track.Id, StartPos = currentPos, EndPos = tcb.Pos, StartTcb = lastTcb, EndTcb = tcb });
-                    currentPos = tcb.Pos;
-                    lastTcb = tcb;
-                }
-                // Last segment
-                double endPos = track.TrackTopology.TrackEnd.Pos; 
-                segments.Add(new Segment { TrackId = track.Id, StartPos = currentPos, EndPos = endPos, StartTcb = lastTcb, EndTcb = null });
-                
-                trackSegments[track.Id] = segments;
-            }
-
-            var processedSegments = new System.Collections.Generic.HashSet<Segment>();
-            int tvdCount = 1;
-
-            foreach (var track in railml.Infrastructure.Tracks.TrackList)
-            {
-                foreach (var segment in trackSegments[track.Id])
-                {
-                    if (processedSegments.Contains(segment)) continue;
-
-                    // Flood Fill for TVD Section
-                    var borders = new System.Collections.Generic.HashSet<string>();
-                    var q = new System.Collections.Generic.Queue<Segment>();
-                    
-                    q.Enqueue(segment);
-                    processedSegments.Add(segment);
-
-                    while (q.Count > 0)
-                    {
-                        var curr = q.Dequeue();
-                        
-                        // Add boundaries
-                        if (curr.StartTcb != null) borders.Add(curr.StartTcb.Id);
-                        if (curr.EndTcb != null) borders.Add(curr.EndTcb.Id);
-
-                        // If Open End (Start == 0), Traverse
-                        if (curr.StartPos == 0)
-                        {
-                            TraverseConnections(railml, curr.TrackId, true, q, processedSegments, trackSegments);
-                        }
-                        
-                        // If Open End (End == Length), Traverse
-                        if (curr.EndTcb == null)
-                        {
-                            TraverseConnections(railml, curr.TrackId, false, q, processedSegments, trackSegments);
-                        }
-                    }
-
-                    if (borders.Count > 0)
-                    {
-                        var tvd = new TvdSection { Id = $"tvd_Switch_{tvdCount}T", Name = $"{tvdCount}T" }; // Naming convention per user example
-                        foreach (var bId in borders) tvd.Borders.Add(new BorderRef { Ref = bId });
-                        railml.Infrastructure.TvdSections.TvdSectionList.Add(tvd);
-                        tvdCount++;
-                    }
-                }
-            }
-        }
-
-        private void TraverseConnections(Railml railml, string trackId, bool isBegin, 
-            System.Collections.Generic.Queue<Segment> q, 
-            System.Collections.Generic.HashSet<Segment> processed,
-            System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<Segment>> trackSegments)
-        {
-            var track = railml.Infrastructure.Tracks.TrackList.FirstOrDefault(t => t.Id == trackId);
-            if (track == null) return;
-
-            var node = isBegin ? track.TrackTopology.TrackBegin : track.TrackTopology.TrackEnd;
-            if (node == null || node.Connections == null) return;
-
-            // Collect connected Node IDs
-            var connectedNodeIds = new System.Collections.Generic.List<string>();
-            
-            if (node.Connections.ConnectionList != null)
-                connectedNodeIds.AddRange(node.Connections.ConnectionList.Select(c => c.Ref));
-            
-            if (node.Connections.Switches != null)
-            {
-                foreach(var sw in node.Connections.Switches)
-                {
-                    connectedNodeIds.Add(sw.Ref);
-                    connectedNodeIds.AddRange(sw.ConnectionList.Select(c => c.Ref));
-                }
-            }
-
-            foreach (var connectedId in connectedNodeIds)
-            {
-                // Connected ID format: "{TrackId}_begin" or "{TrackId}_end"
-                string targetTrackId = connectedId.Replace("_begin", "").Replace("_end", "");
-                bool isTargetBegin = connectedId.EndsWith("_begin");
-
-                if (trackSegments.ContainsKey(targetTrackId))
-                {
-                    // If connecting to Begin, take First segment. If End, take Last segment.
-                    var targetSegs = trackSegments[targetTrackId];
-                    var nextSeg = isTargetBegin ? targetSegs.First() : targetSegs.Last();
-
-                    if (!processed.Contains(nextSeg))
-                    {
-                        processed.Add(nextSeg);
-                        q.Enqueue(nextSeg);
-                    }
-                }
-            }
-        }
-
-        private class Segment
-        {
-            public string TrackId;
-            public double StartPos;
-            public double EndPos;
-            public TrackCircuitBorder StartTcb;
-            public TrackCircuitBorder EndTcb;
-        }
 
         public void Load(string path, MainViewModel viewModel)
         {
@@ -333,62 +186,6 @@ namespace RailmlEditor.Services
                         }
 
                         viewModel.Elements.Add(trackVm);
-
-                        // Load TCBs attached to this track
-                        if (track.TrainDetectionElements?.TrackCircuitBorders != null)
-                        {
-                            foreach(var tcb in track.TrainDetectionElements.TrackCircuitBorders)
-                            {
-                                var tcbVm = new TcbViewModel
-                                {
-                                    Id = tcb.Id,
-                                    ParentTrackId = track.Id,
-                                    PositionOnTrack = tcb.Pos,
-                                    Dir = tcb.Dir,
-                                    // Calculate approx X/Y? 
-                                    // We don't save TCB X/Y in XML (only Pos).
-                                    // Ideally we should recalculate X/Y based on Pos and Track.
-                                    // For now, place at Track Start as fallback or recalculate.
-                                    X = trackVm.X - 5, // Placeholder
-                                    Y = trackVm.Y - 5  // Placeholder
-                                };
-                                // Re-calculate position
-                                if (trackVm is CurvedTrackViewModel curve)
-                                {
-                                    double dist1 = Math.Sqrt(Math.Pow(curve.MX - curve.X, 2) + Math.Pow(curve.MY - curve.Y, 2));
-                                    double dist2 = Math.Sqrt(Math.Pow(curve.X2 - curve.MX, 2) + Math.Pow(curve.Y2 - curve.MY, 2));
-                                    
-                                    if (tcb.Pos <= dist1)
-                                    {
-                                        double t = (dist1 > 0) ? tcb.Pos / dist1 : 0;
-                                        tcbVm.X = curve.X + t * (curve.MX - curve.X) - 5;
-                                        tcbVm.Y = curve.Y + t * (curve.MY - curve.Y) - 5;
-                                    }
-                                    else
-                                    {
-                                        double remaining = tcb.Pos - dist1;
-                                        double t = (dist2 > 0) ? remaining / dist2 : 0;
-                                        tcbVm.X = curve.MX + t * (curve.X2 - curve.MX) - 5;
-                                        tcbVm.Y = curve.MY + t * (curve.Y2 - curve.MY) - 5;
-                                    }
-                                }
-                                else
-                                {
-                                    double dx = trackVm.X2 - trackVm.X;
-                                    double dy = trackVm.Y2 - trackVm.Y;
-                                    double lengthSq = dx * dx + dy * dy;
-                                    if (lengthSq > 0)
-                                    {
-                                        double length = Math.Sqrt(lengthSq);
-                                        double t = tcb.Pos / length; // Normalized
-                                        tcbVm.X = trackVm.X + t * dx - 5;
-                                        tcbVm.Y = trackVm.Y + t * dy - 5;
-                                    }
-                                }
-
-                                viewModel.Elements.Add(tcbVm);
-                            }
-                        }
                     }
                 }
 

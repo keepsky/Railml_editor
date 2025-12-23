@@ -19,6 +19,7 @@ namespace RailmlEditor.Models
         public XmlSerializerNamespaces Namespaces { get; set; } = new XmlSerializerNamespaces();
     }
 
+
     public class Infrastructure
     {
         [XmlElement(ElementName = "tracks")]
@@ -26,9 +27,6 @@ namespace RailmlEditor.Models
 
         [XmlElement(ElementName = "signals")]
         public Signals Signals { get; set; }
-
-        [XmlElement(ElementName = "tvdSections")]
-        public TvdSections TvdSections { get; set; }
     }
 
     public class Signals
@@ -68,9 +66,6 @@ namespace RailmlEditor.Models
 
         [XmlElement(ElementName = "trackTopology")]
         public TrackTopology TrackTopology { get; set; }
-
-        [XmlElement(ElementName = "trainDetectionElements")]
-        public TrainDetectionElements TrainDetectionElements { get; set; }
     }
 
     public class TrackTopology
@@ -93,8 +88,6 @@ namespace RailmlEditor.Models
         [XmlAttribute(AttributeName = "id")]
         public string Id { get; set; }
         
-        [XmlElement("any")]
-        public SehwaAny Any { get; set; }
 
         [XmlElement(ElementName = "connections")]
         public NodeConnections Connections { get; set; }
@@ -137,20 +130,6 @@ namespace RailmlEditor.Models
         public string Course { get; set; }
     }
 
-    public class SehwaAny
-    {
-        [XmlElement("screenPos", Namespace = "http://www.sehwa.co.kr/railml")]
-        public SehwaScreenPos ScreenPos { get; set; }
-    }
-
-    public class SehwaScreenPos
-    {
-        [XmlAttribute("x")]
-        public double X { get; set; }
-
-        [XmlAttribute("y")]
-        public double Y { get; set; }
-    }
 
     public class Connections
     {
@@ -170,47 +149,6 @@ namespace RailmlEditor.Models
         public List<Connection> ConnectionList { get; set; } = new List<Connection>();
     }
 
-    public class TrainDetectionElements
-    {
-        [XmlElement(ElementName = "trackCircuitBorder")]
-        public List<TrackCircuitBorder> TrackCircuitBorders { get; set; } = new List<TrackCircuitBorder>();
-    }
-
-    public class TrackCircuitBorder
-    {
-        [XmlAttribute(AttributeName = "id")]
-        public string Id { get; set; }
-
-        [XmlAttribute(AttributeName = "pos")]
-        public double Pos { get; set; }
-
-        [XmlAttribute(AttributeName = "dir")]
-        public string Dir { get; set; }
-    }
-
-    public class TvdSections
-    {
-        [XmlElement(ElementName = "tvdSection")]
-        public List<TvdSection> TvdSectionList { get; set; } = new List<TvdSection>();
-    }
-
-    public class TvdSection
-    {
-        [XmlAttribute(AttributeName = "id")]
-        public string Id { get; set; }
-
-        [XmlAttribute(AttributeName = "name")]
-        public string Name { get; set; }
-
-        [XmlElement(ElementName = "border")]
-        public List<BorderRef> Borders { get; set; } = new List<BorderRef>();
-    }
-
-    public class BorderRef
-    {
-        [XmlAttribute(AttributeName = "ref")]
-        public string Ref { get; set; }
-    }
 
     public class ScreenPos
     {

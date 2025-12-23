@@ -1,3 +1,6 @@
 RailmlEditor/obj/*
 RailmlEditor/bin/*
 *.railml
+TestSerializer/obj/*
+TestSerializer/bin/*
+TestSerializer/error.log
