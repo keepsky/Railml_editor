@@ -1,4 +1,7 @@
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Linq;
 using System.Windows.Input;
 using RailmlEditor.Models;
 
@@ -27,6 +30,13 @@ namespace RailmlEditor.ViewModels
         {
             get => _id;
             set => SetProperty(ref _id, value);
+        }
+
+        private string _name;
+        public string Name
+        {
+            get => _name;
+            set => SetProperty(ref _name, value);
         }
 
         public bool IsSelected
@@ -123,9 +133,16 @@ namespace RailmlEditor.ViewModels
     }
 
 
+    public class CategoryViewModel : ObservableObject
+    {
+        public string Title { get; set; }
+        public ObservableCollection<BaseElementViewModel> Items { get; } = new ObservableCollection<BaseElementViewModel>();
+    }
+
     public class MainViewModel : ObservableObject
     {
         public ObservableCollection<BaseElementViewModel> Elements { get; } = new ObservableCollection<BaseElementViewModel>();
+        public ObservableCollection<CategoryViewModel> TreeCategories { get; } = new ObservableCollection<CategoryViewModel>();
 
         private BaseElementViewModel _selectedElement;
         public BaseElementViewModel SelectedElement
@@ -138,6 +155,9 @@ namespace RailmlEditor.ViewModels
 
         public MainViewModel()
         {
+            InitializeTreeCategories();
+            Elements.CollectionChanged += Elements_CollectionChanged;
+
             SelectCommand = new RelayCommand(param => 
             {
                 if (param is BaseElementViewModel element)
@@ -147,7 +167,74 @@ namespace RailmlEditor.ViewModels
             });
 
             // Test Data
-            Elements.Add(new TrackViewModel { Id = "Tr01", X = 100, Y = 100, Length = 200 });
+            Elements.Add(new TrackViewModel { Id = "Tr01", Name = "Track 1", X = 100, Y = 100, Length = 200 });
+        }
+
+        private void InitializeTreeCategories()
+        {
+            TreeCategories.Add(new CategoryViewModel { Title = "Track" });
+            TreeCategories.Add(new CategoryViewModel { Title = "Signal" });
+            TreeCategories.Add(new CategoryViewModel { Title = "Point" });
+        }
+
+        private void Elements_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+             if (e.Action == NotifyCollectionChangedAction.Reset)
+             {
+                 foreach(var cat in TreeCategories) cat.Items.Clear();
+             }
+             
+             if (e.NewItems != null)
+             {
+                 foreach(BaseElementViewModel item in e.NewItems)
+                 {
+                     AddToCategory(item);
+                 }
+             }
+             if (e.OldItems != null)
+             {
+                 foreach(BaseElementViewModel item in e.OldItems)
+                 {
+                     RemoveFromCategory(item);
+                 }
+             }
+        }
+
+        private void AddToCategory(BaseElementViewModel item)
+        {
+             string catTitle = "";
+             if (item is TrackViewModel || item is CurvedTrackViewModel) catTitle = "Track";
+             else if (item is SignalViewModel) catTitle = "Signal";
+             else if (item is SwitchViewModel) catTitle = "Point";
+             
+             var cat = TreeCategories.FirstOrDefault(c => c.Title == catTitle);
+             cat?.Items.Add(item);
+             
+             item.PropertyChanged += Element_PropertyChanged;
+        }
+
+        private void RemoveFromCategory(BaseElementViewModel item)
+        {
+             item.PropertyChanged -= Element_PropertyChanged;
+             foreach(var cat in TreeCategories)
+             {
+                 if (cat.Items.Contains(item))
+                 {
+                     cat.Items.Remove(item);
+                     break;
+                 }
+             }
+        }
+
+        private void Element_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(BaseElementViewModel.IsSelected))
+            {
+                if (sender is BaseElementViewModel vm && vm.IsSelected)
+                {
+                    SelectedElement = vm;
+                }
+            }
         }
     }
 }

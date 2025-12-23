@@ -266,93 +266,208 @@
             </Grid.ColumnDefinitions>
 
              <!-- Properties Panel (Moved to Left) -->
-            <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="0,0,1,0" Background="#F0F0F0">
-                <StackPanel Margin="10">
-                    <TextBlock Text="Properties" FontWeight="Bold" Margin="0,0,0,10"/>
-                    <!-- Simple Property Grid for now -->
-                    <ContentControl Content="{Binding SelectedElement}">
-                        <ContentControl.Resources>
-                            <!-- Track Properties -->
-                            <DataTemplate DataType="{x:Type local:ViewModels.TrackViewModel}">
-                                <StackPanel>
-                                    <TextBlock Text="Type: Track" FontWeight="Bold" Margin="0,0,0,5"/>
-                                    <TextBlock Text="ID:"/>
-                                    <TextBox Text="{Binding Id, UpdateSourceTrigger=PropertyChanged}"/>
-                                    
-                                    <Separator Margin="0,10"/>
-                                    <TextBlock Text="Start Point (Begin)" FontWeight="SemiBold"/>
-                                    <TextBlock Text="X:"/>
-                                    <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}"/>
-                                    <TextBlock Text="Y:"/>
-                                    <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}"/>
-                                    
-                                    <Separator Margin="0,10"/>
-                                    <TextBlock Text="End Point (End)" FontWeight="SemiBold"/>
-                                    <TextBlock Text="X2:"/>
-                                    <TextBox Text="{Binding X2, UpdateSourceTrigger=PropertyChanged}"/>
-                                    <TextBlock Text="Y2:"/>
-                                    <TextBox Text="{Binding Y2, UpdateSourceTrigger=PropertyChanged}"/>
-                                </StackPanel>
-                            </DataTemplate>
+            <!-- Left Pane: Tree View and Properties -->
+            <Grid Grid.Column="0" Background="#F0F0F0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-                            <!-- Curved Track Properties -->
-                            <DataTemplate DataType="{x:Type local:ViewModels.CurvedTrackViewModel}">
-                                <StackPanel>
-                                    <TextBlock Text="Type: Curved Track" FontWeight="Bold" Margin="0,0,0,5"/>
-                                    <TextBlock Text="ID:"/>
-                                    <TextBox Text="{Binding Id, UpdateSourceTrigger=PropertyChanged}"/>
-                                    
-                                    <Separator Margin="0,10"/>
-                                    <TextBlock Text="Start (X,Y):"/>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}" Width="50" Margin="0,0,5,0"/>
-                                        <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
-                                    </StackPanel>
-                                    
-                                    <TextBlock Text="Mid (MX,MY):"/>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBox Text="{Binding MX, UpdateSourceTrigger=PropertyChanged}" Width="50" Margin="0,0,5,0"/>
-                                        <TextBox Text="{Binding MY, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
-                                    </StackPanel>
-                                    
-                                    <TextBlock Text="End (X2,Y2):"/>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBox Text="{Binding X2, UpdateSourceTrigger=PropertyChanged}" Width="50" Margin="0,0,5,0"/>
-                                        <TextBox Text="{Binding Y2, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </DataTemplate>
+                <!-- Tree View -->
+                <Border Grid.Row="0" BorderBrush="Gray" BorderThickness="0,0,1,1" Margin="0,0,0,5">
+                    <DockPanel>
+                        <TextBlock Text="Explorer" DockPanel.Dock="Top" FontWeight="Bold" Margin="5"/>
+                        <TreeView ItemsSource="{Binding TreeCategories}" BorderThickness="0" Background="Transparent" Name="ElementTree">
+                            <TreeView.ItemTemplate>
+                                <HierarchicalDataTemplate ItemsSource="{Binding Items}">
+                                    <TextBlock Text="{Binding Title}" FontWeight="Bold"/>
+                                    <HierarchicalDataTemplate.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Id}"/>
+                                                <TextBlock Text=" - " Foreground="Gray"/>
+                                                <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </HierarchicalDataTemplate.ItemTemplate>
+                                </HierarchicalDataTemplate>
+                            </TreeView.ItemTemplate>
+                            <TreeView.ItemContainerStyle>
+                                <Style TargetType="TreeViewItem">
+                                    <Setter Property="IsExpanded" Value="True"/>
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                                </Style>
+                            </TreeView.ItemContainerStyle>
+                        </TreeView>
+                    </DockPanel>
+                </Border>
 
-                            <!-- Switch Properties -->
-                            <DataTemplate DataType="{x:Type local:ViewModels.SwitchViewModel}">
-                                <StackPanel>
-                                    <TextBlock Text="Type: Switch" FontWeight="Bold" Margin="0,0,0,5"/>
-                                    <TextBlock Text="ID:"/>
-                                    <TextBox Text="{Binding Id, UpdateSourceTrigger=PropertyChanged}"/>
-                                    <TextBlock Text="X:"/>
-                                    <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}"/>
-                                    <TextBlock Text="Y:"/>
-                                    <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}"/>
-                                </StackPanel>
-                            </DataTemplate>
+                <!-- Splitter -->
+                <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" Background="LightGray"/>
 
-                            <!-- Signal Properties -->
-                            <DataTemplate DataType="{x:Type local:ViewModels.SignalViewModel}">
-                                <StackPanel>
-                                    <TextBlock Text="Type: Signal" FontWeight="Bold" Margin="0,0,0,5"/>
-                                    <TextBlock Text="ID:"/>
-                                    <TextBox Text="{Binding Id, UpdateSourceTrigger=PropertyChanged}"/>
-                                    <TextBlock Text="X:"/>
-                                    <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}"/>
-                                    <TextBlock Text="Y:"/>
-                                    <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}"/>
-                                </StackPanel>
-                            </DataTemplate>
+                <!-- Properties Panel -->
+                <Border Grid.Row="2" BorderBrush="Gray" BorderThickness="0,1,1,0" Padding="5">
+                    <DockPanel>
+                         <TextBlock Text="Properties" DockPanel.Dock="Top" FontWeight="Bold" Margin="0,0,0,10"/>
+                         <ScrollViewer VerticalScrollBarVisibility="Auto">
+                             <ContentControl Content="{Binding SelectedElement}" Grid.IsSharedSizeScope="True">
+                                 <ContentControl.Resources>
+                                     <Style TargetType="TextBlock" x:Key="PropLabel">
+                                         <Setter Property="FontWeight" Value="SemiBold"/>
+                                         <Setter Property="VerticalAlignment" Value="Center"/>
+                                         <Setter Property="Margin" Value="0,0,10,5"/>
+                                     </Style>
+                                     <Style TargetType="TextBox" x:Key="PropValue">
+                                         <Setter Property="VerticalAlignment" Value="Center"/>
+                                         <Setter Property="Margin" Value="0,0,0,5"/>
+                                     </Style>
 
-                        </ContentControl.Resources>
-                    </ContentControl>
-                </StackPanel>
-            </Border>
+                                     <!-- Track Properties -->
+                                     <DataTemplate DataType="{x:Type local:ViewModels.TrackViewModel}">
+                                         <Grid>
+                                             <Grid.ColumnDefinitions>
+                                                 <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
+                                                 <ColumnDefinition Width="*"/>
+                                             </Grid.ColumnDefinitions>
+                                             <Grid.RowDefinitions>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                             </Grid.RowDefinitions>
+
+                                             <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding Id, Mode=OneWay}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
+
+                                             <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                             <TextBlock Text="Length" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding Length, Mode=OneWay, StringFormat=N2}" IsReadOnly="True" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
+
+                                             <Separator Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10"/>
+
+                                             <TextBlock Text="Begin X" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                             <TextBlock Text="Begin Y" Grid.Row="5" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" Grid.Row="5" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                         </Grid>
+                                     </DataTemplate>
+
+                                     <!-- Curved Track Properties -->
+                                     <DataTemplate DataType="{x:Type local:ViewModels.CurvedTrackViewModel}">
+                                         <Grid>
+                                             <Grid.ColumnDefinitions>
+                                                 <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
+                                                 <ColumnDefinition Width="*"/>
+                                             </Grid.ColumnDefinitions>
+                                             <Grid.RowDefinitions>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                             </Grid.RowDefinitions>
+
+                                             <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding Id, Mode=OneWay}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
+
+                                             <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                             <Separator Grid.Row="2" Grid.ColumnSpan="2" Margin="0,10"/>
+
+                                             <TextBlock Text="Begin X" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                             <TextBlock Text="Begin Y" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                             <TextBlock Text="Mid X" Grid.Row="5" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding MX, UpdateSourceTrigger=PropertyChanged}" Grid.Row="5" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                             <TextBlock Text="Mid Y" Grid.Row="6" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding MY, UpdateSourceTrigger=PropertyChanged}" Grid.Row="6" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                             <TextBlock Text="End X" Grid.Row="7" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding X2, UpdateSourceTrigger=PropertyChanged}" Grid.Row="7" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                             <TextBlock Text="End Y" Grid.Row="8" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding Y2, UpdateSourceTrigger=PropertyChanged}" Grid.Row="8" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                         </Grid>
+                                     </DataTemplate>
+
+                                     <!-- Switch Properties -->
+                                     <DataTemplate DataType="{x:Type local:ViewModels.SwitchViewModel}">
+                                         <Grid>
+                                             <Grid.ColumnDefinitions>
+                                                 <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
+                                                 <ColumnDefinition Width="*"/>
+                                             </Grid.ColumnDefinitions>
+                                             <Grid.RowDefinitions>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                             </Grid.RowDefinitions>
+
+                                             <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding Id, Mode=OneWay}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
+
+                                             <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                             <TextBlock Text="Pos X" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                             <TextBlock Text="Pos Y" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                         </Grid>
+                                     </DataTemplate>
+
+                                     <!-- Signal Properties -->
+                                     <DataTemplate DataType="{x:Type local:ViewModels.SignalViewModel}">
+                                         <Grid>
+                                             <Grid.ColumnDefinitions>
+                                                 <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
+                                                 <ColumnDefinition Width="*"/>
+                                             </Grid.ColumnDefinitions>
+                                             <Grid.RowDefinitions>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                                 <RowDefinition Height="Auto"/>
+                                             </Grid.RowDefinitions>
+
+                                             <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding Id, Mode=OneWay}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
+
+                                             <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                             <TextBlock Text="Pos X" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                             <TextBlock Text="Pos Y" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                             <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                         </Grid>
+                                     </DataTemplate>
+
+                                 </ContentControl.Resources>
+                             </ContentControl>
+                         </ScrollViewer>
+                    </DockPanel>
+                </Border>
+            </Grid>
 
             <!-- Grid Splitter -->
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="LightGray"/>

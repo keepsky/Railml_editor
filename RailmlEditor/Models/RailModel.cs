@@ -40,6 +40,9 @@ namespace RailmlEditor.Models
         [XmlAttribute(AttributeName = "id")]
         public string Id { get; set; }
 
+        [XmlAttribute(AttributeName = "name")]
+        public string Name { get; set; }
+
         [XmlAttribute(AttributeName = "pos")]
         public double Pos { get; set; }
 
@@ -141,6 +144,9 @@ namespace RailmlEditor.Models
     {
         [XmlAttribute(AttributeName = "id")]
         public string Id { get; set; }
+
+        [XmlAttribute(AttributeName = "name")]
+        public string Name { get; set; }
 
         [XmlAttribute(AttributeName = "ref")]
         public string Ref { get; set; }
