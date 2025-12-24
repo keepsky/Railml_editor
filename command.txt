@@ -1,4 +1,15 @@
 
+======================
+trackEnd에 switch가 있고 다른 2개의 trackBegin이 연결되는 경우 아래와 같은 railml 코드가 생성되어야 합니다. switch 태그에는 ref 속성이 없기 때문에 switch 하위에 connection 태그의 ref 속성을 이용합니다. 아래 예제는 1번 트랙에서 2,3번 트랙으로 switch를 통해서 분기되는 경우를 나타낸것입니다.
+<trackEnd id="te_1" pos="100">
+            <connections>
+              <switch id="sw_01">
+                <connection id="conn_1_to_2" ref="tb_2"/>
+                <connection id="conn_1_to_3" ref="tb_3"/>
+              </switch>
+            </connections>
+          </trackEnd>
+======================
 switch가 아닌 일반 track 두개가 연결될때 현재 구현은 tracktopology->connections->connection 태그를 사용하고 있는데, 이것을 수정해서 연결되는 지점의 trackbegin 또는 trackend 태그 하위에 connection 태그가 위치하도록 수정해줘
 ======================
 trackbegin, trackend에 있는 X, Y 속성 대신에 하위에 sehwa:screenPos 태그를 만들고 x, y 속성에 좌표를 저장하도록 수정해줘

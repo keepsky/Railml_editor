@@ -2,42 +2,114 @@
 <railml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:sehwa="http://www.sehwa.co.kr/railml" version="2.5" xmlns="http://www.railml.org/schemas/2013">
   <infrastructure>
     <tracks>
-      <track id="T001">
+      <track id="T001" name="51T">
         <trackTopology>
           <trackBegin pos="0" id="T001_begin">
-            <sehwa:screenPos x="60" y="160" />
+            <connection id="conn_T001_begin_to_T007_end" ref="T007_end" />
+            <sehwa:screenPos x="390" y="190" />
           </trackBegin>
-          <trackEnd pos="100" id="T001_end">
-            <sehwa:screenPos x="160" y="160" />
-          </trackEnd>
-          <connections>
-            <switch id="P001" pos="100" ref="T002_begin">
-              <additionalName name="21" />
-              <connection id="switch_conn_P001_1" ref="PT001_begin" />
-            </switch>
-          </connections>
-        </trackTopology>
-      </track>
-      <track id="T002">
-        <trackTopology>
-          <trackBegin pos="0" id="T002_begin">
-            <connection id="conn_T002_begin_to_T001_end" ref="T001_end" />
-            <sehwa:screenPos x="160" y="160" />
-          </trackBegin>
-          <trackEnd pos="100" id="T002_end">
-            <sehwa:screenPos x="260" y="160" />
+          <trackEnd pos="60" id="T001_end">
+            <connection id="conn_T001_end_to_T002_begin" ref="T002_begin" />
+            <sehwa:screenPos x="450" y="190" />
           </trackEnd>
           <connections />
         </trackTopology>
       </track>
-      <track id="PT001">
+      <track id="PT001" name="51T">
         <trackTopology>
           <trackBegin pos="0" id="PT001_begin">
-            <connection id="conn_PT001_begin_to_T001_end" ref="T001_end" />
-            <sehwa:screenPos mx="220" my="100" x="160" y="160" />
+            <connection id="conn_PT001_begin_to_T003_end" ref="T003_end" />
+            <sehwa:screenPos mx="420" my="120" x="390" y="120" />
           </trackBegin>
-          <trackEnd pos="114" id="PT001_end">
-            <sehwa:screenPos x="250" y="100" />
+          <trackEnd pos="106" id="PT001_end">
+            <connection id="conn_PT001_end_to_T002_begin" ref="T002_begin" />
+            <sehwa:screenPos x="450" y="190" />
+          </trackEnd>
+          <connections />
+        </trackTopology>
+      </track>
+      <track id="T002" name="51T">
+        <trackTopology>
+          <trackBegin pos="0" id="T002_begin">
+            <sehwa:screenPos x="450" y="190" />
+          </trackBegin>
+          <trackEnd pos="50" id="T002_end">
+            <sehwa:screenPos x="500" y="190" />
+          </trackEnd>
+          <connections>
+            <switch id="P001" pos="0">
+              <additionalName name="51" />
+              <connection id="conn_T002_begin_to_T001_end" ref="T001_end" />
+              <connection id="conn_T002_begin_to_PT001_end" ref="PT001_end" />
+            </switch>
+          </connections>
+        </trackTopology>
+      </track>
+      <track id="T003" name="2T">
+        <trackTopology>
+          <trackBegin pos="0" id="T003_begin">
+            <connection id="conn_T003_begin_to_PT002_end" ref="PT002_end" />
+            <sehwa:screenPos x="260" y="120" />
+          </trackBegin>
+          <trackEnd pos="130" id="T003_end">
+            <connection id="conn_T003_end_to_PT001_begin" ref="PT001_begin" />
+            <sehwa:screenPos x="390" y="120" />
+          </trackEnd>
+          <connections />
+        </trackTopology>
+      </track>
+      <track id="PT002" name="21T">
+        <trackTopology>
+          <trackBegin pos="0" id="PT002_begin">
+            <connection id="conn_PT002_begin_to_T004_end" ref="T004_end" />
+            <sehwa:screenPos mx="230" my="120" x="190" y="190" />
+          </trackBegin>
+          <trackEnd pos="110" id="PT002_end">
+            <connection id="conn_PT002_end_to_T003_begin" ref="T003_begin" />
+            <sehwa:screenPos x="260" y="120" />
+          </trackEnd>
+          <connections />
+        </trackTopology>
+      </track>
+      <track id="T004" name="21T">
+        <trackTopology>
+          <trackBegin pos="0" id="T004_begin">
+            <sehwa:screenPos x="140" y="190" />
+          </trackBegin>
+          <trackEnd pos="50" id="T004_end">
+            <sehwa:screenPos x="190" y="190" />
+          </trackEnd>
+          <connections>
+            <switch id="P002" pos="50">
+              <additionalName name="21" />
+              <connection id="conn_T004_end_to_PT002_begin" ref="PT002_begin" />
+              <connection id="conn_T004_end_to_T005_begin" ref="T005_begin" />
+            </switch>
+          </connections>
+        </trackTopology>
+      </track>
+      <track id="T005" name="21T">
+        <trackTopology>
+          <trackBegin pos="0" id="T005_begin">
+            <connection id="conn_T005_begin_to_T004_end" ref="T004_end" />
+            <sehwa:screenPos x="190" y="190" />
+          </trackBegin>
+          <trackEnd pos="70" id="T005_end">
+            <connection id="conn_T005_end_to_T007_begin" ref="T007_begin" />
+            <sehwa:screenPos x="260" y="190" />
+          </trackEnd>
+          <connections />
+        </trackTopology>
+      </track>
+      <track id="T007" name="1T">
+        <trackTopology>
+          <trackBegin pos="0" id="T007_begin">
+            <connection id="conn_T007_begin_to_T005_end" ref="T005_end" />
+            <sehwa:screenPos x="260" y="190" />
+          </trackBegin>
+          <trackEnd pos="130" id="T007_end">
+            <connection id="conn_T007_end_to_T001_begin" ref="T001_begin" />
+            <sehwa:screenPos x="390" y="190" />
           </trackEnd>
           <connections />
         </trackTopology>

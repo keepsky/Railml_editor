@@ -122,9 +122,6 @@ namespace RailmlEditor.Models
         [XmlAttribute(AttributeName = "id")]
         public string Id { get; set; }
         
-        [XmlElement(ElementName = "switch")]
-        public List<Switch> Switches { get; set; } = new List<Switch>();
-
         [XmlElement(ElementName = "connection")]
         public List<Connection> ConnectionList { get; set; } = new List<Connection>();
 
@@ -146,7 +143,6 @@ namespace RailmlEditor.Models
         [XmlAttribute(AttributeName = "course")]
         public string Course { get; set; }
     }
-
 
     public class Connections
     {
@@ -170,9 +166,6 @@ namespace RailmlEditor.Models
 
         [XmlElement(ElementName = "additionalName")]
         public AdditionalName AdditionalName { get; set; }
-
-        [XmlAttribute(AttributeName = "ref")]
-        public string Ref { get; set; }
 
         [XmlElement(ElementName = "connection")]
         public List<Connection> ConnectionList { get; set; } = new List<Connection>();

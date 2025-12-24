@@ -142,9 +142,9 @@ namespace RailmlEditor.Services
 
                     // Logic Change: Add to TrackTopology.Connections instead of nodeA.Connections
                     
-                    bool isTrackEnd = nodeA.Id.EndsWith("_end");
-
-                    if (!isTrackEnd || overlappingNodes.Count == 1)
+                    // bool isTrackEnd = nodeA.Id.EndsWith("_end");
+                    
+                    if (overlappingNodes.Count == 1)
                     {
                          foreach (var nodeB in overlappingNodes)
                          {
@@ -164,41 +164,38 @@ namespace RailmlEditor.Services
                          // Switch Connection
                          // Check if switch already exists (by Ref?) - basic check
                          // Assuming strictly one switch per node for simplified logic
-                         if (!parentTrack.TrackTopology.Connections.Switches.Any(s => s.Ref == overlappingNodes[0].Id)) // Crude check
-                         {
-                             var firstNode = overlappingNodes[0];
-                             
-                             // Attempt to find a SwitchViewModel overlapping this node to get its Name
-                             var switchVm = viewModel.Elements.OfType<SwitchViewModel>()
-                                 .FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - (nodeA.ScreenPos?.X ?? 0), 2) + Math.Pow(s.Y - (nodeA.ScreenPos?.Y ?? 0), 2)) < 5.0);
+                         // Ensure Connections object exists
+                         if (parentTrack.TrackTopology.Connections == null) 
+                             parentTrack.TrackTopology.Connections = new Connections();
 
-                             // Pos Calculation
-                             // If nodeA is Begin, pos=0. If End, pos=Length.
-                             // Track length is theoretically needed.
-                             // For now, if End, using 100 or actual length if we had it.
-                             // Simplified: If End, assume Length. If Begin, 0.
-                             // Wait, TrackNode 'Pos' attribute holds the length for End node? 
-                             // Usually TrackEnd.Pos = Length.
-                             // I'll use nodeA.Pos as the switch position.
-                             
+                         // Check if switch already added for this node
+                         string expectedSwitchId = $"sw_{nodeA.Id}";
+                         // Also check if we should use existing ID from ViewModel?
+                         var switchVmForCheck = viewModel.Elements.OfType<SwitchViewModel>()
+                                 .FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - (nodeA.ScreenPos?.X ?? 0), 2) + Math.Pow(s.Y - (nodeA.ScreenPos?.Y ?? 0), 2)) < 5.0);
+                         if (switchVmForCheck != null) expectedSwitchId = switchVmForCheck.Id;
+
+                         if (!parentTrack.TrackTopology.Connections.Switches.Any(s => s.Id == expectedSwitchId))
+                         {
+                             // Identify Switch VM
                              double switchPos = nodeA.Pos; 
 
                              var switchObj = new Switch
                              {
-                                 Id = switchVm?.Id ?? $"sw_{nodeA.Id}",
-                                 AdditionalName = new AdditionalName { Name = switchVm?.Name },
-                                 Ref = firstNode.Id,
+                                 Id = expectedSwitchId,
+                                 AdditionalName = new AdditionalName { Name = switchVmForCheck?.Name },
                                  Pos = switchPos,
-                                 ScreenPos = (switchVm?.MX.HasValue == true && switchVm?.MY.HasValue == true)
-                                     ? new ScreenPos { X = switchVm.MX.Value, XSpecified = true, Y = switchVm.MY.Value, YSpecified = true }
+                                 ScreenPos = (switchVmForCheck?.MX.HasValue == true && switchVmForCheck?.MY.HasValue == true)
+                                     ? new ScreenPos { X = switchVmForCheck.MX.Value, XSpecified = true, Y = switchVmForCheck.MY.Value, YSpecified = true }
                                      : null
                              };
-                             for (int i = 1; i < overlappingNodes.Count; i++)
+
+                             foreach (var nodeB in overlappingNodes)
                              {
                                  switchObj.ConnectionList.Add(new Connection
                                  {
-                                     Id = $"switch_conn_{switchObj.Id}_{i}",
-                                     Ref = overlappingNodes[i].Id
+                                     Id = $"conn_{nodeA.Id}_to_{nodeB.Id}",
+                                     Ref = nodeB.Id
                                  });
                              }
                              parentTrack.TrackTopology.Connections.Switches.Add(switchObj);
@@ -277,43 +274,6 @@ namespace RailmlEditor.Services
 
                         viewModel.Elements.Add(trackVm);
                         
-                        // Load Switches from TrackBegin
-                        if (track.TrackTopology?.TrackBegin?.Switches != null)
-                        {
-                            foreach (var sw in track.TrackTopology.TrackBegin.Switches)
-                            {
-                                // Check if already added (Switches might be referenced by multiple tracks? No, defined in one node)
-                                if (!viewModel.Elements.Any(e => e.Id == sw.Id))
-                                {
-                                    var switchVm = new SwitchViewModel
-                                    {
-                                        Id = sw.Id,
-                                        Name = sw.AdditionalName?.Name,
-                                        X = trackVm.X, // Switch is at Node position
-                                        Y = trackVm.Y
-                                    };
-                                    viewModel.Elements.Add(switchVm);
-                                }
-                            }
-                        }
-                        // Load Switches from TrackEnd
-                        if (track.TrackTopology?.TrackEnd?.Switches != null)
-                        {
-                            foreach (var sw in track.TrackTopology.TrackEnd.Switches)
-                            {
-                                if (!viewModel.Elements.Any(e => e.Id == sw.Id))
-                                {
-                                    var switchVm = new SwitchViewModel
-                                    {
-                                        Id = sw.Id,
-                                        Name = sw.AdditionalName?.Name,
-                                        X = track.TrackTopology.TrackEnd.ScreenPos?.X ?? 0,
-                                        Y = track.TrackTopology.TrackEnd.ScreenPos?.Y ?? 0
-                                    };
-                                    viewModel.Elements.Add(switchVm);
-                                }
-                            }
-                        }
 
                         // NEW: Load Switches from TrackTopology.Connections (Standardized Location)
                         if (track.TrackTopology?.Connections?.Switches != null)
