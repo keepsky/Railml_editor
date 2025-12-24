@@ -398,6 +398,47 @@
                 </Thumb>
             </Canvas>
         </DataTemplate>
+        <Style x:Key="ToolBarButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#FFFFFF" Offset="0.0"/>
+                        <GradientStop Color="#F0F0F0" Offset="0.5"/>
+                        <GradientStop Color="#E0E0E0" Offset="1.0"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderBrush" Value="#A0A0A0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="3"/>
+                </Style>
+            </Style.Resources>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#F0F0F0" Offset="0.0"/>
+                                <GradientStop Color="#E0E0E0" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="BorderBrush" Value="#007ACC"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#D0D0D0"/>
+                    <Setter Property="Padding" Value="3,3,1,1"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
     <DockPanel>
@@ -414,20 +455,20 @@
 
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar>
-                <Button Click="Toolbox_Click" ToolTip="Track">
+                <Button Click="Toolbox_Click" ToolTip="Track" Style="{StaticResource ToolBarButtonStyle}">
                     <!-- Track Icon using Rectangle -->
-                    <Rectangle Width="30" Height="6" Fill="White" Stroke="Black" StrokeThickness="1" RadiusX="3" RadiusY="3"/>
+                    <Rectangle Width="24" Height="4" Fill="White" Stroke="Black" StrokeThickness="1" RadiusX="2" RadiusY="2"/>
                     <Button.Tag>Track</Button.Tag>
                 </Button>
                 <!-- Switch Button REMOVED -->
-                <Button Click="Toolbox_Click" ToolTip="Signal">
+                <Button Click="Toolbox_Click" ToolTip="Signal" Style="{StaticResource ToolBarButtonStyle}">
                     <!-- Signal Icon using ControlTemplate -->
-                    <Control Template="{StaticResource SignalIcon}" Width="40" Height="20"/>
+                    <Control Template="{StaticResource SignalIcon}" Width="28" Height="14"/>
                     <Button.Tag>Signal</Button.Tag>
                 </Button>
-                <Button Click="Toolbox_Click" ToolTip="Point">
+                <Button Click="Toolbox_Click" ToolTip="Point" Style="{StaticResource ToolBarButtonStyle}">
                     <!-- Point Icon from point.svg -->
-                    <Control Template="{StaticResource PointIcon}" Width="40" Height="20"/>
+                    <Control Template="{StaticResource PointIcon}" Width="28" Height="16"/>
                     <Button.Tag>CurvedTrack</Button.Tag>
                 </Button>
             </ToolBar>
