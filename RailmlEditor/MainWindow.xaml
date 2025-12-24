@@ -379,32 +379,44 @@
                                                  <ColumnDefinition Width="*"/>
                                              </Grid.ColumnDefinitions>
                                              <Grid.RowDefinitions>
-                                                 <RowDefinition Height="Auto"/>
-                                                 <RowDefinition Height="Auto"/>
-                                                 <RowDefinition Height="Auto"/>
-                                                 <RowDefinition Height="Auto"/>
-                                                 <RowDefinition Height="Auto"/>
-                                                 <RowDefinition Height="Auto"/>
-                                                 <RowDefinition Height="Auto"/>
-                                             </Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
 
-                                             <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                             <TextBox Text="{Binding Id, Mode=OneWay}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
+                                            <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Id, Mode=OneWay}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
 
-                                             <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                             <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                            <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
 
-                                             <TextBlock Text="Length" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                             <TextBox Text="{Binding Length, Mode=OneWay, StringFormat=N2}" IsReadOnly="True" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
+                                            <TextBlock Text="Description" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
 
-                                             <Separator Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10"/>
+                                            <TextBlock Text="Type" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding Type, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
 
-                                             <TextBlock Text="Begin X" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                             <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                            <TextBlock Text="MainDir" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <ComboBox ItemsSource="{Binding AvailableMainDirs}" SelectedItem="{Binding MainDir, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
 
-                                             <TextBlock Text="Begin Y" Grid.Row="5" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                             <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" Grid.Row="5" Grid.Column="1" Style="{StaticResource PropValue}"/>
-                                         </Grid>
+                                            <TextBlock Text="Length" Grid.Row="5" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Length, Mode=OneWay, StringFormat=N2}" IsReadOnly="True" Grid.Row="5" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
+
+                                            <Separator Grid.Row="6" Grid.ColumnSpan="2" Margin="0,10"/>
+
+                                            <TextBlock Text="Begin X" Grid.Row="7" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}" Grid.Row="7" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <TextBlock Text="Begin Y" Grid.Row="8" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" Grid.Row="8" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                        </Grid>
                                      </DataTemplate>
 
                                      <!-- Curved Track Properties -->
@@ -496,6 +508,8 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
                                 <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
@@ -504,17 +518,23 @@
                                 <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
                                 <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
 
-                                <TextBlock Text="Direction" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                <ComboBox ItemsSource="{Binding AvailableDirections}" SelectedItem="{Binding Direction, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
+                                <TextBlock Text="Type" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding Type, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
 
-                                <TextBlock Text="X" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                <TextBox Text="{Binding X}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                <TextBlock Text="Function" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                <ComboBox ItemsSource="{Binding AvailableFunctions}" SelectedItem="{Binding Function, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
 
-                                <TextBlock Text="Y" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                <TextBox Text="{Binding Y}" Grid.Row="4" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                <TextBlock Text="Direction" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                <ComboBox ItemsSource="{Binding AvailableDirections}" SelectedItem="{Binding Direction, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
 
-                                <TextBlock Text="Bind Track" Grid.Row="5" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                <TextBox Text="{Binding RelatedTrackId}" Grid.Row="5" Grid.Column="1" Style="{StaticResource PropValue}" IsReadOnly="True"/>
+                                <TextBlock Text="X" Grid.Row="5" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                <TextBox Text="{Binding X}" Grid.Row="5" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                <TextBlock Text="Y" Grid.Row="6" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                <TextBox Text="{Binding Y}" Grid.Row="6" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                <TextBlock Text="Bind Track" Grid.Row="7" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                <TextBox Text="{Binding RelatedTrackId}" Grid.Row="7" Grid.Column="1" Style="{StaticResource PropValue}" IsReadOnly="True"/>
                             </Grid>
                         </DataTemplate>
 

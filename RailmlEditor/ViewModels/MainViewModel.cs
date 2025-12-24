@@ -52,6 +52,38 @@ namespace RailmlEditor.ViewModels
     {
         public override string TypeName => "Track";
         
+        // Collections for ComboBox
+        public System.Collections.Generic.List<string> AvailableTypes { get; } = new System.Collections.Generic.List<string> 
+        { 
+            "mainTrack", "secondaryTrack", "connectingTrack", "sidingTrack", "stationTrack" 
+        };
+        
+        public System.Collections.Generic.List<string> AvailableMainDirs { get; } = new System.Collections.Generic.List<string> 
+        { 
+            "up", "down", "none" 
+        };
+
+        private string _description;
+        public string Description
+        {
+            get => _description;
+            set => SetProperty(ref _description, value);
+        }
+
+        private string _type;
+        public string Type
+        {
+            get => _type;
+            set => SetProperty(ref _type, value);
+        }
+
+        private string _mainDir;
+        public string MainDir
+        {
+            get => _mainDir;
+            set => SetProperty(ref _mainDir, value);
+        }
+        
         public override double X
         {
             get => base.X;
@@ -129,6 +161,31 @@ namespace RailmlEditor.ViewModels
     public class SignalViewModel : BaseElementViewModel
     {
         public override string TypeName => "Signal";
+        
+        // Collections for ComboBox
+        public System.Collections.Generic.List<string> AvailableTypes { get; } = new System.Collections.Generic.List<string> 
+        { 
+            "main", "distant", "repeater", "shunting" 
+        };
+
+        public System.Collections.Generic.List<string> AvailableFunctions { get; } = new System.Collections.Generic.List<string> 
+        { 
+            "exit", "home", "blocking" 
+        };
+
+        private string _type;
+        public string Type
+        {
+            get => _type;
+            set => SetProperty(ref _type, value);
+        }
+
+        private string _function;
+        public string Function
+        {
+            get => _function;
+            set => SetProperty(ref _function, value);
+        }
         
         private string _relatedTrackId;
         public string RelatedTrackId

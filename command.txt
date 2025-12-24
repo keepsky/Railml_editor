@@ -1,3 +1,13 @@
+
+======================
+track에 아래 3개 속성 추가하고 속성창에서 수정할수 있도록 수정해줘
+description : string 타입으로 사용자가 내용 입력
+type : list box로 mainTrack, secondaryTrack, connectingTrack, sidingTrack, stationTrack 을 선택
+mainDir : list box로 up, down, none 선택
+그리고 signal에 아래 속성 추가하고 속성창에서 수정할수 있도록 수정해줘
+type : list box로 main, distant, repeater, shunting 을 선택
+function : list box로 exit, home, blocking 을 선택
+======================
 signal direction=down인 경우 signal의 좌표 기준은 우측 끝지점으로 수정하여 반영
 signal을 track에 위 또는 아래에 표시될때 현재보다 2px 정도 간격을 두도록 수정
 ======================

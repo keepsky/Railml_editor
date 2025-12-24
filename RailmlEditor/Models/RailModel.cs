@@ -40,6 +40,15 @@ namespace RailmlEditor.Models
         [XmlAttribute(AttributeName = "name")]
         public string Name { get; set; }
 
+        [XmlAttribute(AttributeName = "description")]
+        public string Description { get; set; }
+
+        [XmlAttribute(AttributeName = "type")]
+        public string Type { get; set; }
+
+        [XmlAttribute(AttributeName = "mainDir")]
+        public string MainDir { get; set; }
+
         [XmlElement(ElementName = "trackTopology")]
         public TrackTopology TrackTopology { get; set; }
 
@@ -66,6 +75,12 @@ namespace RailmlEditor.Models
 
         [XmlAttribute(AttributeName = "dir")]
         public string Dir { get; set; }
+
+        [XmlAttribute(AttributeName = "type")]
+        public string Type { get; set; }
+
+        [XmlAttribute(AttributeName = "function")]
+        public string Function { get; set; }
 
         // Mapped to <additionalName name="...">
         [XmlElement(ElementName = "additionalName")]

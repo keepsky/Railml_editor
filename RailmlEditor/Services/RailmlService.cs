@@ -28,6 +28,9 @@ namespace RailmlEditor.Services
                 {
                     Id = element.Id,
                     Name = element.Name,
+                    Description = element.Description,
+                    Type = element.Type,
+                    MainDir = element.MainDir,
                     TrackTopology = new TrackTopology
                     {
                         TrackBegin = new TrackNode 
@@ -68,6 +71,8 @@ namespace RailmlEditor.Services
                         {
                             Id = sigVm.Id,
                             Dir = sigVm.Direction,
+                            Type = sigVm.Type,
+                            Function = sigVm.Function,
                             AdditionalName = new AdditionalName { Name = sigVm.Name },
                             Pos = (int)dist, 
                             X = sigVm.X,
@@ -198,6 +203,9 @@ namespace RailmlEditor.Services
 
                         trackVm.Id = track.Id;
                         trackVm.Name = track.Name;
+                        trackVm.Description = track.Description;
+                        trackVm.Type = track.Type;
+                        trackVm.MainDir = track.MainDir;
                         trackVm.X = track.TrackTopology?.TrackBegin?.X ?? 0;
                         trackVm.Y = track.TrackTopology?.TrackBegin?.Y ?? 0;
                         
@@ -261,9 +269,11 @@ namespace RailmlEditor.Services
                                 var signalVm = new SignalViewModel
                                 {
                                     Id = signal.Id,
-                                    Direction = signal.Dir ?? "up", // Load Dir or default
-                                    Name = signal.AdditionalName?.Name, // Load from AdditionalName
-                                    X = signal.X, // Should match Track X if pos=0/snapped
+                                    Direction = signal.Dir ?? "up",
+                                    Type = signal.Type,
+                                    Function = signal.Function,
+                                    Name = signal.AdditionalName?.Name,
+                                    X = signal.X,
                                     Y = signal.Y,
                                     RelatedTrackId = track.Id
                                 };
