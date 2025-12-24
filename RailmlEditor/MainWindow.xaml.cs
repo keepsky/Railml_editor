@@ -20,7 +20,7 @@ namespace RailmlEditor
         private Point _toolboxDragStart;
         private Point _startPoint;
         private bool _isDragging;
-        private FrameworkElement _draggedControl;
+        private FrameworkElement? _draggedControl;
         private System.Collections.Generic.Dictionary<BaseElementViewModel, Point> _originalPositions = new System.Collections.Generic.Dictionary<BaseElementViewModel, Point>();
 
         private void Toolbox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -85,7 +85,7 @@ namespace RailmlEditor
                     double my = defaultPos.Y - 60;
                     newElement = new CurvedTrackViewModel
                     {
-                        Id = GetNextId("PT"),
+                        Id = GetNextId("T"),
                         X = defaultPos.X,
                         Y = defaultPos.Y,
                         // Length removed to avoid overriding X2 logic if Length setter affects it
@@ -643,7 +643,7 @@ namespace RailmlEditor
 
         // Tag Dragging Fields
         private bool _isTagDragging = false;
-        private SwitchViewModel _draggedTagSwitch = null;
+        private SwitchViewModel? _draggedTagSwitch = null;
         private Point _tagDragStartPoint;
         private Point _tagDragOriginalAbsPoint;
 

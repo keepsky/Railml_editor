@@ -54,6 +54,9 @@ namespace RailmlEditor.Models
 
         [XmlElement(ElementName = "ocsElements")]
         public OcsElements OcsElements { get; set; }
+
+        [XmlAttribute(AttributeName = "code")]
+        public string Code { get; set; }
     }
 
     public class OcsElements
@@ -112,6 +115,18 @@ namespace RailmlEditor.Models
 
         [XmlElement(ElementName = "connections")]
         public Connections Connections { get; set; }
+
+        [XmlElement(ElementName = "cornerPos", Namespace = "http://www.sehwa.co.kr/railml")]
+        public CornerPos CornerPos { get; set; }
+    }
+
+    public class CornerPos
+    {
+        [XmlAttribute(AttributeName = "x")]
+        public double X { get; set; }
+
+        [XmlAttribute(AttributeName = "y")]
+        public double Y { get; set; }
     }
 
     public class TrackNode

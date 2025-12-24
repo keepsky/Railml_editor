@@ -1,4 +1,8 @@
 
+
+======================
+현재 curved track이라고 정의해서 id를 PT001, PT002 형식으로 정의한 track을 일반적인 track과 동일하게  T001, T002로 id를 만들고 track의 code 속성에 "corner"라고 정의하고, trackBegin 하위에 sehwa:screenpos 태그에서 mx, my 속성은 tracktopology 하위에 sehwa:cornerPos 태그를 만들고 x, y로 변경하도록 수정해줘
+그리고 그외 일반적인 track의 경우 code 속성값은 "plain"으로 정의하도록 수정해줘
 ======================
 trackEnd에 switch가 있고 다른 2개의 trackBegin이 연결되는 경우 아래와 같은 railml 코드가 생성되어야 합니다. switch 태그에는 ref 속성이 없기 때문에 switch 하위에 connection 태그의 ref 속성을 이용합니다. 아래 예제는 1번 트랙에서 2,3번 트랙으로 switch를 통해서 분기되는 경우를 나타낸것입니다.
 <trackEnd id="te_1" pos="100">

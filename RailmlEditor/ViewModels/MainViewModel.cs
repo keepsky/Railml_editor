@@ -32,8 +32,8 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _id, value);
         }
 
-        private string _name;
-        public string Name
+        private string? _name;
+        public string? Name
         {
             get => _name;
             set => SetProperty(ref _name, value);
@@ -63,22 +63,22 @@ namespace RailmlEditor.ViewModels
             "up", "down", "none" 
         };
 
-        private string _description;
-        public string Description
+        private string? _description;
+        public string? Description
         {
             get => _description;
             set => SetProperty(ref _description, value);
         }
 
-        private string _type;
-        public string Type
+        private string? _type;
+        public string? Type
         {
             get => _type;
             set => SetProperty(ref _type, value);
         }
 
-        private string _mainDir;
-        public string MainDir
+        private string? _mainDir;
+        public string? MainDir
         {
             get => _mainDir;
             set => SetProperty(ref _mainDir, value);
@@ -200,22 +200,22 @@ namespace RailmlEditor.ViewModels
             "exit", "home", "blocking" 
         };
 
-        private string _type;
-        public string Type
+        private string? _type;
+        public string? Type
         {
             get => _type;
             set => SetProperty(ref _type, value);
         }
 
-        private string _function;
-        public string Function
+        private string? _function;
+        public string? Function
         {
             get => _function;
             set => SetProperty(ref _function, value);
         }
         
-        private string _relatedTrackId;
-        public string RelatedTrackId
+        private string? _relatedTrackId;
+        public string? RelatedTrackId
         {
             get => _relatedTrackId;
             set => SetProperty(ref _relatedTrackId, value);

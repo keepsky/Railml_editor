@@ -24,34 +24,35 @@ namespace RailmlEditor.Services
             var trackMap = new System.Collections.Generic.Dictionary<string, Track>();
             foreach (var element in viewModel.Elements.OfType<TrackViewModel>())
             {
+                // Determine if Curved
+                bool isCurved = element is CurvedTrackViewModel;
+                CurvedTrackViewModel ctv = isCurved ? (CurvedTrackViewModel)element : null;
+
                 var track = new Track
                 {
-                    Id = element.Id,
+                    Id = GetRailmlId(element.Id),
                     Name = element.Name,
                     Description = element.Description,
                     Type = element.Type,
                     MainDir = element.MainDir,
+                    Code = isCurved ? "corner" : "plain",
                     TrackTopology = new TrackTopology
                     {
                         TrackBegin = new TrackNode 
                         { 
-                            Id = $"{element.Id}_begin",
+                            Id = $"{GetRailmlId(element.Id)}_begin",
                             Pos = 0,
                             ScreenPos = new ScreenPos
                             {
                                 X = element.X,
                                 XSpecified = true,
                                 Y = element.Y,
-                                YSpecified = true,
-                                MX = (element is CurvedTrackViewModel ctv) ? ctv.MX : 0,
-                                MXSpecified = (element is CurvedTrackViewModel),
-                                MY = (element is CurvedTrackViewModel ctv2) ? ctv2.MY : 0,
-                                MYSpecified = (element is CurvedTrackViewModel)
+                                YSpecified = true
                             }
                         },
                         TrackEnd = new TrackNode 
                         { 
-                            Id = $"{element.Id}_end", 
+                            Id = $"{GetRailmlId(element.Id)}_end", 
                             Pos = (int)element.Length,
                             ScreenPos = new ScreenPos
                             {
@@ -61,6 +62,7 @@ namespace RailmlEditor.Services
                                 YSpecified = true
                             }
                         },
+                        CornerPos = isCurved ? new CornerPos { X = ctv.MX, Y = ctv.MY } : null
                     },
                      // OcsElements initialized conditionally below
                 };
@@ -228,18 +230,28 @@ namespace RailmlEditor.Services
             XmlSerializer serializer = new XmlSerializer(typeof(Railml));
             using (FileStream fs = new FileStream(path, FileMode.Open))
             {
-                var railml = (Railml)serializer.Deserialize(fs);
+                var railml = (Railml?)serializer.Deserialize(fs);
 
                 viewModel.Elements.Clear();
 
-                if (railml.Infrastructure?.Tracks?.TrackList != null)
+                if (railml?.Infrastructure?.Tracks?.TrackList != null)
                 {
                     foreach (var track in railml.Infrastructure.Tracks.TrackList)
                     {
                         TrackViewModel trackVm;
                         
-                        if (track.TrackTopology?.TrackBegin?.ScreenPos != null)
+                        if (track.Code == "corner" && track.TrackTopology?.CornerPos != null)
                         {
+                            var ctv = new CurvedTrackViewModel
+                            {
+                                MX = track.TrackTopology.CornerPos.X,
+                                MY = track.TrackTopology.CornerPos.Y
+                            };
+                            trackVm = ctv;
+                        }
+                        else if (track.TrackTopology?.TrackBegin?.ScreenPos != null && track.TrackTopology.TrackBegin.ScreenPos.MXSpecified)
+                        {
+                            // Backward Compatibility: Load from ScreenPos
                             var ctv = new CurvedTrackViewModel
                             {
                                 MX = track.TrackTopology.TrackBegin.ScreenPos.MX,
@@ -365,6 +377,12 @@ namespace RailmlEditor.Services
 
                 // Removed global Signal loading loop
             }
+        }
+        private string GetRailmlId(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return id;
+            if (id.StartsWith("PT")) return id.Replace("PT", "T");
+            return id;
         }
     }
 }
