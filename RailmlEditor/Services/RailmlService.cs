@@ -149,9 +149,9 @@ namespace RailmlEditor.Services
                          foreach (var nodeB in overlappingNodes)
                          {
                              // Simple Connection
-                             if(!parentTrack.TrackTopology.Connections.ConnectionList.Any(c => c.Ref == nodeB.Id))
+                             if(!nodeA.ConnectionList.Any(c => c.Ref == nodeB.Id))
                              {
-                                 parentTrack.TrackTopology.Connections.ConnectionList.Add(new Connection 
+                                 nodeA.ConnectionList.Add(new Connection 
                                  { 
                                      Id = $"conn_{nodeA.Id}_to_{nodeB.Id}",
                                      Ref = nodeB.Id 
@@ -278,9 +278,9 @@ namespace RailmlEditor.Services
                         viewModel.Elements.Add(trackVm);
                         
                         // Load Switches from TrackBegin
-                        if (track.TrackTopology?.TrackBegin?.Connections?.Switches != null)
+                        if (track.TrackTopology?.TrackBegin?.Switches != null)
                         {
-                            foreach (var sw in track.TrackTopology.TrackBegin.Connections.Switches)
+                            foreach (var sw in track.TrackTopology.TrackBegin.Switches)
                             {
                                 // Check if already added (Switches might be referenced by multiple tracks? No, defined in one node)
                                 if (!viewModel.Elements.Any(e => e.Id == sw.Id))
@@ -297,9 +297,9 @@ namespace RailmlEditor.Services
                             }
                         }
                         // Load Switches from TrackEnd
-                        if (track.TrackTopology?.TrackEnd?.Connections?.Switches != null)
+                        if (track.TrackTopology?.TrackEnd?.Switches != null)
                         {
-                            foreach (var sw in track.TrackTopology.TrackEnd.Connections.Switches)
+                            foreach (var sw in track.TrackTopology.TrackEnd.Switches)
                             {
                                 if (!viewModel.Elements.Any(e => e.Id == sw.Id))
                                 {

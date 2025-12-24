@@ -122,20 +122,14 @@ namespace RailmlEditor.Models
         [XmlAttribute(AttributeName = "id")]
         public string Id { get; set; }
         
-        [XmlElement(ElementName = "connections")]
-        public NodeConnections Connections { get; set; }
-
-        [XmlElement(ElementName = "screenPos", Namespace = "http://www.sehwa.co.kr/railml")]
-        public ScreenPos ScreenPos { get; set; }
-    }
-
-    public class NodeConnections
-    {
         [XmlElement(ElementName = "switch")]
         public List<Switch> Switches { get; set; } = new List<Switch>();
 
         [XmlElement(ElementName = "connection")]
         public List<Connection> ConnectionList { get; set; } = new List<Connection>();
+
+        [XmlElement(ElementName = "screenPos", Namespace = "http://www.sehwa.co.kr/railml")]
+        public ScreenPos ScreenPos { get; set; }
     }
 
     public class Connection
