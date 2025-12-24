@@ -12,6 +12,7 @@
         <local:SegmentLengthConverter x:Key="SegmentLengthConverter"/>
         <local:TagPositionConverter x:Key="TagPos"/>
         <local:MidPointConverter x:Key="MidPoint"/>
+        <local:ReadableAngleConverter x:Key="ReadableAngle"/>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
         <!-- Grid Background Brush (10px dots) -->
@@ -91,8 +92,8 @@
                     </Thumb.Template>
                 </Thumb>
 
-                <!-- Track Name Display (6px, centered for plain tracks) -->
-                <TextBlock Text="{Binding Name}" FontSize="6" Foreground="Black">
+                <!-- Track Name Display (6px, perfectly centered horizontally) -->
+                <Grid>
                     <Canvas.Left>
                         <MultiBinding Converter="{StaticResource MidPoint}">
                             <Binding Path="X2"/>
@@ -105,10 +106,8 @@
                             <Binding Path="Y"/>
                         </MultiBinding>
                     </Canvas.Top>
-                    <TextBlock.RenderTransform>
-                        <TranslateTransform X="-15" Y="-4"/>
-                    </TextBlock.RenderTransform>
-                </TextBlock>
+                    <TextBlock Text="{Binding Name}" FontSize="6" Foreground="Black" Width="200" TextAlignment="Center" Margin="-100,-4,0,0"/>
+                </Grid>
             </Canvas>
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:ViewModels.SwitchViewModel}">
@@ -396,6 +395,36 @@
                         </ControlTemplate>
                     </Thumb.Template>
                 </Thumb>
+
+                <!-- Track Name Display (6px, centered at Mid point of 1st segment and upright-rotated) -->
+                <Grid>
+                    <Canvas.Left>
+                        <MultiBinding Converter="{StaticResource MidPoint}">
+                            <Binding Path="MX"/>
+                            <Binding Path="X"/>
+                        </MultiBinding>
+                    </Canvas.Left>
+                    <Canvas.Top>
+                        <MultiBinding Converter="{StaticResource MidPoint}">
+                            <Binding Path="MY"/>
+                            <Binding Path="Y"/>
+                        </MultiBinding>
+                    </Canvas.Top>
+                    <TextBlock Text="{Binding Name}" FontSize="6" Foreground="Black" Width="200" TextAlignment="Center" Margin="-100,-4,0,0" RenderTransformOrigin="0.5,0.5">
+                        <TextBlock.RenderTransform>
+                            <RotateTransform>
+                                <RotateTransform.Angle>
+                                    <MultiBinding Converter="{StaticResource ReadableAngle}">
+                                        <Binding Path="X"/>
+                                        <Binding Path="Y"/>
+                                        <Binding Path="MX"/>
+                                        <Binding Path="MY"/>
+                                    </MultiBinding>
+                                </RotateTransform.Angle>
+                            </RotateTransform>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+                </Grid>
             </Canvas>
         </DataTemplate>
         <Style x:Key="ToolBarButtonStyle" TargetType="Button">
