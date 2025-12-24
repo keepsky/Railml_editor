@@ -1,5 +1,7 @@
 
 ======================
+ctrl + 마우스 휠 up/down으로 전체 요소를 확대하거나 축소하는 기능을 추가해줘
+======================
 track에 아래 3개 속성 추가하고 속성창에서 수정할수 있도록 수정해줘
 description : string 타입으로 사용자가 내용 입력
 type : list box로 mainTrack, secondaryTrack, connectingTrack, sidingTrack, stationTrack 을 선택

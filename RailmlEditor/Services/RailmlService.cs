@@ -50,22 +50,21 @@ namespace RailmlEditor.Services
                             X = element.X2, 
                             Y = element.Y2 
                         },
-                     },
-                     OcsElements = new OcsElements { Signals = new Signals() }
+                    },
+                     // OcsElements initialized conditionally below
                 };
 
                 // Add Signals bound to this track
-                foreach (var sigVm in viewModel.Elements.OfType<SignalViewModel>())
+                var boundSignals = viewModel.Elements.OfType<SignalViewModel>().Where(s => s.RelatedTrackId == element.Id).ToList();
+                
+                if (boundSignals.Count > 0)
                 {
-                    if (sigVm.RelatedTrackId == element.Id)
+                    track.OcsElements = new OcsElements { Signals = new Signals() };
+                    
+                    foreach (var sigVm in boundSignals)
                     {
                         // Calculate Pos relative to track start
                         double dist = Math.Sqrt(Math.Pow(sigVm.X - element.X, 2) + Math.Pow(sigVm.Y - element.Y, 2));
-                        // If near End, it might be length. 
-                        // Actually, if Snapped to End (X2,Y2), dist might be Length?
-                        // Let's project signal position onto track line to be precise?
-                        // But for now, if Snapped, Dist from (X,Y) is good enough approximation of Pos.
-                        // If Snapped to End (X2,Y2), Dist = Length.
                         
                         var signal = new Signal
                         {

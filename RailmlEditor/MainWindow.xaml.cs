@@ -18,6 +18,10 @@ namespace RailmlEditor
         }
 
         private Point _toolboxDragStart;
+        private Point _startPoint;
+        private bool _isDragging;
+        private FrameworkElement _draggedControl;
+        private System.Collections.Generic.Dictionary<BaseElementViewModel, Point> _originalPositions = new System.Collections.Generic.Dictionary<BaseElementViewModel, Point>();
 
         private void Toolbox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -139,9 +143,6 @@ namespace RailmlEditor
             }
         }
 
-        private bool _isDragging = false;
-        private Point _startPoint;
-        private FrameworkElement _draggedControl;
 
         // Selection & Panning State
         private bool _isSelecting = false;
@@ -319,11 +320,27 @@ namespace RailmlEditor
                     {
                          viewModel.IsSelected = !viewModel.IsSelected;
                     }
-                    // If already selected, we don't deselect others to allow dragging the group.
                     
+                    if (viewModel.IsSelected)
+                    {
+                        _isDragging = true;
+                        _draggedControl = element;
+                        _startPoint = e.GetPosition(MainDesigner);
+                        
+                        _originalPositions.Clear();
+                        foreach (var el in _viewModel.Elements)
+                        {
+                            if (el.IsSelected)
+                            {
+                                 _originalPositions[el] = new Point(el.X, el.Y);
+                            }
+                        }
+                    }
+
                     _viewModel.SelectedElement = viewModel; // Keep this for property grid focus
                     
                     MainGrid.Focus();
+                    // element.CaptureMouse(); // Capturing usually handled by parent or implicit? Explicit for dragging.
                     element.CaptureMouse();
                     e.Handled = true;
                 }
@@ -335,105 +352,86 @@ namespace RailmlEditor
             if (_isDragging && _draggedControl != null)
             {
                 Point currentPos = e.GetPosition(MainDesigner);
+                // Total Delta from Start
                 double deltaX = currentPos.X - _startPoint.X;
                 double deltaY = currentPos.Y - _startPoint.Y;
 
-                // We want to apply this delta to all selected items, but we need to ensure we don't drift.
-                // A better approach is: on MouseDown, store initial positions of ALL selected items.
-                // But simplified approach: 
-                // We shouldn't change the ViewModel directly with raw delta, we should round the RESULT.
+                // Snap delta to 10px grid if no constraints
+                // But we want to snap individual elements relative to their original position or grid?
+                // Previous logic: snap delta.
                 
-                // To support "Moving unit is 10px":
-                // 1. Calculate raw new position, then snap.
-                // 2. OR Snap the delta.
-                
-                // User requirement: "Unit is 10px".
-                
-                // Let's iterate all selected. To avoid drift, we might need a map of OriginalPositions.
-                // Since we didn't store a map, let's just do incremental updates? No, that drifts.
-                // Let's just use the current positions + delta is risky if we call this 60fps.
-                // We need the original positions.
-                // Let's store the Start Position of the MOUSE, and calculate Total Delta.
-                // Then for each item, TargetPosition = OriginalPosition + TotalDelta.
-                // But we don't have OriginalPositions for everyone.
-                
-                // Quick fix: On MouseDown, capture a dictionary of IDs -> Original Pos?
-                // Or just do relative movement with snapping on the DRAG logic?
-                
-                // Let's try direct modification with snapping. 
-                // We need to know the *previous* snapped position to apply delta? 
-                
-                // Actually, correct way: Store Original positions when Drag starts.
-                // Since I can't add fields easily in middle of file, I will just accept slight drift or handle it by resetting the start point?
-                // No, resetting start point is bad for snapping.
-                
-                // Alternative: Only update if delta > 10.
-                if (Math.Abs(deltaX) >= 10 || Math.Abs(deltaY) >= 10)
+                double snapDeltaX = Math.Round(deltaX / 10.0) * 10.0;
+                double snapDeltaY = Math.Round(deltaY / 10.0) * 10.0;
+
+                foreach (var kvp in _originalPositions)
                 {
-                    double snapX = Math.Round(deltaX / 10.0) * 10.0;
-                    double snapY = Math.Round(deltaY / 10.0) * 10.0;
+                    var element = kvp.Key;
+                    var orig = kvp.Value;
+                    
+                    // Proposed New Position based on Grid Snap Delta
+                    double proposedX = orig.X + snapDeltaX;
+                    double proposedY = orig.Y + snapDeltaY;
+                    
+                    // Calculate shift from current position (to propagate to X2/Y2)
+                    double shiftX = proposedX - element.X;
+                    double shiftY = proposedY - element.Y;
+                    
+                    // Update Position
+                    element.X = proposedX;
+                    element.Y = proposedY;
 
-                    if (snapX != 0 || snapY != 0)
+                    if (element is TrackViewModel trackVm)
                     {
-                        foreach (var element in _viewModel.Elements)
-                        {
-                            if (element.IsSelected)
-                            {
-                                element.X += snapX;
-                                element.Y += snapY;
-
-                                if (element is TrackViewModel trackVm)
-                                {
-                                    trackVm.X2 += snapX;
-                                    trackVm.Y2 += snapY;
-
-                                    if (trackVm is CurvedTrackViewModel curved)
-                                    {
-                                        curved.MX += snapX;
-                                        curved.MY += snapY;
-                                    }
-                                }
-                                
-                                // Signal Snapping Logic
-                                if (element is SignalViewModel signalVm)
-                                {
-                                    signalVm.RelatedTrackId = null; // Reset first
-                                    foreach (var other in _viewModel.Elements)
-                                    {
-                                        if (other is TrackViewModel t && other != signalVm)
-                                        {
-                                            // Distance to Track Start
-                                            double distStartSq = Math.Pow(signalVm.X - t.X, 2) + Math.Pow(signalVm.Y - t.Y, 2);
-                                            // Distance to Track End
-                                            double distEndSq = Math.Pow(signalVm.X - t.X2, 2) + Math.Pow(signalVm.Y - t.Y2, 2);
-                                            
-                                            // 20px radius visual snap
-                                            // IF Direction is UP, snap to START
-                                            if (signalVm.Direction == "up" && distStartSq < 400.0) 
-                                            {
-                                                 signalVm.X = t.X;
-                                                 signalVm.Y = t.Y - 15; // Top alignment (User requested -15)
-                                                 signalVm.RelatedTrackId = t.Id;
-                                                 break;
-                                            }
-                                            // IF Direction is DOWN, snap to END
-                                            else if (signalVm.Direction == "down" && distEndSq < 400.0)
-                                            {
-                                                 signalVm.X = t.X2;
-                                                 signalVm.Y = t.Y2 + 5; // Bottom alignment (User requested +5)
-                                                 signalVm.RelatedTrackId = t.Id;
-                                                 break;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // Increment start point by the amount we consumed.
-                         _startPoint.X += snapX;
-                         _startPoint.Y += snapY;
+                         trackVm.X2 += shiftX;
+                         trackVm.Y2 += shiftY;
+                         
+                         if (trackVm is CurvedTrackViewModel curved)
+                         {
+                             curved.MX += shiftX;
+                             curved.MY += shiftY;
+                         }
                     }
+                }
+                
+                // Now apply Snapping Logic for Signals (Post-Processing)
+                // This must run AFTER position updates to check if we fall into a snap well.
+                foreach (var kvp in _originalPositions)
+                {
+                     var element = kvp.Key;
+                     if (element is SignalViewModel signalVm)
+                     {
+                         // Temporary: Assume unbinding first.
+                         var oldRelated = signalVm.RelatedTrackId;
+                         signalVm.RelatedTrackId = null; 
+                         
+                         foreach (var other in _viewModel.Elements)
+                         {
+                             if (other is TrackViewModel t && other != signalVm)
+                             {
+                                 double distStartSq = Math.Pow(signalVm.X - t.X, 2) + Math.Pow(signalVm.Y - t.Y, 2);
+                                 double distEndSq = Math.Pow(signalVm.X - t.X2, 2) + Math.Pow(signalVm.Y - t.Y2, 2);
+                                 
+                                 // Snap Radius 20px (400 sq)
+                                 bool snapped = false;
+                                 if (signalVm.Direction == "up" && distStartSq < 400.0)
+                                 {
+                                     signalVm.X = t.X;
+                                     signalVm.Y = t.Y - 15;
+                                     signalVm.RelatedTrackId = t.Id;
+                                     snapped = true;
+                                 }
+                                 else if (signalVm.Direction == "down" && distEndSq < 400.0)
+                                 {
+                                     signalVm.X = t.X2;
+                                     signalVm.Y = t.Y2 + 5;
+                                     signalVm.RelatedTrackId = t.Id;
+                                     snapped = true;
+                                 }
+                                 
+                                 if (snapped) break;
+                             }
+                         }
+                     }
                 }
             }
         }
@@ -581,6 +579,28 @@ namespace RailmlEditor
         private void FileExit_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void MainScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (System.Windows.Input.Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+            {
+                e.Handled = true;
+                double scaleFactor = e.Delta > 0 ? 0.1 : -0.1;
+                
+                // Get current scale
+                double newScaleX = MainScaleTransform.ScaleX + scaleFactor;
+                double newScaleY = MainScaleTransform.ScaleY + scaleFactor;
+
+                // Clamp limits (0.2x to 5.0x)
+                if (newScaleX < 0.2) newScaleX = 0.2;
+                if (newScaleY < 0.2) newScaleY = 0.2;
+                if (newScaleX > 5.0) newScaleX = 5.0;
+                if (newScaleY > 5.0) newScaleY = 5.0;
+
+                MainScaleTransform.ScaleX = newScaleX;
+                MainScaleTransform.ScaleY = newScaleY;
+            }
         }
     }
 }

@@ -555,12 +555,15 @@
                   MouseUp="MainGrid_MouseUp"
                   Focusable="True"
                   KeyDown="MainGrid_KeyDown">
-                <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" PreviewMouseWheel="MainScrollViewer_PreviewMouseWheel">
                 <ItemsControl x:Name="MainDesigner" 
                               ItemsSource="{Binding Elements}" 
                               Background="White" Width="2000" Height="2000"
                               AllowDrop="True"
                               Drop="MainDesigner_Drop">
+                    <ItemsControl.LayoutTransform>
+                        <ScaleTransform x:Name="MainScaleTransform" ScaleX="1" ScaleY="1"/>
+                    </ItemsControl.LayoutTransform>
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <Canvas/>
