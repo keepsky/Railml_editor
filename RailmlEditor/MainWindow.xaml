@@ -15,11 +15,16 @@
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         
         <!-- Grid Background Brush (10px dots) -->
-        <DrawingBrush x:Key="GridBackgroundBrush" Viewport="0,0,10,10" ViewportUnits="Absolute" TileMode="Tile">
+        <!-- Fix: Set Viewbox="0,0,10,10" Absolute to prevent stretching the 1px rect to fill the tile -->
+        <DrawingBrush x:Key="GridBackgroundBrush" 
+                      Viewbox="0,0,10,10" ViewboxUnits="Absolute"
+                      Viewport="0,0,10,10" ViewportUnits="Absolute" 
+                      TileMode="Tile">
             <DrawingBrush.Drawing>
-                <GeometryDrawing Brush="#808080">
+                <GeometryDrawing Brush="#D3D3D3">
                     <GeometryDrawing.Geometry>
-                        <EllipseGeometry RadiusX="1" RadiusY="1" Center="0,0"/>
+                        <!-- Smallest size: 1x1 pixel square -->
+                        <RectangleGeometry Rect="0,0,1,1"/>
                     </GeometryDrawing.Geometry>
                 </GeometryDrawing>
             </DrawingBrush.Drawing>
