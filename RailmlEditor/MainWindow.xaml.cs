@@ -51,7 +51,7 @@ namespace RailmlEditor
                 {
                     newElement = new TrackViewModel
                     {
-                        Id = $"Tr{_viewModel.Elements.Count + 1}",
+                        Id = $"T{_viewModel.Elements.Count + 1:D3}",
                         X = defaultPos.X, 
                         Y = defaultPos.Y,
                         Length = 100 
@@ -61,7 +61,7 @@ namespace RailmlEditor
                 {
                     newElement = new SwitchViewModel
                     {
-                        Id = $"Sw{_viewModel.Elements.Count + 1}",
+                        Id = $"P{_viewModel.Elements.Count + 1:D3}", // P001 for Switch
                         X = defaultPos.X,
                         Y = defaultPos.Y
                     };
@@ -70,7 +70,7 @@ namespace RailmlEditor
                 {
                     newElement = new SignalViewModel
                     {
-                        Id = $"Sig{_viewModel.Elements.Count + 1}",
+                        Id = $"S{_viewModel.Elements.Count + 1:D3}",
                         X = defaultPos.X,
                         Y = defaultPos.Y
                     };
@@ -79,7 +79,7 @@ namespace RailmlEditor
                 {
                     newElement = new CurvedTrackViewModel
                     {
-                        Id = $"CurvedTr{_viewModel.Elements.Count + 1}",
+                        Id = $"PT{_viewModel.Elements.Count + 1:D3}",
                         X = defaultPos.X,
                         Y = defaultPos.Y,
                         Length = 100, 
@@ -111,7 +111,7 @@ namespace RailmlEditor
                 {
                     newElement = new TrackViewModel
                     {
-                        Id = $"Tr{_viewModel.Elements.Count + 1}",
+                        Id = $"T{_viewModel.Elements.Count + 1:D3}",
                         X = dropPosition.X,
                         Y = dropPosition.Y,
                         Length = 100 // Default Length
@@ -123,7 +123,7 @@ namespace RailmlEditor
                 {
                     newElement = new SignalViewModel
                     {
-                        Id = $"Sig{_viewModel.Elements.Count + 1}",
+                        Id = $"S{_viewModel.Elements.Count + 1:D3}",
                         X = dropPosition.X,
                         Y = dropPosition.Y
                     };
@@ -408,20 +408,20 @@ namespace RailmlEditor
                                             double distEndSq = Math.Pow(signalVm.X - t.X2, 2) + Math.Pow(signalVm.Y - t.Y2, 2);
                                             
                                             // 20px radius visual snap
-                                            if (distStartSq < 400.0) 
+                                            // IF Direction is UP, snap to START
+                                            if (signalVm.Direction == "up" && distStartSq < 400.0) 
                                             {
                                                  signalVm.X = t.X;
                                                  signalVm.Y = t.Y - 15; // Top alignment (Height 10 + 5 Gap)
                                                  signalVm.RelatedTrackId = t.Id;
-                                                 signalVm.Direction = "up";
                                                  break;
                                             }
-                                            else if (distEndSq < 400.0)
+                                            // IF Direction is DOWN, snap to END
+                                            else if (signalVm.Direction == "down" && distEndSq < 400.0)
                                             {
                                                  signalVm.X = t.X2;
                                                  signalVm.Y = t.Y2 + 5; // Bottom alignment (5 Gap)
                                                  signalVm.RelatedTrackId = t.Id;
-                                                 signalVm.Direction = "down";
                                                  break;
                                             }
                                         }

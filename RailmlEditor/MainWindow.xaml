@@ -105,12 +105,9 @@
                     <!-- Rect 3 (Top Right) -->
                     <Rectangle Canvas.Left="166" Canvas.Top="8" Width="154" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
                     <!-- Rect 1 (Diagonal) -->
-                    <Rectangle Width="210" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
+                    <Rectangle Canvas.Left="20" Canvas.Top="68.32" Width="210" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
                         <Rectangle.RenderTransform>
-                             <TransformGroup>
-                                 <RotateTransform Angle="-45" CenterX="125" CenterY="88.32"/>
-                                 <TranslateTransform X="20" Y="68.32"/>
-                             </TransformGroup>
+                             <RotateTransform Angle="-45"/>
                         </Rectangle.RenderTransform>
                     </Rectangle>
                 </Canvas>
@@ -294,7 +291,7 @@
                     <Control Template="{StaticResource SignalIcon}" Width="40" Height="20"/>
                     <Button.Tag>Signal</Button.Tag>
                 </Button>
-                <Button Click="Toolbox_Click" ToolTip="Curved Track">
+                <Button Click="Toolbox_Click" ToolTip="Point">
                     <!-- Point Icon from point.svg -->
                     <Control Template="{StaticResource PointIcon}" Width="40" Height="20"/>
                     <Button.Tag>CurvedTrack</Button.Tag>
@@ -505,7 +502,7 @@
                                 <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
 
                                 <TextBlock Text="Direction" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                <TextBox Text="{Binding Direction, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                <ComboBox ItemsSource="{Binding AvailableDirections}" SelectedItem="{Binding Direction, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
 
                                 <TextBlock Text="X" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
                                 <TextBox Text="{Binding X}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>

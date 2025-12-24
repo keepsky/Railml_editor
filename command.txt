@@ -1,3 +1,9 @@
+signal 속성의 direction은 up, down을 선택하는 리스트박스 형태로 수정
+현재 signal 아이콘을 마우스로 드래그 하면 자동으로 좌우 반전이 되는 기능 삭제하고 선택된 direction에 따라서만 signal 이미지가 좌우 반전이 되도록 수정
+direction=up인 경우 signal.svg 이미지 그대로 사용해서 좌표값이 trackBegin 지점 근처에 있으면 signal이 trackBegin 위쪽에 위치시켜서 해당 track과 바인딩 되도록 수정
+direction=down인 경우 signal.svg 좌우 반전 형태로 사용해서 좌표값이 trackEnd 지점 근처에 있으면 signal이 trackEnd 아래쪽에 위치시켜서 해당 track과 바인딩 되도록 수정 
+
+======================
 toolbar의 curved track 버튼의 이미지를 image 폴더의 point.svg 이미지로 변경
 toolbar에 있는 선로전환기 아이콘은 삭제하고
 track을 겹쳐서 생성된 switch를 선로전환기로 정의하고 좌측 요소 tree에 switch를 추가하고 switch를 선택하면 좌측 속성영역에 switch의 속성들을 표시하도록 수정해줘

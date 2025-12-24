@@ -137,6 +137,8 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _relatedTrackId, value);
         }
 
+        public System.Collections.Generic.List<string> AvailableDirections { get; } = new System.Collections.Generic.List<string> { "up", "down" };
+        
         private string _direction = "up";
         public string Direction
         {
@@ -192,7 +194,7 @@ namespace RailmlEditor.ViewModels
             });
 
             // Test Data
-            Elements.Add(new TrackViewModel { Id = "Tr01", Name = "Track 1", X = 100, Y = 100, Length = 200 });
+            // Test Data Removed
         }
 
         private void InitializeTreeCategories()
@@ -360,7 +362,7 @@ namespace RailmlEditor.ViewModels
                 {
                     var newSwitch = new SwitchViewModel
                     {
-                        Id = $"Sw{Elements.Count + 1}",
+                        Id = $"P{Elements.Count + 1:D3}",
                         X = c.X,
                         Y = c.Y
                     };

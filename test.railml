@@ -2,53 +2,40 @@
 <railml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:sehwa="http://www.sehwa.co.kr/railml" version="2.5" xmlns="http://www.railml.org/schemas/2013">
   <infrastructure>
     <tracks>
-      <track id="Tr01" name="1AT">
+      <track id="T001" name="1AT">
         <trackTopology>
-          <trackBegin pos="0" id="Tr01_begin" X="80" Y="250" />
-          <trackEnd pos="80" id="Tr01_end" X="160" Y="250">
+          <trackBegin pos="0" id="T001_begin" X="110" Y="300">
             <connections>
-              <connection id="conn_Tr01_end_to_Tr2_begin" ref="Tr2_begin" />
-            </connections>
-          </trackEnd>
-        </trackTopology>
-        <ocsElements>
-          <signals />
-        </ocsElements>
-      </track>
-      <track id="Tr2" name="21T">
-        <trackTopology>
-          <trackBegin pos="0" id="Tr2_begin" X="160" Y="250">
-            <connections>
-              <connection id="conn_Tr2_begin_to_Tr01_end" ref="Tr01_end" />
+              <connection id="conn_T001_begin_to_T006_end" ref="T006_end" />
             </connections>
           </trackBegin>
-          <trackEnd pos="80" id="Tr2_end" X="240" Y="250">
+          <trackEnd pos="80" id="T001_end" X="190" Y="300">
             <connections>
-              <switch id="sw_Tr2_end" ref="CurvedTr3_begin">
-                <connection id="switch_conn_sw_Tr2_end_1" ref="Tr4_begin" />
-              </switch>
+              <connection id="conn_T001_end_to_T002_begin" ref="T002_begin" />
             </connections>
           </trackEnd>
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="Sig7" pos="0" X="160" Y="230">
-              <additionalName name="1A" />
+            <signal id="S009" dir="up" pos="15" X="110" Y="285">
+              <additionalName />
             </signal>
           </signals>
         </ocsElements>
       </track>
-      <track id="CurvedTr3" name="21T">
+      <track id="T002" name="21T">
         <trackTopology>
-          <trackBegin pos="0" id="CurvedTr3_begin" X="240" Y="250">
+          <trackBegin pos="0" id="T002_begin" X="190" Y="300">
             <connections>
-              <connection id="conn_CurvedTr3_begin_to_Tr2_end" ref="Tr2_end" />
+              <connection id="conn_T002_begin_to_T001_end" ref="T001_end" />
             </connections>
-            <sehwa:screenPos mx="290" my="200" />
           </trackBegin>
-          <trackEnd pos="120.71067811865476" id="CurvedTr3_end" X="340" Y="200">
+          <trackEnd pos="40" id="T002_end" X="230" Y="300">
             <connections>
-              <connection id="conn_CurvedTr3_end_to_Tr5_begin" ref="Tr5_begin" />
+              <switch id="sw_T002_end" ref="PT003_begin">
+                <additionalName name="21" />
+                <connection id="switch_conn_sw_T002_end_1" ref="T004_begin" />
+              </switch>
             </connections>
           </trackEnd>
         </trackTopology>
@@ -56,16 +43,17 @@
           <signals />
         </ocsElements>
       </track>
-      <track id="Tr4" name="21T">
+      <track id="PT003" name="21T">
         <trackTopology>
-          <trackBegin pos="0" id="Tr4_begin" X="240" Y="250">
+          <trackBegin pos="0" id="PT003_begin" X="230" Y="300">
             <connections>
-              <connection id="conn_Tr4_begin_to_Tr2_end" ref="Tr2_end" />
+              <connection id="conn_PT003_begin_to_T002_end" ref="T002_end" />
             </connections>
+            <sehwa:screenPos mx="280" my="250" />
           </trackBegin>
-          <trackEnd pos="100" id="Tr4_end" X="340" Y="250">
+          <trackEnd pos="110" id="PT003_end" X="320" Y="250">
             <connections>
-              <connection id="conn_Tr4_end_to_Tr6_begin" ref="Tr6_begin" />
+              <connection id="conn_PT003_end_to_T008_begin" ref="T008_begin" />
             </connections>
           </trackEnd>
         </trackTopology>
@@ -73,27 +61,57 @@
           <signals />
         </ocsElements>
       </track>
-      <track id="Tr5" name="2T">
+      <track id="T004" name="21T">
         <trackTopology>
-          <trackBegin pos="0" id="Tr5_begin" X="340" Y="200">
+          <trackBegin pos="0" id="T004_begin" X="230" Y="300">
             <connections>
-              <connection id="conn_Tr5_begin_to_CurvedTr3_end" ref="CurvedTr3_end" />
+              <connection id="conn_T004_begin_to_T002_end" ref="T002_end" />
             </connections>
           </trackBegin>
-          <trackEnd pos="280" id="Tr5_end" X="620" Y="200" />
+          <trackEnd pos="90" id="T004_end" X="320" Y="300">
+            <connections>
+              <connection id="conn_T004_end_to_T007_begin" ref="T007_begin" />
+            </connections>
+          </trackEnd>
         </trackTopology>
         <ocsElements>
           <signals />
         </ocsElements>
       </track>
-      <track id="Tr6" name="1T">
+      <track id="T006" name="B902T">
         <trackTopology>
-          <trackBegin pos="0" id="Tr6_begin" X="340" Y="250">
+          <trackBegin pos="0" id="T006_begin" X="40" Y="300" />
+          <trackEnd pos="70" id="T006_end" X="110" Y="300">
             <connections>
-              <connection id="conn_Tr6_begin_to_Tr4_end" ref="Tr4_end" />
+              <connection id="conn_T006_end_to_T001_begin" ref="T001_begin" />
+            </connections>
+          </trackEnd>
+        </trackTopology>
+        <ocsElements>
+          <signals />
+        </ocsElements>
+      </track>
+      <track id="T007" name="1T">
+        <trackTopology>
+          <trackBegin pos="0" id="T007_begin" X="320" Y="300">
+            <connections>
+              <connection id="conn_T007_begin_to_T004_end" ref="T004_end" />
             </connections>
           </trackBegin>
-          <trackEnd pos="280" id="Tr6_end" X="620" Y="250" />
+          <trackEnd pos="330" id="T007_end" X="650" Y="300" />
+        </trackTopology>
+        <ocsElements>
+          <signals />
+        </ocsElements>
+      </track>
+      <track id="T008" name="2T">
+        <trackTopology>
+          <trackBegin pos="0" id="T008_begin" X="320" Y="250">
+            <connections>
+              <connection id="conn_T008_begin_to_PT003_end" ref="PT003_end" />
+            </connections>
+          </trackBegin>
+          <trackEnd pos="330" id="T008_end" X="650" Y="250" />
         </trackTopology>
         <ocsElements>
           <signals />

@@ -43,7 +43,7 @@ namespace RailmlEditor.Services
                         TrackEnd = new TrackNode 
                         { 
                             Id = $"{element.Id}_end", 
-                            Pos = element.Length,
+                            Pos = (int)element.Length,
                             X = element.X2, 
                             Y = element.Y2 
                         },
@@ -69,7 +69,7 @@ namespace RailmlEditor.Services
                             Id = sigVm.Id,
                             Dir = sigVm.Direction,
                             AdditionalName = new AdditionalName { Name = sigVm.Name },
-                            Pos = dist, 
+                            Pos = (int)dist, 
                             X = sigVm.X,
                             Y = sigVm.Y
                         };

@@ -72,7 +72,7 @@ namespace RailmlEditor.Models
         public AdditionalName AdditionalName { get; set; }
 
         [XmlAttribute(AttributeName = "pos")]
-        public double Pos { get; set; }
+        public int Pos { get; set; }
 
         // Visual Coordinates
         [XmlAttribute]
