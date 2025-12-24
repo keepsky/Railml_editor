@@ -169,12 +169,18 @@ namespace RailmlEditor.Models
     {
         [XmlElement(ElementName = "switch")]
         public List<Switch> Switches { get; set; } = new List<Switch>();
+
+        [XmlElement(ElementName = "connection")]
+        public List<Connection> ConnectionList { get; set; } = new List<Connection>();
     }
 
     public class Switch
     {
         [XmlAttribute(AttributeName = "id")]
         public string Id { get; set; }
+
+        [XmlAttribute(AttributeName = "pos")]
+        public double Pos { get; set; }
 
         [XmlElement(ElementName = "additionalName")]
         public AdditionalName AdditionalName { get; set; }

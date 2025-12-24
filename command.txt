@@ -1,3 +1,10 @@
+현재 connections 태그를 trackend 속성 하위에 속해 있는데 tracktopology 하위에 속하도록 수정하고 connections->switch 태그에는 pos 속성을 이용해서 switch(point)의 상대 위치를 저장하도록 수정해줘
+======================
+신호기에 대해서 name을 아래 규칙으로 표시하도록 수정해줘
+signal direction=up인 경우 이미지 좌측에 이미지 높이와 중앙 정렬되도록 표시하고
+signal direction=down인 경우 이미지 우측에 이미지 높이와 중앙 정렬되도록 표시하고
+name 표시할때 폰크 크기는 10px 정도로 설정
+======================
 point가 만들어지면 아래의 내용을 수행하는 기능 추가
 image 폴더의 ptag.svg 이미지를 이용해서 point의 좌표 밑에 표시하고 (Y축 +5px )
 ptag.svg 이미지의 우측 라운드 박스에 point name을 표시

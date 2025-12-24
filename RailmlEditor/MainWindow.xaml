@@ -166,24 +166,74 @@
         </ControlTemplate>
 
         <DataTemplate DataType="{x:Type local:ViewModels.SignalViewModel}">
-            <Control Template="{StaticResource SignalIcon}" Width="20" Height="10" RenderTransformOrigin="0.5,0.5">
-                <Control.Style>
-                    <Style TargetType="Control">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsFlipped}" Value="True">
-                                <Setter Property="RenderTransform">
-                                    <Setter.Value>
-                                        <TransformGroup>
-                                            <ScaleTransform ScaleX="-1" ScaleY="1"/>
-                                            <TranslateTransform X="-20"/>
-                                        </TransformGroup>
-                                    </Setter.Value>
-                                </Setter>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Control.Style>
-            </Control>
+            <!-- Fixed Layout Grid: Matches Icon Size (20x10) -->
+            <!-- ClipToBounds="False" is CRITICAL because text is positioned outside (negative coordinates) -->
+            <Grid Width="20" Height="10" ClipToBounds="False">
+                
+                <!-- Icon (Centered in Grid) -->
+                <!-- Note: Flipped Icon translates to X=-20, occupying -20..0 visual space -->
+                <Control Template="{StaticResource SignalIcon}" Width="20" Height="10" RenderTransformOrigin="0.5,0.5">
+                    <Control.Style>
+                        <Style TargetType="Control">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsFlipped}" Value="True">
+                                    <Setter Property="RenderTransform">
+                                        <Setter.Value>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleX="-1" ScaleY="1"/>
+                                                <TranslateTransform X="-20"/>
+                                            </TransformGroup>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Control.Style>
+                </Control>
+
+                <!-- Left Text: Direction Up -->
+                <!-- Aligns Right Edge to Grid Left (0) with 2px gap -->
+                <!-- Use RenderTransform instead of Margin to avoid layout collapse (20px width - 22px margin < 0) -->
+                <!-- Align Right (at 20). Translate -22 -> Right Edge at -2. -->
+                <TextBlock Text="{Binding Name}" 
+                           FontSize="8" VerticalAlignment="Center" 
+                           HorizontalAlignment="Right">
+                    <TextBlock.RenderTransform>
+                        <TranslateTransform X="-22"/>
+                    </TextBlock.RenderTransform>
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Direction}" Value="up">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <!-- Right Text: Direction Down -->
+                <!-- Aligns Left Edge to Grid Left (0) -->
+                <!-- Flipped Icon is at -20..0. Text starts at 0. -->
+                <!-- HorizontalAlignment="Left" -> Left Edge at 0. -->
+                <!-- Margin Left="0" -> X=0. -->
+                <TextBlock Text="{Binding Name}" 
+                           FontSize="8" VerticalAlignment="Center" 
+                           HorizontalAlignment="Left" Margin="0,0,0,0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Direction}" Value="down">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                
+            </Grid>
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:ViewModels.CurvedTrackViewModel}">
             <Canvas>

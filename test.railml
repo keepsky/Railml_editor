@@ -2,73 +2,46 @@
 <railml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:sehwa="http://www.sehwa.co.kr/railml" version="2.5" xmlns="http://www.railml.org/schemas/2013">
   <infrastructure>
     <tracks>
-      <track id="T001" name="B902T">
+      <track id="T001" name="1AT">
         <trackTopology>
-          <trackBegin pos="0" id="T001_begin" X="60" Y="260" />
-          <trackEnd pos="100" id="T001_end" X="160" Y="260">
-            <connections>
-              <connection id="conn_T001_end_to_T002_begin" ref="T002_begin" />
-            </connections>
-          </trackEnd>
+          <trackBegin pos="0" id="T001_begin" X="60" Y="280" />
+          <trackEnd pos="100" id="T001_end" X="160" Y="280" />
+          <connections>
+            <connection id="conn_T001_end_to_T002_begin" ref="T002_begin" />
+          </connections>
         </trackTopology>
       </track>
-      <track id="T002" name="1AT">
+      <track id="T002" name="21T">
         <trackTopology>
-          <trackBegin pos="0" id="T002_begin" X="160" Y="260">
-            <connections>
-              <connection id="conn_T002_begin_to_T001_end" ref="T001_end" />
-            </connections>
-          </trackBegin>
-          <trackEnd pos="100" id="T002_end" X="260" Y="260">
-            <connections>
-              <connection id="conn_T002_end_to_T004_begin" ref="T004_begin" />
-            </connections>
-          </trackEnd>
+          <trackBegin pos="0" id="T002_begin" X="160" Y="280" />
+          <trackEnd pos="70" id="T002_end" X="230" Y="280" />
+          <connections>
+            <switch id="P001" pos="70" ref="PT001_begin">
+              <additionalName name="21" />
+              <connection id="switch_conn_P001_1" ref="T003_begin" />
+            </switch>
+            <connection id="conn_T002_begin_to_T001_end" ref="T001_end" />
+          </connections>
         </trackTopology>
-        <ocsElements>
-          <signals>
-            <signal id="S001" dir="up" pos="15" X="160" Y="245">
-              <additionalName />
-            </signal>
-          </signals>
-        </ocsElements>
       </track>
       <track id="PT001" name="21T">
         <trackTopology>
-          <trackBegin pos="0" id="PT001_begin" X="310" Y="260">
-            <connections>
-              <connection id="conn_PT001_begin_to_T004_end" ref="T004_end" />
-            </connections>
-            <sehwa:screenPos mx="370" my="200" />
+          <trackBegin pos="0" id="PT001_begin" X="230" Y="280">
+            <sehwa:screenPos mx="290" my="220" />
           </trackBegin>
-          <trackEnd pos="114" id="PT001_end" X="400" Y="200" />
+          <trackEnd pos="114" id="PT001_end" X="320" Y="220" />
+          <connections>
+            <connection id="conn_PT001_begin_to_T002_end" ref="T002_end" />
+          </connections>
         </trackTopology>
       </track>
-      <track id="T003" name="21T">
+      <track id="T003">
         <trackTopology>
-          <trackBegin pos="0" id="T003_begin" X="310" Y="260">
-            <connections>
-              <connection id="conn_T003_begin_to_T004_end" ref="T004_end" />
-            </connections>
-          </trackBegin>
-          <trackEnd pos="90" id="T003_end" X="400" Y="260" />
-        </trackTopology>
-      </track>
-      <track id="T004" name="21T">
-        <trackTopology>
-          <trackBegin pos="0" id="T004_begin" X="260" Y="260">
-            <connections>
-              <connection id="conn_T004_begin_to_T002_end" ref="T002_end" />
-            </connections>
-          </trackBegin>
-          <trackEnd pos="50" id="T004_end" X="310" Y="260">
-            <connections>
-              <switch id="P001" ref="PT001_begin">
-                <additionalName name="21" />
-                <connection id="switch_conn_P001_1" ref="T003_begin" />
-              </switch>
-            </connections>
-          </trackEnd>
+          <trackBegin pos="0" id="T003_begin" X="230" Y="280" />
+          <trackEnd pos="100" id="T003_end" X="330" Y="280" />
+          <connections>
+            <connection id="conn_T003_begin_to_T002_end" ref="T002_end" />
+          </connections>
         </trackTopology>
       </track>
     </tracks>

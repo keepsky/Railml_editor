@@ -90,11 +90,17 @@ namespace RailmlEditor.Services
             // Signals are now handled inside Track loop.
 
             // 3. Auto-Generate Connections & Switches
+            // 3. Auto-Generate Connections & Switches
             var allNodes = new System.Collections.Generic.List<TrackNode>();
+            var nodeToTrack = new System.Collections.Generic.Dictionary<TrackNode, Track>(); // Map Node -> Track
+
             foreach(var track in railml.Infrastructure.Tracks.TrackList)
             {
                 allNodes.Add(track.TrackTopology.TrackBegin);
+                nodeToTrack[track.TrackTopology.TrackBegin] = track;
+
                 allNodes.Add(track.TrackTopology.TrackEnd);
+                nodeToTrack[track.TrackTopology.TrackEnd] = track;
             }
 
             foreach(var nodeA in allNodes)
@@ -113,7 +119,12 @@ namespace RailmlEditor.Services
 
                 if (overlappingNodes.Count > 0)
                 {
-                    if (nodeA.Connections == null) nodeA.Connections = new NodeConnections();
+                    // Identify Parent Track
+                    var parentTrack = nodeToTrack[nodeA];
+                    if (parentTrack.TrackTopology.Connections == null)
+                        parentTrack.TrackTopology.Connections = new Connections();
+
+                    // Logic Change: Add to TrackTopology.Connections instead of nodeA.Connections
                     
                     bool isTrackEnd = nodeA.Id.EndsWith("_end");
 
@@ -121,9 +132,10 @@ namespace RailmlEditor.Services
                     {
                          foreach (var nodeB in overlappingNodes)
                          {
-                             if(!nodeA.Connections.ConnectionList.Any(c => c.Ref == nodeB.Id))
+                             // Simple Connection
+                             if(!parentTrack.TrackTopology.Connections.ConnectionList.Any(c => c.Ref == nodeB.Id))
                              {
-                                 nodeA.Connections.ConnectionList.Add(new Connection 
+                                 parentTrack.TrackTopology.Connections.ConnectionList.Add(new Connection 
                                  { 
                                      Id = $"conn_{nodeA.Id}_to_{nodeB.Id}",
                                      Ref = nodeB.Id 
@@ -133,7 +145,10 @@ namespace RailmlEditor.Services
                     }
                     else
                     {
-                         if (nodeA.Connections.Switches.Count == 0)
+                         // Switch Connection
+                         // Check if switch already exists (by Ref?) - basic check
+                         // Assuming strictly one switch per node for simplified logic
+                         if (!parentTrack.TrackTopology.Connections.Switches.Any(s => s.Ref == overlappingNodes[0].Id)) // Crude check
                          {
                              var firstNode = overlappingNodes[0];
                              
@@ -141,11 +156,23 @@ namespace RailmlEditor.Services
                              var switchVm = viewModel.Elements.OfType<SwitchViewModel>()
                                  .FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - nodeA.X, 2) + Math.Pow(s.Y - nodeA.Y, 2)) < 5.0);
 
+                             // Pos Calculation
+                             // If nodeA is Begin, pos=0. If End, pos=Length.
+                             // Track length is theoretically needed.
+                             // For now, if End, using 100 or actual length if we had it.
+                             // Simplified: If End, assume Length. If Begin, 0.
+                             // Wait, TrackNode 'Pos' attribute holds the length for End node? 
+                             // Usually TrackEnd.Pos = Length.
+                             // I'll use nodeA.Pos as the switch position.
+                             
+                             double switchPos = nodeA.Pos; 
+
                              var switchObj = new Switch
                              {
                                  Id = switchVm?.Id ?? $"sw_{nodeA.Id}",
                                  AdditionalName = new AdditionalName { Name = switchVm?.Name },
-                                 Ref = firstNode.Id
+                                 Ref = firstNode.Id,
+                                 Pos = switchPos // New Attribute
                              };
                              for (int i = 1; i < overlappingNodes.Count; i++)
                              {
@@ -155,7 +182,7 @@ namespace RailmlEditor.Services
                                      Ref = overlappingNodes[i].Id
                                  });
                              }
-                             nodeA.Connections.Switches.Add(switchObj);
+                             parentTrack.TrackTopology.Connections.Switches.Add(switchObj);
                          }
                     }
                 }
@@ -254,6 +281,41 @@ namespace RailmlEditor.Services
                                         Name = sw.AdditionalName?.Name,
                                         X = track.TrackTopology.TrackEnd.X,
                                         Y = track.TrackTopology.TrackEnd.Y
+                                    };
+                                    viewModel.Elements.Add(switchVm);
+                                }
+                            }
+                        }
+
+                        // NEW: Load Switches from TrackTopology.Connections (Standardized Location)
+                        if (track.TrackTopology?.Connections?.Switches != null)
+                        {
+                            foreach (var sw in track.TrackTopology.Connections.Switches)
+                            {
+                                if (!viewModel.Elements.Any(e => e.Id == sw.Id))
+                                {
+                                    // Calculate Position based on 'pos' attribute
+                                    double pos = sw.Pos;
+                                    double startX = trackVm.X;
+                                    double startY = trackVm.Y;
+                                    double endX = trackVm.X2;
+                                    double endY = trackVm.Y2;
+                                    
+                                    // Use TrackViewModel Length if available, or calculate distance
+                                    double length = Math.Sqrt(Math.Pow(endX - startX, 2) + Math.Pow(endY - startY, 2));
+                                    if (length < 0.1) length = 1; // Avoid divide by zero
+
+                                    // Linear Interpolation for X/Y
+                                    double ratio = pos / length;
+                                    double swX = startX + ratio * (endX - startX);
+                                    double swY = startY + ratio * (endY - startY);
+
+                                    var switchVm = new SwitchViewModel
+                                    {
+                                        Id = sw.Id,
+                                        Name = sw.AdditionalName?.Name,
+                                        X = swX,
+                                        Y = swY
                                     };
                                     viewModel.Elements.Add(switchVm);
                                 }
