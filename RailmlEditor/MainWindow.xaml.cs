@@ -55,7 +55,7 @@ namespace RailmlEditor
                 {
                     newElement = new TrackViewModel
                     {
-                        Id = $"T{_viewModel.Elements.Count + 1:D3}",
+                        Id = GetNextId("T"),
                         X = defaultPos.X, 
                         Y = defaultPos.Y,
                         Length = 100 
@@ -65,7 +65,7 @@ namespace RailmlEditor
                 {
                     newElement = new SwitchViewModel
                     {
-                        Id = $"P{_viewModel.Elements.Count + 1:D3}", // P001 for Switch
+                        Id = GetNextId("P"),
                         X = defaultPos.X,
                         Y = defaultPos.Y
                     };
@@ -74,21 +74,26 @@ namespace RailmlEditor
                 {
                     newElement = new SignalViewModel
                     {
-                        Id = $"S{_viewModel.Elements.Count + 1:D3}",
+                        Id = GetNextId("S"),
                         X = defaultPos.X,
                         Y = defaultPos.Y
                     };
                 }
                 else if (type == "CurvedTrack")
                 {
+                    double mx = defaultPos.X + 60;
+                    double my = defaultPos.Y - 60;
                     newElement = new CurvedTrackViewModel
                     {
-                        Id = $"PT{_viewModel.Elements.Count + 1:D3}",
+                        Id = GetNextId("PT"),
                         X = defaultPos.X,
                         Y = defaultPos.Y,
-                        Length = 100, 
-                        MX = defaultPos.X + 50,
-                        MY = defaultPos.Y + 50 
+                        // Length removed to avoid overriding X2 logic if Length setter affects it
+                        // Set MX, MY, X2, Y2 explicitly
+                        MX = mx,
+                        MY = my,
+                        X2 = mx + 30,
+                        Y2 = my
                     };
                 }
 
@@ -115,7 +120,7 @@ namespace RailmlEditor
                 {
                     newElement = new TrackViewModel
                     {
-                        Id = $"T{_viewModel.Elements.Count + 1:D3}",
+                        Id = GetNextId("T"),
                         X = dropPosition.X,
                         Y = dropPosition.Y,
                         Length = 100 // Default Length
@@ -127,7 +132,7 @@ namespace RailmlEditor
                 {
                     newElement = new SignalViewModel
                     {
-                        Id = $"S{_viewModel.Elements.Count + 1:D3}",
+                        Id = GetNextId("S"),
                         X = dropPosition.X,
                         Y = dropPosition.Y
                     };
@@ -141,6 +146,19 @@ namespace RailmlEditor
                     if (newElement is TrackViewModel) _viewModel.UpdateProximitySwitches();
                 }
             }
+        }
+
+        private string GetNextId(string prefix)
+        {
+            int max = 0;
+            foreach(var el in _viewModel.Elements)
+            {
+                if (el.Id != null && el.Id.StartsWith(prefix) && int.TryParse(el.Id.Substring(prefix.Length), out int n))
+                {
+                    if (n > max) max = n;
+                }
+            }
+            return $"{prefix}{max + 1:D3}";
         }
 
 
@@ -302,6 +320,26 @@ namespace RailmlEditor
         {
             if (sender is FrameworkElement element && element.DataContext is BaseElementViewModel viewModel)
             {
+                // Prevent Switch Dragging
+                if (viewModel is SwitchViewModel)
+                {
+                    // Allow selection but prevent drag
+                     if (e.ChangedButton == MouseButton.Left)
+                    {
+                        if (!viewModel.IsSelected && (Keyboard.Modifiers & ModifierKeys.Control) == 0)
+                        {
+                            foreach (var el in _viewModel.Elements) el.IsSelected = false;
+                            viewModel.IsSelected = true;
+                        }
+                        else if ((Keyboard.Modifiers & ModifierKeys.Control) != 0)
+                        {
+                             viewModel.IsSelected = !viewModel.IsSelected;
+                        }
+                    }
+                    e.Handled = true;
+                    return;
+                }
+
                 _isDragging = true;
                 _draggedControl = element;
                 _startPoint = e.GetPosition(MainDesigner);

@@ -14,6 +14,17 @@
         <local:SegmentLengthConverter x:Key="SegmentLengthConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         
+        <!-- Grid Background Brush (10px dots) -->
+        <DrawingBrush x:Key="GridBackgroundBrush" Viewport="0,0,10,10" ViewportUnits="Absolute" TileMode="Tile">
+            <DrawingBrush.Drawing>
+                <GeometryDrawing Brush="#808080">
+                    <GeometryDrawing.Geometry>
+                        <EllipseGeometry RadiusX="1" RadiusY="1" Center="0,0"/>
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+        
         <!-- Data Templates for Visual Elements -->
         <DataTemplate DataType="{x:Type local:ViewModels.TrackViewModel}">
             <Canvas>
@@ -77,8 +88,43 @@
             </Canvas>
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:ViewModels.SwitchViewModel}">
-            <!-- Switch is logical only, no visual representation on canvas -->
-            <Grid Visibility="Collapsed"/>
+            <Canvas>
+                 <!-- Point Tag Image (ptag.svg) -->
+                 <!-- Scaled to 0.5x (130x40). Circle center at (20,20). -->
+                 <!-- Position: Top=5px, Left aligned such that circle center is at switch X (0). -->
+                 <!-- So Left = -20. -->
+                 <!-- Scaled to Height 12px (Original 80px). Scale 0.15. -->
+                 <!-- Scaled to Height 12px (Original 82px). Scale 0.146. -->
+                 <!-- Width 35.4px (Original 242px). -->
+                 <!-- User requested X = -15. Y = 7. -->
+                 <Grid Canvas.Top="7" Canvas.Left="-15" Width="35" Height="12">
+                     <!-- Replaced SVG Image with XAML Vector Graphics due to lack of native SVG support -->
+                     <Viewbox Stretch="Uniform">
+                         <Canvas Width="242" Height="82">
+                             <!-- Right Rounded Rectangle (x=81, y=1, w=160, h=80) -->
+                             <Rectangle Canvas.Left="81" Canvas.Top="1" Width="160" Height="80" 
+                                        RadiusX="32" RadiusY="32" Fill="White" Stroke="Black" StrokeThickness="5"/>
+                             <!-- Left Circle (cx=31, cy=41, r=30 -> x=1, y=11, w=60, h=60) -->
+                             <Ellipse Canvas.Left="1" Canvas.Top="11" Width="60" Height="60" 
+                                      Fill="White" Stroke="Black" StrokeThickness="5"/>
+                         </Canvas>
+                     </Viewbox>
+                     
+                     <!-- Text Name in Right Round Box -->
+                     <!-- Box starts at 81 * 0.146 = 11.8px. Width 160 * 0.146 = 23.4px. -->
+                     <TextBlock Text="{Binding Name}" 
+                                Margin="12,0,0,0" Width="23"
+                                VerticalAlignment="Center" HorizontalAlignment="Center"
+                                TextAlignment="Center"
+                                Foreground="Black" FontWeight="Bold" FontSize="10"/>
+                 </Grid>
+                 
+                 <!-- Selecting Logic Aid (Transparent Hit Box around center?) -->
+                 <!-- Switch logic uses 5px radius. Let's add a small transparent circle for hitting if needed? -->
+                 <!-- User didn't ask for hit test visual, but dragging requires hitting. -->
+                 <!-- If I add this large tag, hitting the tag will select the switch. -->
+                 <!-- That is good. -->
+            </Canvas>
         </DataTemplate>
         <!-- Signal Icon Template -->
         <ControlTemplate x:Key="SignalIcon">
@@ -558,7 +604,7 @@
                 <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" PreviewMouseWheel="MainScrollViewer_PreviewMouseWheel">
                 <ItemsControl x:Name="MainDesigner" 
                               ItemsSource="{Binding Elements}" 
-                              Background="White" Width="2000" Height="2000"
+                              Background="{StaticResource GridBackgroundBrush}" Width="2000" Height="2000"
                               AllowDrop="True"
                               Drop="MainDesigner_Drop">
                     <ItemsControl.LayoutTransform>

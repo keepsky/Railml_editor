@@ -143,7 +143,7 @@ namespace RailmlEditor.Services
 
                              var switchObj = new Switch
                              {
-                                 Id = $"sw_{nodeA.Id}",
+                                 Id = switchVm?.Id ?? $"sw_{nodeA.Id}",
                                  AdditionalName = new AdditionalName { Name = switchVm?.Name },
                                  Ref = firstNode.Id
                              };

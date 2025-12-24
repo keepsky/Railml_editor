@@ -155,7 +155,20 @@ namespace RailmlEditor.ViewModels
     public class SwitchViewModel : BaseElementViewModel
     {
         public override string TypeName => "Switch";
-        // Orientation, BranchAngle etc.
+        
+        [ReadOnly(true)]
+        public override double X
+        {
+            get => base.X;
+            set => base.X = value;
+        }
+
+        [ReadOnly(true)]
+        public override double Y
+        {
+            get => base.Y;
+            set => base.Y = value;
+        }
     }
 
     public class SignalViewModel : BaseElementViewModel
@@ -412,14 +425,26 @@ namespace RailmlEditor.ViewModels
                 Elements.Remove(sw);
             }
 
+            // Determine Next ID based on existing Switches only
+            int maxId = 0;
+            foreach (var sw in Elements.OfType<SwitchViewModel>())
+            {
+                if (sw.Id.StartsWith("P") && int.TryParse(sw.Id.Substring(1), out int num))
+                {
+                     if (num > maxId) maxId = num;
+                }
+            }
+
             // Check clusters for missing switches
             foreach (var c in clusters)
             {
                 if (!Elements.OfType<SwitchViewModel>().Any(sw => System.Math.Sqrt(System.Math.Pow(sw.X - c.X, 2) + System.Math.Pow(sw.Y - c.Y, 2)) < 10.0))
                 {
+                    maxId++;
                     var newSwitch = new SwitchViewModel
                     {
-                        Id = $"P{Elements.Count + 1:D3}",
+                        Id = $"P{maxId:D3}",
+                        Name = $"P{maxId:D3}", // Auto-assign Name as ID for visibility
                         X = c.X,
                         Y = c.Y
                     };
