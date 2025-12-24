@@ -254,6 +254,11 @@ namespace RailmlEditor
                                     curved.MY += snapY;
                                 }
                             }
+                            else if (element is SwitchViewModel sw)
+                            {
+                                if (sw.MX.HasValue) sw.MX += snapX;
+                                if (sw.MY.HasValue) sw.MY += snapY;
+                            }
                         }
                         // Update "Last Point" by the snapped amount to avoid drift
                         _panStartPoint.X += snapX;

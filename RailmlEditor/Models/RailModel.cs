@@ -92,11 +92,17 @@ namespace RailmlEditor.Models
         [XmlAttribute(AttributeName = "pos")]
         public int Pos { get; set; }
 
-        // Visual Coordinates
+        // Visual Coordinates (Legacy attributes, hide from Save but keep for Load)
         [XmlAttribute]
         public double X { get; set; }
+        public bool ShouldSerializeX() => false;
+
         [XmlAttribute]
         public double Y { get; set; }
+        public bool ShouldSerializeY() => false;
+
+        [XmlElement(ElementName = "screenPos", Namespace = "http://www.sehwa.co.kr/railml")]
+        public ScreenPos ScreenPos { get; set; }
     }
 
     public class AdditionalName

@@ -87,8 +87,7 @@ namespace RailmlEditor.Services
                             Function = sigVm.Function,
                             AdditionalName = new AdditionalName { Name = sigVm.Name },
                             Pos = (int)dist, 
-                            X = sigVm.X,
-                            Y = sigVm.Y
+                            ScreenPos = new ScreenPos { X = sigVm.X, XSpecified = true, Y = sigVm.Y, YSpecified = true }
                         };
                         track.OcsElements.Signals.SignalList.Add(signal);
                     }
@@ -336,8 +335,8 @@ namespace RailmlEditor.Services
                                     Type = signal.Type,
                                     Function = signal.Function,
                                     Name = signal.AdditionalName?.Name,
-                                    X = signal.X,
-                                    Y = signal.Y,
+                                    X = signal.ScreenPos?.X ?? signal.X,
+                                    Y = signal.ScreenPos?.Y ?? signal.Y,
                                     RelatedTrackId = track.Id
                                 };
 
