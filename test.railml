@@ -17,7 +17,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="S009" dir="up" pos="15" X="110" Y="285">
+            <signal id="S010" dir="up" pos="15" X="110" Y="285">
               <additionalName />
             </signal>
           </signals>
@@ -75,7 +75,11 @@
           </trackEnd>
         </trackTopology>
         <ocsElements>
-          <signals />
+          <signals>
+            <signal id="S009" dir="down" pos="90" X="320" Y="305">
+              <additionalName />
+            </signal>
+          </signals>
         </ocsElements>
       </track>
       <track id="T006" name="B902T">

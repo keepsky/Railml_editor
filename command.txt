@@ -1,3 +1,7 @@
+signal direction=down인 경우 signal의 좌표 기준은 우측 끝지점으로 수정하여 반영
+signal을 track에 위 또는 아래에 표시될때 현재보다 2px 정도 간격을 두도록 수정
+======================
+
 signal 속성의 direction은 up, down을 선택하는 리스트박스 형태로 수정
 현재 signal 아이콘을 마우스로 드래그 하면 자동으로 좌우 반전이 되는 기능 삭제하고 선택된 direction에 따라서만 signal 이미지가 좌우 반전이 되도록 수정
 direction=up인 경우 signal.svg 이미지 그대로 사용해서 좌표값이 trackBegin 지점 근처에 있으면 signal이 trackBegin 위쪽에 위치시켜서 해당 track과 바인딩 되도록 수정

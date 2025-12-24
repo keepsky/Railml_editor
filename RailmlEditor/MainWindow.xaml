@@ -122,7 +122,10 @@
                             <DataTrigger Binding="{Binding IsFlipped}" Value="True">
                                 <Setter Property="RenderTransform">
                                     <Setter.Value>
-                                        <ScaleTransform ScaleX="-1" ScaleY="1"/>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="-1" ScaleY="1"/>
+                                            <TranslateTransform X="-20"/>
+                                        </TransformGroup>
                                     </Setter.Value>
                                 </Setter>
                             </DataTrigger>

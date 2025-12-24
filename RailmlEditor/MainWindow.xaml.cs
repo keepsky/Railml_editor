@@ -412,7 +412,7 @@ namespace RailmlEditor
                                             if (signalVm.Direction == "up" && distStartSq < 400.0) 
                                             {
                                                  signalVm.X = t.X;
-                                                 signalVm.Y = t.Y - 15; // Top alignment (Height 10 + 5 Gap)
+                                                 signalVm.Y = t.Y - 15; // Top alignment (User requested -15)
                                                  signalVm.RelatedTrackId = t.Id;
                                                  break;
                                             }
@@ -420,7 +420,7 @@ namespace RailmlEditor
                                             else if (signalVm.Direction == "down" && distEndSq < 400.0)
                                             {
                                                  signalVm.X = t.X2;
-                                                 signalVm.Y = t.Y2 + 5; // Bottom alignment (5 Gap)
+                                                 signalVm.Y = t.Y2 + 5; // Bottom alignment (User requested +5)
                                                  signalVm.RelatedTrackId = t.Id;
                                                  break;
                                             }
