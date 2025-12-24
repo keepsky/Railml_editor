@@ -1,5 +1,26 @@
+toolbar의 curved track 버튼의 이미지를 image 폴더의 point.svg 이미지로 변경
+toolbar에 있는 선로전환기 아이콘은 삭제하고
+track을 겹쳐서 생성된 switch를 선로전환기로 정의하고 좌측 요소 tree에 switch를 추가하고 switch를 선택하면 좌측 속성영역에 switch의 속성들을 표시하도록 수정해줘
+switch의 경우 id는 현재대로 자동으로 생성하고 name 속성을 switch -> additionalName -> name에 추가하여 입력할수 있도록 수정
+======================
+signal 속성에 dir 속성을 추가하고 up, down으로 설정할수 있도록 수정해줘
+up인경우(default) signal.svg 이미지 그대로 사용해서 track의 위쪽에 위치하도록 수정하고
+down인경우 signal.svg 이미지 좌우 반전 형태로 사용해서 track의 아래쪽에 위치하도록 수정해줘
 
+======================
+signal을 추가했는데 관련 속성이 railml에 추가되지 않고 있는데 아래 속성을 railml에 추가되도록 수정해줘
+track -> ocsElements -> signals -> signal -> id 속성을 추가
+track -> ocsElements -> signals -> signal -> additionalName -> name 속성을 추가
 
+======================
+
+svg 폴더에 있는 signal.svg 파일을 이용해서 toolbar의 signal 버튼을 변경하고, 버튼을 누르면 signal을 추가할수 있도록 수정해줘
+signal을 마우스로 이동하다가 trackBegin의 위쪽 5px 지점에 위치하면 signal이 track 위 해당 지점에 위치하도록 수정하고
+signal을 마우스로 이동하다가 trackBegin의 아래쪽 5px 지점에 위치하면 signal 이미지를 좌우 반전 형태로 변경해서 signal이 track 아래 해당 지점에 위치하도록 수정
+======================
+
+railml 2.5에 따르면 signal은 track에 종속되어 track -> ocsElements -> signals -> signal 형태로 구성되어야 한다.
+따라서 signal을 마우스로 드래그 하다가 trackBegin 지점에 위치하면 자동으로 바인딩되도록 수정하고 해당 track의 ocsElements 태그 하위에 signal 태그를 추가하도록 수정해줘 
 ======================
 
 좌측 속성영역을 아래와 같이 수정해줘

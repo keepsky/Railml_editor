@@ -41,7 +41,7 @@
                  </Rectangle>
 
                  <!-- Start Thumb -->
-                 <Thumb DragDelta="StartThumb_DragDelta" DragStarted="Thumb_DragStarted" Canvas.Left="-6" Canvas.Top="-6"
+                 <Thumb DragDelta="StartThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted" Canvas.Left="-6" Canvas.Top="-6"
                         Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
                      <Thumb.Template>
                          <ControlTemplate>
@@ -51,7 +51,7 @@
                  </Thumb>
                  
                  <!-- End Thumb -->
-                 <Thumb DragDelta="EndThumb_DragDelta" DragStarted="Thumb_DragStarted"
+                 <Thumb DragDelta="EndThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted"
                         Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
                     <Canvas.Left>
                          <MultiBinding Converter="{StaticResource DiffConverter}">
@@ -77,10 +77,62 @@
             </Canvas>
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:ViewModels.SwitchViewModel}">
-            <Polygon Points="0,0 40,0 20,20 0,0" Fill="Orange" Stroke="Black" StrokeThickness="1"/>
+            <!-- Switch is logical only, no visual representation on canvas -->
+            <Grid Visibility="Collapsed"/>
         </DataTemplate>
+        <!-- Signal Icon Template -->
+        <ControlTemplate x:Key="SignalIcon">
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="110" Height="53">
+                    <!-- Red Head -->
+                    <Ellipse Canvas.Left="58" Canvas.Top="1" Width="50" Height="50" Fill="#FF0000" Stroke="Black" StrokeThickness="3"/>
+                    <!-- Horizontal Line -->
+                    <Path Data="M 3 26 L 58 26" Stroke="Black" StrokeThickness="6"/>
+                    <!-- Vertical Line (Base) -->
+                    <Path Data="M 3 7.25 L 3 44.75" Stroke="Black" StrokeThickness="6"/>
+                    <!-- White Circle -->
+                    <Ellipse Canvas.Left="13" Canvas.Top="11" Width="30" Height="30" Fill="White" Stroke="Black" StrokeThickness="3"/>
+                </Canvas>
+            </Viewbox>
+        </ControlTemplate>
+
+        <!-- Point Icon Template (from point.svg) -->
+        <ControlTemplate x:Key="PointIcon">
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="320" Height="177">
+                    <!-- Rect 2 (Bottom) -->
+                    <Rectangle Canvas.Left="0" Canvas.Top="129" Width="320" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <!-- Rect 3 (Top Right) -->
+                    <Rectangle Canvas.Left="166" Canvas.Top="8" Width="154" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <!-- Rect 1 (Diagonal) -->
+                    <Rectangle Width="210" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
+                        <Rectangle.RenderTransform>
+                             <TransformGroup>
+                                 <RotateTransform Angle="-45" CenterX="125" CenterY="88.32"/>
+                                 <TranslateTransform X="20" Y="68.32"/>
+                             </TransformGroup>
+                        </Rectangle.RenderTransform>
+                    </Rectangle>
+                </Canvas>
+            </Viewbox>
+        </ControlTemplate>
+
         <DataTemplate DataType="{x:Type local:ViewModels.SignalViewModel}">
-            <Ellipse Width="15" Height="15" Fill="Red" Stroke="DarkRed" StrokeThickness="1"/>
+            <Control Template="{StaticResource SignalIcon}" Width="20" Height="10" RenderTransformOrigin="0.5,0.5">
+                <Control.Style>
+                    <Style TargetType="Control">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsFlipped}" Value="True">
+                                <Setter Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="-1" ScaleY="1"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Control.Style>
+            </Control>
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:ViewModels.CurvedTrackViewModel}">
             <Canvas>
@@ -153,7 +205,7 @@
                  </Rectangle>
 
                 <!-- Start Thumb -->
-                <Thumb DragDelta="StartThumb_DragDelta" DragStarted="Thumb_DragStarted" Canvas.Left="-6" Canvas.Top="-6"
+                <Thumb DragDelta="StartThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted" Canvas.Left="-6" Canvas.Top="-6"
                        Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
                      <Thumb.Template>
                          <ControlTemplate>
@@ -163,7 +215,7 @@
                 </Thumb>
 
                 <!-- Mid Thumb (Relative Position) -->
-                <Thumb DragDelta="MidThumb_DragDelta" DragStarted="Thumb_DragStarted" Canvas.Left="-6" Canvas.Top="-6"
+                <Thumb DragDelta="MidThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted" Canvas.Left="-6" Canvas.Top="-6"
                        Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
                     <!-- Translate by MX - X, MY - Y -->
                      <Thumb.RenderTransform>
@@ -190,7 +242,7 @@
                 </Thumb>
 
                 <!-- End Thumb -->
-                <Thumb DragDelta="EndThumb_DragDelta" DragStarted="Thumb_DragStarted"
+                <Thumb DragDelta="EndThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted"
                        Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
                     <Canvas.Left>
                          <MultiBinding Converter="{StaticResource DiffConverter}">
@@ -236,19 +288,15 @@
                     <Rectangle Width="30" Height="6" Fill="White" Stroke="Black" StrokeThickness="1" RadiusX="3" RadiusY="3"/>
                     <Button.Tag>Track</Button.Tag>
                 </Button>
-                <Button Click="Toolbox_Click" ToolTip="Switch">
-                    <!-- Switch Icon using Polygon -->
-                     <Polygon Points="0,0 20,0 10,10 0,0" Fill="Orange" Stroke="Black" StrokeThickness="1" Stretch="Uniform" Width="20" Height="20"/>
-                     <Button.Tag>Switch</Button.Tag>
-                </Button>
+                <!-- Switch Button REMOVED -->
                 <Button Click="Toolbox_Click" ToolTip="Signal">
-                    <!-- Signal Icon using Ellipse -->
-                    <Ellipse Width="15" Height="15" Fill="Red" Stroke="DarkRed" StrokeThickness="1"/>
+                    <!-- Signal Icon using ControlTemplate -->
+                    <Control Template="{StaticResource SignalIcon}" Width="40" Height="20"/>
                     <Button.Tag>Signal</Button.Tag>
                 </Button>
                 <Button Click="Toolbox_Click" ToolTip="Curved Track">
-                    <!-- Icon: Simple Curve -->
-                    <Path Data="M 2,15 Q 15,2 28,15" Stroke="Black" StrokeThickness="2" Fill="Transparent" Width="30" Height="20"/>
+                    <!-- Point Icon from point.svg -->
+                    <Control Template="{StaticResource PointIcon}" Width="40" Height="20"/>
                     <Button.Tag>CurvedTrack</Button.Tag>
                 </Button>
             </ToolBar>
@@ -436,31 +484,39 @@
 
                                      <!-- Signal Properties -->
                                      <DataTemplate DataType="{x:Type local:ViewModels.SignalViewModel}">
-                                         <Grid>
-                                             <Grid.ColumnDefinitions>
-                                                 <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
-                                                 <ColumnDefinition Width="*"/>
-                                             </Grid.ColumnDefinitions>
-                                             <Grid.RowDefinitions>
-                                                 <RowDefinition Height="Auto"/>
-                                                 <RowDefinition Height="Auto"/>
-                                                 <RowDefinition Height="Auto"/>
-                                                 <RowDefinition Height="Auto"/>
-                                             </Grid.RowDefinitions>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                                             <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                             <TextBox Text="{Binding Id, Mode=OneWay}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
+                                <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                <TextBox Text="{Binding Id}" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" IsReadOnly="True"/>
 
-                                             <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                             <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
 
-                                             <TextBlock Text="Pos X" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                             <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                <TextBlock Text="Direction" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                <TextBox Text="{Binding Direction, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
 
-                                             <TextBlock Text="Pos Y" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                             <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
-                                         </Grid>
-                                     </DataTemplate>
+                                <TextBlock Text="X" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                <TextBox Text="{Binding X}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                <TextBlock Text="Y" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                <TextBox Text="{Binding Y}" Grid.Row="4" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                <TextBlock Text="Bind Track" Grid.Row="5" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                <TextBox Text="{Binding RelatedTrackId}" Grid.Row="5" Grid.Column="1" Style="{StaticResource PropValue}" IsReadOnly="True"/>
+                            </Grid>
+                        </DataTemplate>
 
                                  </ContentControl.Resources>
                              </ContentControl>

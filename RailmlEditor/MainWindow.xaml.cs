@@ -92,6 +92,8 @@ namespace RailmlEditor
                 {
                     _viewModel.Elements.Add(newElement);
                     _viewModel.SelectedElement = newElement; 
+                    
+                    if (newElement is TrackViewModel) _viewModel.UpdateProximitySwitches();
                 }
             }
         }
@@ -115,15 +117,8 @@ namespace RailmlEditor
                         Length = 100 // Default Length
                     };
                 }
-                else if (type == "Switch")
-                {
-                    newElement = new SwitchViewModel
-                    {
-                        Id = $"Sw{_viewModel.Elements.Count + 1}",
-                        X = dropPosition.X,
-                        Y = dropPosition.Y
-                    };
-                }
+                // Switch Removed from Toolbox but ViewModel logic remains if needed
+                
                 else if (type == "Signal")
                 {
                     newElement = new SignalViewModel
@@ -138,6 +133,8 @@ namespace RailmlEditor
                 {
                     _viewModel.Elements.Add(newElement);
                     _viewModel.SelectedElement = newElement; // Auto Select
+                    
+                    if (newElement is TrackViewModel) _viewModel.UpdateProximitySwitches();
                 }
             }
         }
@@ -396,6 +393,40 @@ namespace RailmlEditor
                                         curved.MY += snapY;
                                     }
                                 }
+                                
+                                // Signal Snapping Logic
+                                if (element is SignalViewModel signalVm)
+                                {
+                                    signalVm.RelatedTrackId = null; // Reset first
+                                    foreach (var other in _viewModel.Elements)
+                                    {
+                                        if (other is TrackViewModel t && other != signalVm)
+                                        {
+                                            // Distance to Track Start
+                                            double distStartSq = Math.Pow(signalVm.X - t.X, 2) + Math.Pow(signalVm.Y - t.Y, 2);
+                                            // Distance to Track End
+                                            double distEndSq = Math.Pow(signalVm.X - t.X2, 2) + Math.Pow(signalVm.Y - t.Y2, 2);
+                                            
+                                            // 20px radius visual snap
+                                            if (distStartSq < 400.0) 
+                                            {
+                                                 signalVm.X = t.X;
+                                                 signalVm.Y = t.Y - 15; // Top alignment (Height 10 + 5 Gap)
+                                                 signalVm.RelatedTrackId = t.Id;
+                                                 signalVm.Direction = "up";
+                                                 break;
+                                            }
+                                            else if (distEndSq < 400.0)
+                                            {
+                                                 signalVm.X = t.X2;
+                                                 signalVm.Y = t.Y2 + 5; // Bottom alignment (5 Gap)
+                                                 signalVm.RelatedTrackId = t.Id;
+                                                 signalVm.Direction = "down";
+                                                 break;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                         
@@ -488,6 +519,11 @@ namespace RailmlEditor
              }
         }
 
+        private void Thumb_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
+        {
+             _viewModel.UpdateProximitySwitches();
+        }
+
         private void Item_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (_isDragging)
@@ -498,6 +534,9 @@ namespace RailmlEditor
                     _draggedControl.ReleaseMouseCapture();
                     _draggedControl = null;
                 }
+                
+                // Track moved -> Update topology
+                _viewModel.UpdateProximitySwitches();
             }
         }
 
@@ -511,6 +550,7 @@ namespace RailmlEditor
                 try
                 {
                     service.Load(dialog.FileName, _viewModel);
+                    _viewModel.UpdateProximitySwitches();
                 }
                 catch (Exception ex)
                 {

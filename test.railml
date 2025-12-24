@@ -4,22 +4,25 @@
     <tracks>
       <track id="Tr01" name="1AT">
         <trackTopology>
-          <trackBegin pos="0" id="Tr01_begin" X="70" Y="270" />
-          <trackEnd pos="80" id="Tr01_end" X="150" Y="270">
+          <trackBegin pos="0" id="Tr01_begin" X="80" Y="250" />
+          <trackEnd pos="80" id="Tr01_end" X="160" Y="250">
             <connections>
               <connection id="conn_Tr01_end_to_Tr2_begin" ref="Tr2_begin" />
             </connections>
           </trackEnd>
         </trackTopology>
+        <ocsElements>
+          <signals />
+        </ocsElements>
       </track>
       <track id="Tr2" name="21T">
         <trackTopology>
-          <trackBegin pos="0" id="Tr2_begin" X="150" Y="270">
+          <trackBegin pos="0" id="Tr2_begin" X="160" Y="250">
             <connections>
               <connection id="conn_Tr2_begin_to_Tr01_end" ref="Tr01_end" />
             </connections>
           </trackBegin>
-          <trackEnd pos="80" id="Tr2_end" X="230" Y="270">
+          <trackEnd pos="80" id="Tr2_end" X="240" Y="250">
             <connections>
               <switch id="sw_Tr2_end" ref="CurvedTr3_begin">
                 <connection id="switch_conn_sw_Tr2_end_1" ref="Tr4_begin" />
@@ -27,59 +30,75 @@
             </connections>
           </trackEnd>
         </trackTopology>
+        <ocsElements>
+          <signals>
+            <signal id="Sig7" pos="0" X="160" Y="230">
+              <additionalName name="1A" />
+            </signal>
+          </signals>
+        </ocsElements>
       </track>
       <track id="CurvedTr3" name="21T">
         <trackTopology>
-          <trackBegin pos="0" id="CurvedTr3_begin" X="230" Y="270">
+          <trackBegin pos="0" id="CurvedTr3_begin" X="240" Y="250">
             <connections>
               <connection id="conn_CurvedTr3_begin_to_Tr2_end" ref="Tr2_end" />
             </connections>
-            <sehwa:screenPos mx="280" my="220" />
+            <sehwa:screenPos mx="290" my="200" />
           </trackBegin>
-          <trackEnd pos="120.71067811865476" id="CurvedTr3_end" X="330" Y="220">
+          <trackEnd pos="120.71067811865476" id="CurvedTr3_end" X="340" Y="200">
             <connections>
               <connection id="conn_CurvedTr3_end_to_Tr5_begin" ref="Tr5_begin" />
             </connections>
           </trackEnd>
         </trackTopology>
+        <ocsElements>
+          <signals />
+        </ocsElements>
       </track>
       <track id="Tr4" name="21T">
         <trackTopology>
-          <trackBegin pos="0" id="Tr4_begin" X="230" Y="270">
+          <trackBegin pos="0" id="Tr4_begin" X="240" Y="250">
             <connections>
               <connection id="conn_Tr4_begin_to_Tr2_end" ref="Tr2_end" />
             </connections>
           </trackBegin>
-          <trackEnd pos="100" id="Tr4_end" X="330" Y="270">
+          <trackEnd pos="100" id="Tr4_end" X="340" Y="250">
             <connections>
               <connection id="conn_Tr4_end_to_Tr6_begin" ref="Tr6_begin" />
             </connections>
           </trackEnd>
         </trackTopology>
+        <ocsElements>
+          <signals />
+        </ocsElements>
       </track>
       <track id="Tr5" name="2T">
         <trackTopology>
-          <trackBegin pos="0" id="Tr5_begin" X="330" Y="220">
+          <trackBegin pos="0" id="Tr5_begin" X="340" Y="200">
             <connections>
               <connection id="conn_Tr5_begin_to_CurvedTr3_end" ref="CurvedTr3_end" />
             </connections>
           </trackBegin>
-          <trackEnd pos="280" id="Tr5_end" X="610" Y="220" />
+          <trackEnd pos="280" id="Tr5_end" X="620" Y="200" />
         </trackTopology>
+        <ocsElements>
+          <signals />
+        </ocsElements>
       </track>
       <track id="Tr6" name="1T">
         <trackTopology>
-          <trackBegin pos="0" id="Tr6_begin" X="330" Y="270">
+          <trackBegin pos="0" id="Tr6_begin" X="340" Y="250">
             <connections>
               <connection id="conn_Tr6_begin_to_Tr4_end" ref="Tr4_end" />
             </connections>
           </trackBegin>
-          <trackEnd pos="280" id="Tr6_end" X="610" Y="270" />
+          <trackEnd pos="280" id="Tr6_end" X="620" Y="250" />
         </trackTopology>
+        <ocsElements>
+          <signals />
+        </ocsElements>
       </track>
     </tracks>
-    <signals>
-      <signal id="Sig7" name="1A" pos="0" X="150" Y="250" />
-    </signals>
   </infrastructure>
 </railml>

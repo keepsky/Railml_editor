@@ -15,8 +15,7 @@ namespace RailmlEditor.Services
             {
                 Infrastructure = new Infrastructure
                 {
-                    Tracks = new Tracks(),
-                    Signals = new Signals()
+                    Tracks = new Tracks()
                 }
             };
             railml.Namespaces.Add("sehwa", "http://www.sehwa.co.kr/railml");
@@ -48,176 +47,262 @@ namespace RailmlEditor.Services
                             X = element.X2, 
                             Y = element.Y2 
                         },
-                     }
+                     },
+                     OcsElements = new OcsElements { Signals = new Signals() }
                 };
+
+                // Add Signals bound to this track
+                foreach (var sigVm in viewModel.Elements.OfType<SignalViewModel>())
+                {
+                    if (sigVm.RelatedTrackId == element.Id)
+                    {
+                        // Calculate Pos relative to track start
+                        double dist = Math.Sqrt(Math.Pow(sigVm.X - element.X, 2) + Math.Pow(sigVm.Y - element.Y, 2));
+                        // If near End, it might be length. 
+                        // Actually, if Snapped to End (X2,Y2), dist might be Length?
+                        // Let's project signal position onto track line to be precise?
+                        // But for now, if Snapped, Dist from (X,Y) is good enough approximation of Pos.
+                        // If Snapped to End (X2,Y2), Dist = Length.
+                        
+                        var signal = new Signal
+                        {
+                            Id = sigVm.Id,
+                            Dir = sigVm.Direction,
+                            AdditionalName = new AdditionalName { Name = sigVm.Name },
+                            Pos = dist, 
+                            X = sigVm.X,
+                            Y = sigVm.Y
+                        };
+                        track.OcsElements.Signals.SignalList.Add(signal);
+                    }
+                }
+
                 railml.Infrastructure.Tracks.TrackList.Add(track);
                 trackMap[element.Id] = track;
             }
 
-            // 2. Add Signals & TCBs
-            foreach (var element in viewModel.Elements)
-            {
-                if (element is SignalViewModel signalVm)
-                {
-                     {
-                         var signal = new Signal 
-                         { 
-                             Id = signalVm.Id, 
-                             Name = signalVm.Name,
-                             X = signalVm.X, 
-                             Y = signalVm.Y 
-                         };
-                         railml.Infrastructure.Signals.SignalList.Add(signal);
-                     }
-                 }
-             }
- 
-             // 3. Auto-Generate Connections & Switches
-             var allNodes = new System.Collections.Generic.List<TrackNode>();
-             foreach(var track in railml.Infrastructure.Tracks.TrackList)
-             {
-                 allNodes.Add(track.TrackTopology.TrackBegin);
-                 allNodes.Add(track.TrackTopology.TrackEnd);
-             }
- 
-             foreach(var nodeA in allNodes)
-             {
-                 var overlappingNodes = new System.Collections.Generic.List<TrackNode>();
-                 foreach(var nodeB in allNodes)
-                 {
-                     if(nodeA == nodeB) continue;
-                     bool isBeginA = nodeA.Id.EndsWith("_begin");
-                     bool isBeginB = nodeB.Id.EndsWith("_begin");
-                     if (isBeginA == isBeginB) continue; 
- 
-                     double dist = Math.Sqrt(Math.Pow(nodeA.X - nodeB.X, 2) + Math.Pow(nodeA.Y - nodeB.Y, 2));
-                     if(dist < 1.0) overlappingNodes.Add(nodeB);
-                 }
- 
-                 if (overlappingNodes.Count > 0)
-                 {
-                     if (nodeA.Connections == null) nodeA.Connections = new NodeConnections();
-                     
-                     bool isTrackEnd = nodeA.Id.EndsWith("_end");
- 
-                     if (!isTrackEnd || overlappingNodes.Count == 1)
-                     {
-                          foreach (var nodeB in overlappingNodes)
-                          {
-                              if(!nodeA.Connections.ConnectionList.Any(c => c.Ref == nodeB.Id))
-                              {
-                                  nodeA.Connections.ConnectionList.Add(new Connection 
-                                  { 
-                                      Id = $"conn_{nodeA.Id}_to_{nodeB.Id}",
-                                      Ref = nodeB.Id 
-                                  });
-                              }
-                          }
-                     }
-                     else
-                     {
-                          if (nodeA.Connections.Switches.Count == 0)
-                          {
-                              var firstNode = overlappingNodes[0];
-                              
-                              // Attempt to find a SwitchViewModel overlapping this node to get its Name
-                              var switchVm = viewModel.Elements.OfType<SwitchViewModel>()
-                                  .FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - nodeA.X, 2) + Math.Pow(s.Y - nodeA.Y, 2)) < 5.0);
+            // 2. Add Signals & TCBs (REMOVED global signals additions)
+            // Just kept loop structure for clarity or removal
+            // Signals are now handled inside Track loop.
 
-                              var switchObj = new Switch
-                              {
-                                  Id = $"sw_{nodeA.Id}",
-                                  Name = switchVm?.Name,
-                                  Ref = firstNode.Id
-                              };
-                              for (int i = 1; i < overlappingNodes.Count; i++)
-                              {
-                                  switchObj.ConnectionList.Add(new Connection
-                                  {
-                                      Id = $"switch_conn_{switchObj.Id}_{i}",
-                                      Ref = overlappingNodes[i].Id
-                                  });
-                              }
-                              nodeA.Connections.Switches.Add(switchObj);
-                          }
-                     }
-                 }
-             }
- 
- 
-             // Serialize
-             XmlSerializer serializer = new XmlSerializer(typeof(Railml));
-             using (TextWriter writer = new StreamWriter(path))
-             {
-                 serializer.Serialize(writer, railml);
-             }
-         }
- 
- 
-         public void Load(string path, MainViewModel viewModel)
-         {
-             XmlSerializer serializer = new XmlSerializer(typeof(Railml));
-             using (FileStream fs = new FileStream(path, FileMode.Open))
-             {
-                 var railml = (Railml)serializer.Deserialize(fs);
- 
-                 viewModel.Elements.Clear();
- 
-                 if (railml.Infrastructure?.Tracks?.TrackList != null)
-                 {
-                     foreach (var track in railml.Infrastructure.Tracks.TrackList)
-                     {
-                         TrackViewModel trackVm;
-                         
-                         if (track.TrackTopology?.TrackBegin?.ScreenPos != null)
+            // 3. Auto-Generate Connections & Switches
+            var allNodes = new System.Collections.Generic.List<TrackNode>();
+            foreach(var track in railml.Infrastructure.Tracks.TrackList)
+            {
+                allNodes.Add(track.TrackTopology.TrackBegin);
+                allNodes.Add(track.TrackTopology.TrackEnd);
+            }
+
+            foreach(var nodeA in allNodes)
+            {
+                var overlappingNodes = new System.Collections.Generic.List<TrackNode>();
+                foreach(var nodeB in allNodes)
+                {
+                    if(nodeA == nodeB) continue;
+                    bool isBeginA = nodeA.Id.EndsWith("_begin");
+                    bool isBeginB = nodeB.Id.EndsWith("_begin");
+                    if (isBeginA == isBeginB) continue; 
+
+                    double dist = Math.Sqrt(Math.Pow(nodeA.X - nodeB.X, 2) + Math.Pow(nodeA.Y - nodeB.Y, 2));
+                    if(dist < 1.0) overlappingNodes.Add(nodeB);
+                }
+
+                if (overlappingNodes.Count > 0)
+                {
+                    if (nodeA.Connections == null) nodeA.Connections = new NodeConnections();
+                    
+                    bool isTrackEnd = nodeA.Id.EndsWith("_end");
+
+                    if (!isTrackEnd || overlappingNodes.Count == 1)
+                    {
+                         foreach (var nodeB in overlappingNodes)
                          {
-                             var ctv = new CurvedTrackViewModel
+                             if(!nodeA.Connections.ConnectionList.Any(c => c.Ref == nodeB.Id))
                              {
-                                 MX = track.TrackTopology.TrackBegin.ScreenPos.MX,
-                                 MY = track.TrackTopology.TrackBegin.ScreenPos.MY
+                                 nodeA.Connections.ConnectionList.Add(new Connection 
+                                 { 
+                                     Id = $"conn_{nodeA.Id}_to_{nodeB.Id}",
+                                     Ref = nodeB.Id 
+                                 });
+                             }
+                         }
+                    }
+                    else
+                    {
+                         if (nodeA.Connections.Switches.Count == 0)
+                         {
+                             var firstNode = overlappingNodes[0];
+                             
+                             // Attempt to find a SwitchViewModel overlapping this node to get its Name
+                             var switchVm = viewModel.Elements.OfType<SwitchViewModel>()
+                                 .FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - nodeA.X, 2) + Math.Pow(s.Y - nodeA.Y, 2)) < 5.0);
+
+                             var switchObj = new Switch
+                             {
+                                 Id = $"sw_{nodeA.Id}",
+                                 AdditionalName = new AdditionalName { Name = switchVm?.Name },
+                                 Ref = firstNode.Id
                              };
-                             trackVm = ctv;
+                             for (int i = 1; i < overlappingNodes.Count; i++)
+                             {
+                                 switchObj.ConnectionList.Add(new Connection
+                                 {
+                                     Id = $"switch_conn_{switchObj.Id}_{i}",
+                                     Ref = overlappingNodes[i].Id
+                                 });
+                             }
+                             nodeA.Connections.Switches.Add(switchObj);
                          }
-                         else
-                         {
-                             trackVm = new TrackViewModel();
-                         }
- 
-                         trackVm.Id = track.Id;
-                         trackVm.Name = track.Name;
-                         trackVm.X = track.TrackTopology?.TrackBegin?.X ?? 0;
-                         trackVm.Y = track.TrackTopology?.TrackBegin?.Y ?? 0;
-                         
-                         // Set X2, Y2 from TrackEnd
-                         if (track.TrackTopology?.TrackEnd != null)
-                         {
-                             trackVm.X2 = track.TrackTopology.TrackEnd.X;
-                             trackVm.Y2 = track.TrackTopology.TrackEnd.Y;
-                         }
-                         else
-                         {
-                             // Default length 100 if no end specified
-                             trackVm.Length = 100; 
-                         }
- 
-                         viewModel.Elements.Add(trackVm);
-                     }
-                 }
- 
-                 if (railml.Infrastructure?.Signals?.SignalList != null)
-                 {
-                      foreach (var signal in railml.Infrastructure.Signals.SignalList)
-                      {
-                          var signalVm = new SignalViewModel
-                          {
-                              Id = signal.Id,
-                              Name = signal.Name,
-                              X = signal.X,
-                              Y = signal.Y
-                          };
-                          viewModel.Elements.Add(signalVm);
-                      }
-                 }
+                    }
+                }
+            }
+
+
+            // Serialize
+            XmlSerializer serializer = new XmlSerializer(typeof(Railml));
+            using (TextWriter writer = new StreamWriter(path))
+            {
+                serializer.Serialize(writer, railml);
+            }
+        }
+
+
+        public void Load(string path, MainViewModel viewModel)
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(Railml));
+            using (FileStream fs = new FileStream(path, FileMode.Open))
+            {
+                var railml = (Railml)serializer.Deserialize(fs);
+
+                viewModel.Elements.Clear();
+
+                if (railml.Infrastructure?.Tracks?.TrackList != null)
+                {
+                    foreach (var track in railml.Infrastructure.Tracks.TrackList)
+                    {
+                        TrackViewModel trackVm;
+                        
+                        if (track.TrackTopology?.TrackBegin?.ScreenPos != null)
+                        {
+                            var ctv = new CurvedTrackViewModel
+                            {
+                                MX = track.TrackTopology.TrackBegin.ScreenPos.MX,
+                                MY = track.TrackTopology.TrackBegin.ScreenPos.MY
+                            };
+                            trackVm = ctv;
+                        }
+                        else
+                        {
+                            trackVm = new TrackViewModel();
+                        }
+
+                        trackVm.Id = track.Id;
+                        trackVm.Name = track.Name;
+                        trackVm.X = track.TrackTopology?.TrackBegin?.X ?? 0;
+                        trackVm.Y = track.TrackTopology?.TrackBegin?.Y ?? 0;
+                        
+                        // Set X2, Y2 from TrackEnd
+                        if (track.TrackTopology?.TrackEnd != null)
+                        {
+                            trackVm.X2 = track.TrackTopology.TrackEnd.X;
+                            trackVm.Y2 = track.TrackTopology.TrackEnd.Y;
+                        }
+                        else
+                        {
+                            // Default length 100 if no end specified
+                            trackVm.Length = 100; 
+                        }
+
+                        viewModel.Elements.Add(trackVm);
+                        
+                        // Load Switches from TrackBegin
+                        if (track.TrackTopology?.TrackBegin?.Connections?.Switches != null)
+                        {
+                            foreach (var sw in track.TrackTopology.TrackBegin.Connections.Switches)
+                            {
+                                // Check if already added (Switches might be referenced by multiple tracks? No, defined in one node)
+                                if (!viewModel.Elements.Any(e => e.Id == sw.Id))
+                                {
+                                    var switchVm = new SwitchViewModel
+                                    {
+                                        Id = sw.Id,
+                                        Name = sw.AdditionalName?.Name,
+                                        X = trackVm.X, // Switch is at Node position
+                                        Y = trackVm.Y
+                                    };
+                                    viewModel.Elements.Add(switchVm);
+                                }
+                            }
+                        }
+                        // Load Switches from TrackEnd
+                        if (track.TrackTopology?.TrackEnd?.Connections?.Switches != null)
+                        {
+                            foreach (var sw in track.TrackTopology.TrackEnd.Connections.Switches)
+                            {
+                                if (!viewModel.Elements.Any(e => e.Id == sw.Id))
+                                {
+                                    var switchVm = new SwitchViewModel
+                                    {
+                                        Id = sw.Id,
+                                        Name = sw.AdditionalName?.Name,
+                                        X = track.TrackTopology.TrackEnd.X,
+                                        Y = track.TrackTopology.TrackEnd.Y
+                                    };
+                                    viewModel.Elements.Add(switchVm);
+                                }
+                            }
+                        }
+
+                        // Load Signals
+                        if (track.OcsElements?.Signals?.SignalList != null)
+                        {
+                            foreach (var signal in track.OcsElements.Signals.SignalList)
+                            {
+                                var signalVm = new SignalViewModel
+                                {
+                                    Id = signal.Id,
+                                    Direction = signal.Dir ?? "up", // Load Dir or default
+                                    Name = signal.AdditionalName?.Name, // Load from AdditionalName
+                                    X = signal.X, // Should match Track X if pos=0/snapped
+                                    Y = signal.Y,
+                                    RelatedTrackId = track.Id
+                                };
+
+                                // Infer Flipped state from geometry if Dir missing or consistent check
+                                // Priority: geometry if loaded? 
+                                // Actually, if we have Dir, trust Dir. But ensure geometry matches?
+                                // User: "Calculate IsFlipped based on Y position" was previous logic.
+                                // Now we have Explicit Dir.
+                                // If Dir is set, we use it. 
+                                // But if Dir is "up" but Y is below, should we fix Dir or fix Y?
+                                // Let's trust Dir primarily, but if Dir is missing/null, use geometry.
+                                if (string.IsNullOrEmpty(signal.Dir))
+                                { 
+                                     if (signal.Y > trackVm.Y + 5)
+                                     {
+                                         signalVm.Direction = "down";
+                                     }
+                                }
+                                
+                                // Fallback if X/Y missing in XML (rely on Pos=0/Track)
+                                if (signal.X == 0 && signal.Y == 0 && signal.Pos == 0)
+                                {
+                                     signalVm.X = trackVm.X;
+                                     signalVm.Y = trackVm.Y;
+                                     // Apply offset based on Dir
+                                     signalVm.Y += (signalVm.Direction == "down" ? 20 : -20);
+                                     // Actually trackVm.Y is center line? Visuals currently assume track is line.
+                                     // Snapping logic puts it at +/- 20.
+                                     // So we should respect that.
+                                }
+
+                                viewModel.Elements.Add(signalVm);
+                            }
+                        }
+                    }
+                }
+
+                // Removed global Signal loading loop
             }
         }
     }

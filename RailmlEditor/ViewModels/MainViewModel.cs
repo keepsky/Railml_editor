@@ -129,7 +129,32 @@ namespace RailmlEditor.ViewModels
     public class SignalViewModel : BaseElementViewModel
     {
         public override string TypeName => "Signal";
-        // Type, Aspect etc.
+        
+        private string _relatedTrackId;
+        public string RelatedTrackId
+        {
+            get => _relatedTrackId;
+            set => SetProperty(ref _relatedTrackId, value);
+        }
+
+        private string _direction = "up";
+        public string Direction
+        {
+            get => _direction;
+            set 
+            {
+                if (SetProperty(ref _direction, value))
+                {
+                    OnPropertyChanged(nameof(IsFlipped));
+                }
+            }
+        }
+
+        public bool IsFlipped
+        {
+            get => _direction == "down";
+            set => Direction = value ? "down" : "up";
+        }
     }
 
 
@@ -233,6 +258,113 @@ namespace RailmlEditor.ViewModels
                 if (sender is BaseElementViewModel vm && vm.IsSelected)
                 {
                     SelectedElement = vm;
+                }
+            }
+            else if (e.PropertyName == nameof(SignalViewModel.Direction)) // Handle Direction Change
+            {
+                if (sender is SignalViewModel signal && !string.IsNullOrEmpty(signal.RelatedTrackId))
+                {
+                    var track = Elements.FirstOrDefault(el => el.Id == signal.RelatedTrackId) as TrackViewModel;
+                    if (track != null)
+                    {
+                        if (signal.Direction == "down")
+                        {
+                            signal.X = track.X2;
+                            signal.Y = track.Y2 + 15; // TrackEnd + Offset
+                        }
+                        else
+                        {
+                            signal.X = track.X;
+                            signal.Y = track.Y - 15; // TrackBegin - Offset (Height 10 + 5 Gap)
+                        }
+                    }
+                }
+            }
+        }
+        public void UpdateProximitySwitches()
+        {
+            // 1. Collect all endpoints
+            var tracks = Elements.OfType<TrackViewModel>().ToList();
+            var points = new System.Collections.Generic.List<(double X, double Y, string TrackId)>();
+
+            foreach (var t in tracks)
+            {
+                points.Add((t.X, t.Y, t.Id));
+                points.Add((t.X2, t.Y2, t.Id));
+            }
+
+            // 2. Cluster points (Simple greedy clustering or just iterate)
+            // We want unique locations where count > 2.
+            var clusters = new System.Collections.Generic.List<(double X, double Y, int Count)>();
+            var processedIndices = new System.Collections.Generic.HashSet<int>();
+
+            for (int i = 0; i < points.Count; i++)
+            {
+                if (processedIndices.Contains(i)) continue;
+
+                double sumX = points[i].X;
+                double sumY = points[i].Y;
+                int count = 1;
+                processedIndices.Add(i);
+
+                // Find neighbors
+                for (int j = i + 1; j < points.Count; j++)
+                {
+                    if (processedIndices.Contains(j)) continue;
+
+                    double dist = System.Math.Sqrt(System.Math.Pow(points[i].X - points[j].X, 2) + System.Math.Pow(points[i].Y - points[j].Y, 2));
+                    if (dist < 5.0) // Tolerance
+                    {
+                        sumX += points[j].X;
+                        sumY += points[j].Y;
+                        count++;
+                        processedIndices.Add(j);
+                    }
+                }
+
+                if (count > 2)
+                {
+                    clusters.Add((sumX / count, sumY / count, count));
+                }
+            }
+
+            // 3. Reconcile Switches
+            var existingSwitches = Elements.OfType<SwitchViewModel>().ToList();
+            var switchesToRemove = new System.Collections.Generic.List<SwitchViewModel>();
+
+            // Check existing switches validity
+            foreach (var sw in existingSwitches)
+            {
+                bool isValid = false;
+                foreach (var c in clusters)
+                {
+                    double dist = System.Math.Sqrt(System.Math.Pow(sw.X - c.X, 2) + System.Math.Pow(sw.Y - c.Y, 2));
+                    if (dist < 10.0)
+                    {
+                        isValid = true;
+                        break;
+                    }
+                }
+                if (!isValid) switchesToRemove.Add(sw);
+            }
+
+            foreach (var sw in switchesToRemove)
+            {
+                Elements.Remove(sw);
+            }
+
+            // Check clusters for missing switches
+            foreach (var c in clusters)
+            {
+                if (!Elements.OfType<SwitchViewModel>().Any(sw => System.Math.Sqrt(System.Math.Pow(sw.X - c.X, 2) + System.Math.Pow(sw.Y - c.Y, 2)) < 10.0))
+                {
+                    var newSwitch = new SwitchViewModel
+                    {
+                        Id = $"Sw{Elements.Count + 1}",
+                        X = c.X,
+                        Y = c.Y
+                    };
+                    Elements.Add(newSwitch);
                 }
             }
         }
