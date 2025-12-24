@@ -1,3 +1,5 @@
+ptag의 좌표는 기본적으로 현재의 기본값으로 사용하고 이미지를 마우스로 선택해서 위치를 이동할수 있도록 수정하고 만약 위치가 변경되는 경우 바뀐 좌표는 sehwa:screenpos mx, my에 좌표를 저장하고, 이동한 좌표 mx, my가 pos x,y와 동일하면 sehwa:scrrenpos 태그는 다시 제거 하도록 수정해줘
+======================
 현재 connections 태그를 trackend 속성 하위에 속해 있는데 tracktopology 하위에 속하도록 수정하고 connections->switch 태그에는 pos 속성을 이용해서 switch(point)의 상대 위치를 저장하도록 수정해줘
 ======================
 신호기에 대해서 name을 아래 규칙으로 표시하도록 수정해줘

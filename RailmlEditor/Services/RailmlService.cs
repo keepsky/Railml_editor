@@ -172,7 +172,10 @@ namespace RailmlEditor.Services
                                  Id = switchVm?.Id ?? $"sw_{nodeA.Id}",
                                  AdditionalName = new AdditionalName { Name = switchVm?.Name },
                                  Ref = firstNode.Id,
-                                 Pos = switchPos // New Attribute
+                                 Pos = switchPos,
+                                 ScreenPos = (switchVm?.MX.HasValue == true && switchVm?.MY.HasValue == true)
+                                     ? new ScreenPos { MX = switchVm.MX.Value, MY = switchVm.MY.Value }
+                                     : null
                              };
                              for (int i = 1; i < overlappingNodes.Count; i++)
                              {
@@ -315,7 +318,9 @@ namespace RailmlEditor.Services
                                         Id = sw.Id,
                                         Name = sw.AdditionalName?.Name,
                                         X = swX,
-                                        Y = swY
+                                        Y = swY,
+                                        MX = sw.ScreenPos?.MX,
+                                        MY = sw.ScreenPos?.MY
                                     };
                                     viewModel.Elements.Add(switchVm);
                                 }

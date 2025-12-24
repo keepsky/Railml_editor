@@ -640,5 +640,79 @@ namespace RailmlEditor
                 MainScaleTransform.ScaleY = newScaleY;
             }
         }
+
+        // Tag Dragging Fields
+        private bool _isTagDragging = false;
+        private SwitchViewModel _draggedTagSwitch = null;
+        private Point _tagDragStartPoint;
+        private Point _tagDragOriginalAbsPoint;
+
+        private void Tag_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement el && el.DataContext is SwitchViewModel swVm)
+            {
+                _isTagDragging = true;
+                _draggedTagSwitch = swVm;
+                _tagDragStartPoint = e.GetPosition(MainDesigner);
+                
+                // Calculate current Absolute Position of Tag
+                // If MX/MY are null, use default offset relative to Switch X/Y
+                double currentMX = swVm.MX ?? (swVm.X - 15.0);
+                double currentMY = swVm.MY ?? (swVm.Y + 7.0);
+
+                _tagDragOriginalAbsPoint = new Point(currentMX, currentMY);
+
+                el.CaptureMouse();
+                e.Handled = true; 
+            }
+        }
+
+        private void Tag_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isTagDragging && _draggedTagSwitch != null && sender is FrameworkElement el)
+            {
+                Point currentPos = e.GetPosition(MainDesigner);
+                Point startPoint = _tagDragStartPoint;
+                
+                double deltaX = currentPos.X - startPoint.X;
+                double deltaY = currentPos.Y - startPoint.Y;
+
+                // Calculate New Absolute Position
+                double newMX = _tagDragOriginalAbsPoint.X + deltaX;
+                double newMY = _tagDragOriginalAbsPoint.Y + deltaY;
+
+                // Snap to 5px Grid
+                newMX = Math.Round(newMX / 5.0) * 5.0;
+                newMY = Math.Round(newMY / 5.0) * 5.0;
+
+                _draggedTagSwitch.MX = newMX;
+                _draggedTagSwitch.MY = newMY;
+            }
+        }
+
+        private void Tag_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isTagDragging && _draggedTagSwitch != null && sender is FrameworkElement el)
+            {
+                // Reset Condition: "If moved coordinate mx, my is same as pos x,y"
+                if (_draggedTagSwitch.MX.HasValue && _draggedTagSwitch.MY.HasValue)
+                {
+                    double dist = Math.Sqrt(Math.Pow(_draggedTagSwitch.MX.Value - _draggedTagSwitch.X, 2) + 
+                                            Math.Pow(_draggedTagSwitch.MY.Value - _draggedTagSwitch.Y, 2));
+                    
+                    if (dist < 5.0)
+                    {
+                        // Reset to Default
+                        _draggedTagSwitch.MX = null;
+                        _draggedTagSwitch.MY = null;
+                    }
+                }
+
+                _isTagDragging = false;
+                _draggedTagSwitch = null;
+                el.ReleaseMouseCapture();
+                e.Handled = true;
+            }
+        }
     }
 }

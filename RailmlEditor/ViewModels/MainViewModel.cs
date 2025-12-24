@@ -169,6 +169,20 @@ namespace RailmlEditor.ViewModels
             get => base.Y;
             set => base.Y = value;
         }
+
+        private double? _mx;
+        public double? MX
+        {
+            get => _mx;
+            set => SetProperty(ref _mx, value);
+        }
+
+        private double? _my;
+        public double? MY
+        {
+            get => _my;
+            set => SetProperty(ref _my, value);
+        }
     }
 
     public class SignalViewModel : BaseElementViewModel

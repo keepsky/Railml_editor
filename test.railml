@@ -4,8 +4,8 @@
     <tracks>
       <track id="T001" name="1AT">
         <trackTopology>
-          <trackBegin pos="0" id="T001_begin" X="60" Y="280" />
-          <trackEnd pos="100" id="T001_end" X="160" Y="280" />
+          <trackBegin pos="0" id="T001_begin" X="40" Y="170" />
+          <trackEnd pos="100" id="T001_end" X="140" Y="170" />
           <connections>
             <connection id="conn_T001_end_to_T002_begin" ref="T002_begin" />
           </connections>
@@ -13,10 +13,11 @@
       </track>
       <track id="T002" name="21T">
         <trackTopology>
-          <trackBegin pos="0" id="T002_begin" X="160" Y="280" />
-          <trackEnd pos="70" id="T002_end" X="230" Y="280" />
+          <trackBegin pos="0" id="T002_begin" X="140" Y="170" />
+          <trackEnd pos="100" id="T002_end" X="240" Y="170" />
           <connections>
-            <switch id="P001" pos="70" ref="PT001_begin">
+            <switch id="P001" pos="100" ref="PT001_begin">
+              <sehwa:screenPos mx="215" my="130" />
               <additionalName name="21" />
               <connection id="switch_conn_P001_1" ref="T003_begin" />
             </switch>
@@ -26,19 +27,19 @@
       </track>
       <track id="PT001" name="21T">
         <trackTopology>
-          <trackBegin pos="0" id="PT001_begin" X="230" Y="280">
-            <sehwa:screenPos mx="290" my="220" />
+          <trackBegin pos="0" id="PT001_begin" X="240" Y="170">
+            <sehwa:screenPos mx="300" my="110" />
           </trackBegin>
-          <trackEnd pos="114" id="PT001_end" X="320" Y="220" />
+          <trackEnd pos="114" id="PT001_end" X="330" Y="110" />
           <connections>
             <connection id="conn_PT001_begin_to_T002_end" ref="T002_end" />
           </connections>
         </trackTopology>
       </track>
-      <track id="T003">
+      <track id="T003" name="21T">
         <trackTopology>
-          <trackBegin pos="0" id="T003_begin" X="230" Y="280" />
-          <trackEnd pos="100" id="T003_end" X="330" Y="280" />
+          <trackBegin pos="0" id="T003_begin" X="240" Y="170" />
+          <trackEnd pos="100" id="T003_end" X="340" Y="170" />
           <connections>
             <connection id="conn_T003_begin_to_T002_end" ref="T002_end" />
           </connections>

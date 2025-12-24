@@ -182,6 +182,9 @@ namespace RailmlEditor.Models
         [XmlAttribute(AttributeName = "pos")]
         public double Pos { get; set; }
 
+        [XmlElement(ElementName = "screenPos", Namespace = "http://www.sehwa.co.kr/railml")]
+        public ScreenPos ScreenPos { get; set; }
+
         [XmlElement(ElementName = "additionalName")]
         public AdditionalName AdditionalName { get; set; }
 

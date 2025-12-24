@@ -12,6 +12,7 @@
         <local:AddConverter x:Key="AddConverter"/>
         <!-- <local:BezierConverter x:Key="BezierConverter"/> -->
         <local:SegmentLengthConverter x:Key="SegmentLengthConverter"/>
+        <local:TagPositionConverter x:Key="TagPos"/>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         
         <!-- Grid Background Brush (10px dots) -->
@@ -102,7 +103,22 @@
                  <!-- Scaled to Height 12px (Original 82px). Scale 0.146. -->
                  <!-- Width 35.4px (Original 242px). -->
                  <!-- User requested X = -15. Y = 7. -->
-                 <Grid Canvas.Top="7" Canvas.Left="-15" Width="35" Height="12">
+                 <Grid Width="35" Height="12" 
+                       MouseLeftButtonDown="Tag_MouseLeftButtonDown"
+                       MouseMove="Tag_MouseMove"
+                       MouseLeftButtonUp="Tag_MouseLeftButtonUp">
+                     <Canvas.Left>
+                         <MultiBinding Converter="{StaticResource TagPos}" ConverterParameter="X">
+                             <Binding Path="MX"/>
+                             <Binding Path="X"/>
+                         </MultiBinding>
+                     </Canvas.Left>
+                     <Canvas.Top>
+                         <MultiBinding Converter="{StaticResource TagPos}" ConverterParameter="Y">
+                             <Binding Path="MY"/>
+                             <Binding Path="Y"/>
+                         </MultiBinding>
+                     </Canvas.Top>
                      <!-- Replaced SVG Image with XAML Vector Graphics due to lack of native SVG support -->
                      <Viewbox Stretch="Uniform">
                          <Canvas Width="242" Height="82">
