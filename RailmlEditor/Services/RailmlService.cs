@@ -37,18 +37,29 @@ namespace RailmlEditor.Services
                         { 
                             Id = $"{element.Id}_begin",
                             Pos = 0,
-                            X = element.X, 
-                            Y = element.Y,
-                            ScreenPos = element is CurvedTrackViewModel ctv 
-                                ? new ScreenPos { MX = ctv.MX, MY = ctv.MY } 
-                                : null
+                            ScreenPos = new ScreenPos
+                            {
+                                X = element.X,
+                                XSpecified = true,
+                                Y = element.Y,
+                                YSpecified = true,
+                                MX = (element is CurvedTrackViewModel ctv) ? ctv.MX : 0,
+                                MXSpecified = (element is CurvedTrackViewModel),
+                                MY = (element is CurvedTrackViewModel ctv2) ? ctv2.MY : 0,
+                                MYSpecified = (element is CurvedTrackViewModel)
+                            }
                         },
                         TrackEnd = new TrackNode 
                         { 
                             Id = $"{element.Id}_end", 
                             Pos = (int)element.Length,
-                            X = element.X2, 
-                            Y = element.Y2 
+                            ScreenPos = new ScreenPos
+                            {
+                                X = element.X2,
+                                XSpecified = true,
+                                Y = element.Y2,
+                                YSpecified = true
+                            }
                         },
                     },
                      // OcsElements initialized conditionally below
@@ -113,7 +124,12 @@ namespace RailmlEditor.Services
                     bool isBeginB = nodeB.Id.EndsWith("_begin");
                     if (isBeginA == isBeginB) continue; 
 
-                    double dist = Math.Sqrt(Math.Pow(nodeA.X - nodeB.X, 2) + Math.Pow(nodeA.Y - nodeB.Y, 2));
+                    double ax = nodeA.ScreenPos?.X ?? 0;
+                    double ay = nodeA.ScreenPos?.Y ?? 0;
+                    double bx = nodeB.ScreenPos?.X ?? 0;
+                    double by = nodeB.ScreenPos?.Y ?? 0;
+
+                    double dist = Math.Sqrt(Math.Pow(ax - bx, 2) + Math.Pow(ay - by, 2));
                     if(dist < 1.0) overlappingNodes.Add(nodeB);
                 }
 
@@ -154,7 +170,7 @@ namespace RailmlEditor.Services
                              
                              // Attempt to find a SwitchViewModel overlapping this node to get its Name
                              var switchVm = viewModel.Elements.OfType<SwitchViewModel>()
-                                 .FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - nodeA.X, 2) + Math.Pow(s.Y - nodeA.Y, 2)) < 5.0);
+                                 .FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - (nodeA.ScreenPos?.X ?? 0), 2) + Math.Pow(s.Y - (nodeA.ScreenPos?.Y ?? 0), 2)) < 5.0);
 
                              // Pos Calculation
                              // If nodeA is Begin, pos=0. If End, pos=Length.
@@ -174,7 +190,7 @@ namespace RailmlEditor.Services
                                  Ref = firstNode.Id,
                                  Pos = switchPos,
                                  ScreenPos = (switchVm?.MX.HasValue == true && switchVm?.MY.HasValue == true)
-                                     ? new ScreenPos { MX = switchVm.MX.Value, MY = switchVm.MY.Value }
+                                     ? new ScreenPos { X = switchVm.MX.Value, XSpecified = true, Y = switchVm.MY.Value, YSpecified = true }
                                      : null
                              };
                              for (int i = 1; i < overlappingNodes.Count; i++)
@@ -193,10 +209,19 @@ namespace RailmlEditor.Services
 
 
             // Serialize
-            XmlSerializer serializer = new XmlSerializer(typeof(Railml));
-            using (TextWriter writer = new StreamWriter(path))
+            try
             {
-                serializer.Serialize(writer, railml);
+                XmlSerializer serializer = new XmlSerializer(typeof(Railml));
+                using (TextWriter writer = new StreamWriter(path))
+                {
+                    serializer.Serialize(writer, railml);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Simple logging to debug
+                File.WriteAllText("save_error.txt", ex.ToString());
+                throw; // Re-throw to let UI handle or crash
             }
         }
 
@@ -235,14 +260,14 @@ namespace RailmlEditor.Services
                         trackVm.Description = track.Description;
                         trackVm.Type = track.Type;
                         trackVm.MainDir = track.MainDir;
-                        trackVm.X = track.TrackTopology?.TrackBegin?.X ?? 0;
-                        trackVm.Y = track.TrackTopology?.TrackBegin?.Y ?? 0;
+                        trackVm.X = track.TrackTopology?.TrackBegin?.ScreenPos?.X ?? 0;
+                        trackVm.Y = track.TrackTopology?.TrackBegin?.ScreenPos?.Y ?? 0;
                         
                         // Set X2, Y2 from TrackEnd
                         if (track.TrackTopology?.TrackEnd != null)
                         {
-                            trackVm.X2 = track.TrackTopology.TrackEnd.X;
-                            trackVm.Y2 = track.TrackTopology.TrackEnd.Y;
+                            trackVm.X2 = track.TrackTopology.TrackEnd.ScreenPos?.X ?? 0;
+                            trackVm.Y2 = track.TrackTopology.TrackEnd.ScreenPos?.Y ?? 0;
                         }
                         else
                         {
@@ -282,8 +307,8 @@ namespace RailmlEditor.Services
                                     {
                                         Id = sw.Id,
                                         Name = sw.AdditionalName?.Name,
-                                        X = track.TrackTopology.TrackEnd.X,
-                                        Y = track.TrackTopology.TrackEnd.Y
+                                        X = track.TrackTopology.TrackEnd.ScreenPos?.X ?? 0,
+                                        Y = track.TrackTopology.TrackEnd.ScreenPos?.Y ?? 0
                                     };
                                     viewModel.Elements.Add(switchVm);
                                 }
@@ -319,8 +344,8 @@ namespace RailmlEditor.Services
                                         Name = sw.AdditionalName?.Name,
                                         X = swX,
                                         Y = swY,
-                                        MX = sw.ScreenPos?.MX,
-                                        MY = sw.ScreenPos?.MY
+                                        MX = (sw.ScreenPos != null && sw.ScreenPos.XSpecified) ? sw.ScreenPos.X : (double?)null,
+                                        MY = (sw.ScreenPos != null && sw.ScreenPos.YSpecified) ? sw.ScreenPos.Y : (double?)null
                                     };
                                     viewModel.Elements.Add(switchVm);
                                 }

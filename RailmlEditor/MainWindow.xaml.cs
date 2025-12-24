@@ -651,12 +651,26 @@ namespace RailmlEditor
         {
             if (sender is FrameworkElement el && el.DataContext is SwitchViewModel swVm)
             {
-                _isTagDragging = true;
+                // Selection Logic
+                if ((Keyboard.Modifiers & ModifierKeys.Control) == 0)
+                {
+                    if (!swVm.IsSelected)
+                    {
+                        foreach (var element in _viewModel.Elements) element.IsSelected = false;
+                        swVm.IsSelected = true;
+                    }
+                }
+                else
+                {
+                    swVm.IsSelected = !swVm.IsSelected;
+                }
+                _viewModel.SelectedElement = swVm;
+
+                // Drag Init (Delayed)
+                _isTagDragging = false; 
                 _draggedTagSwitch = swVm;
                 _tagDragStartPoint = e.GetPosition(MainDesigner);
                 
-                // Calculate current Absolute Position of Tag
-                // If MX/MY are null, use default offset relative to Switch X/Y
                 double currentMX = swVm.MX ?? (swVm.X - 15.0);
                 double currentMY = swVm.MY ?? (swVm.Y + 7.0);
 
@@ -669,42 +683,57 @@ namespace RailmlEditor
 
         private void Tag_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_isTagDragging && _draggedTagSwitch != null && sender is FrameworkElement el)
+            if (_draggedTagSwitch != null && sender is FrameworkElement el)
             {
-                Point currentPos = e.GetPosition(MainDesigner);
-                Point startPoint = _tagDragStartPoint;
-                
-                double deltaX = currentPos.X - startPoint.X;
-                double deltaY = currentPos.Y - startPoint.Y;
+                if (!_isTagDragging)
+                {
+                    Point cur = e.GetPosition(MainDesigner);
+                    if (Math.Abs(cur.X - _tagDragStartPoint.X) > 5 || Math.Abs(cur.Y - _tagDragStartPoint.Y) > 5)
+                    {
+                        _isTagDragging = true;
+                    }
+                }
 
-                // Calculate New Absolute Position
-                double newMX = _tagDragOriginalAbsPoint.X + deltaX;
-                double newMY = _tagDragOriginalAbsPoint.Y + deltaY;
+                if (_isTagDragging)
+                {
+                    Point currentPos = e.GetPosition(MainDesigner);
+                    Point startPoint = _tagDragStartPoint;
+                    
+                    double deltaX = currentPos.X - startPoint.X;
+                    double deltaY = currentPos.Y - startPoint.Y;
 
-                // Snap to 5px Grid
-                newMX = Math.Round(newMX / 5.0) * 5.0;
-                newMY = Math.Round(newMY / 5.0) * 5.0;
+                    // Calculate New Absolute Position
+                    double newMX = _tagDragOriginalAbsPoint.X + deltaX;
+                    double newMY = _tagDragOriginalAbsPoint.Y + deltaY;
 
-                _draggedTagSwitch.MX = newMX;
-                _draggedTagSwitch.MY = newMY;
+                    // Snap to 5px Grid
+                    newMX = Math.Round(newMX / 5.0) * 5.0;
+                    newMY = Math.Round(newMY / 5.0) * 5.0;
+
+                    _draggedTagSwitch.MX = newMX;
+                    _draggedTagSwitch.MY = newMY;
+                }
             }
         }
 
         private void Tag_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (_isTagDragging && _draggedTagSwitch != null && sender is FrameworkElement el)
+            if (_draggedTagSwitch != null && sender is FrameworkElement el)
             {
-                // Reset Condition: "If moved coordinate mx, my is same as pos x,y"
-                if (_draggedTagSwitch.MX.HasValue && _draggedTagSwitch.MY.HasValue)
+                if (_isTagDragging)
                 {
-                    double dist = Math.Sqrt(Math.Pow(_draggedTagSwitch.MX.Value - _draggedTagSwitch.X, 2) + 
-                                            Math.Pow(_draggedTagSwitch.MY.Value - _draggedTagSwitch.Y, 2));
-                    
-                    if (dist < 5.0)
+                    // Reset Condition: "If moved coordinate mx, my is same as pos x,y"
+                    if (_draggedTagSwitch.MX.HasValue && _draggedTagSwitch.MY.HasValue)
                     {
-                        // Reset to Default
-                        _draggedTagSwitch.MX = null;
-                        _draggedTagSwitch.MY = null;
+                        double dist = Math.Sqrt(Math.Pow(_draggedTagSwitch.MX.Value - _draggedTagSwitch.X, 2) + 
+                                                Math.Pow(_draggedTagSwitch.MY.Value - _draggedTagSwitch.Y, 2));
+                        
+                        if (dist < 5.0)
+                        {
+                            // Reset to Default
+                            _draggedTagSwitch.MX = null;
+                            _draggedTagSwitch.MY = null;
+                        }
                     }
                 }
 
@@ -712,6 +741,29 @@ namespace RailmlEditor
                 _draggedTagSwitch = null;
                 el.ReleaseMouseCapture();
                 e.Handled = true;
+            }
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.V && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                if (_viewModel.SelectedElement != null)
+                {
+                    if (Clipboard.ContainsText())
+                    {
+                        try
+                        {
+                            string text = Clipboard.GetText();
+                            _viewModel.SelectedElement.Name = text;
+                            e.Handled = true;
+                        }
+                        catch 
+                        { 
+                            // Ignore clipboard access errors 
+                        }
+                    }
+                }
             }
         }
     }

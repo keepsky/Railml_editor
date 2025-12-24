@@ -122,22 +122,11 @@ namespace RailmlEditor.Models
         [XmlAttribute(AttributeName = "id")]
         public string Id { get; set; }
         
-
         [XmlElement(ElementName = "connections")]
         public NodeConnections Connections { get; set; }
 
-        // Standard Coordinates (already seemingly present or handled via other means, but explicitly adding extensions if needed)
-        // Note: The previous code assumes X/Y exist on TrackNode. I should verify if they are there. 
-        // If they are missing in the view, I should be careful. 
-        // But user request focuses on <sehwa:screenPos>.
-        
         [XmlElement(ElementName = "screenPos", Namespace = "http://www.sehwa.co.kr/railml")]
         public ScreenPos ScreenPos { get; set; }
-
-        // Coordinates for serialization (if not already strictly defined)
-        [XmlAttribute] public double X { get; set; }
-        [XmlAttribute] public double Y { get; set; }
-
     }
 
     public class NodeConnections
@@ -201,7 +190,26 @@ namespace RailmlEditor.Models
         [XmlAttribute(AttributeName = "mx")]
         public double MX { get; set; }
 
+        [XmlIgnore]
+        public bool MXSpecified { get; set; }
+
         [XmlAttribute(AttributeName = "my")]
         public double MY { get; set; }
+
+        [XmlIgnore]
+        public bool MYSpecified { get; set; }
+
+        [XmlAttribute(AttributeName = "x")]
+        public double X { get; set; }
+
+        [XmlIgnore]
+        public bool XSpecified { get; set; }
+
+        [XmlAttribute(AttributeName = "y")]
+        public double Y { get; set; }
+
+        [XmlIgnore]
+        public bool YSpecified { get; set; }
     }
 }
+
