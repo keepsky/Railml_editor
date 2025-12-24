@@ -57,11 +57,38 @@ namespace RailmlEditor.ViewModels
         { 
             "mainTrack", "secondaryTrack", "connectingTrack", "sidingTrack", "stationTrack" 
         };
+
+        public bool IsCurved => this is CurvedTrackViewModel;
         
         public System.Collections.Generic.List<string> AvailableMainDirs { get; } = new System.Collections.Generic.List<string> 
         { 
             "up", "down", "none" 
         };
+
+        public ICommand FlipHorizontallyCommand { get; }
+        public ICommand FlipVerticallyCommand { get; }
+
+        public TrackViewModel()
+        {
+            FlipHorizontallyCommand = new RelayCommand(_ => FlipHorizontally());
+            FlipVerticallyCommand = new RelayCommand(_ => FlipVertically());
+        }
+
+        protected virtual void FlipHorizontally()
+        {
+            double tempX = X;
+            X = X2;
+            X2 = tempX;
+            OnPropertyChanged(nameof(X));
+            OnPropertyChanged(nameof(X2));
+            OnPropertyChanged(nameof(Length));
+        }
+
+        protected virtual void FlipVertically()
+        {
+            // By default, do nothing or only for curved tracks if required.
+            // But user said: "Flip Vertically only for code=corner"
+        }
 
         private string? _description;
         public string? Description

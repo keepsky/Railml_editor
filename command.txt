@@ -1,5 +1,8 @@
 
 
+track을 마우스 우클릭해서 메뉴를 표시하고 좌우반전, 상하반전 메뉴를 만들어줘
+상하반전는 code=corner 인 track만 메뉴를 보여주고 각 점의 좌표가 상하 대칭 반전 되도록 변경해주고
+좌우반전은 모든 code에 대해서 메뉴를 보여주고 각 점의 좌표가 좌우 대칭 반전 되도록 변경하는 코드를 적용해줘
 ======================
 현재 curved track이라고 정의해서 id를 PT001, PT002 형식으로 정의한 track을 일반적인 track과 동일하게  T001, T002로 id를 만들고 track의 code 속성에 "corner"라고 정의하고, trackBegin 하위에 sehwa:screenpos 태그에서 mx, my 속성은 tracktopology 하위에 sehwa:cornerPos 태그를 만들고 x, y로 변경하도록 수정해줘
 그리고 그외 일반적인 track의 경우 code 속성값은 "plain"으로 정의하도록 수정해줘

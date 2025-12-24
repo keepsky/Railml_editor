@@ -18,6 +18,27 @@ namespace RailmlEditor.ViewModels
             set { _my = value; OnPropertyChanged(); OnPropertyChanged(nameof(Length)); }
         }
 
+        protected override void FlipHorizontally()
+        {
+            double oldX = X;
+            double oldX2 = X2;
+            base.FlipHorizontally();
+            MX = oldX + oldX2 - MX;
+            OnPropertyChanged(nameof(MX));
+        }
+
+        protected override void FlipVertically()
+        {
+            double oldY = Y;
+            double oldY2 = Y2;
+            Y = oldY2;
+            Y2 = oldY;
+            MY = oldY + oldY2 - MY;
+            OnPropertyChanged(nameof(Y));
+            OnPropertyChanged(nameof(Y2));
+            OnPropertyChanged(nameof(MY));
+        }
+
         public override double Length
         {
             get
