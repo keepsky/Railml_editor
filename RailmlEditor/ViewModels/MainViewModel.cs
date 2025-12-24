@@ -280,16 +280,30 @@ namespace RailmlEditor.ViewModels
     public class MainViewModel : ObservableObject
     {
         public ObservableCollection<BaseElementViewModel> Elements { get; } = new ObservableCollection<BaseElementViewModel>();
+        public ObservableCollection<BaseElementViewModel> SelectedElements { get; } = new ObservableCollection<BaseElementViewModel>();
+
         public ObservableCollection<CategoryViewModel> TreeCategories { get; } = new ObservableCollection<CategoryViewModel>();
 
-        private BaseElementViewModel _selectedElement;
-        public BaseElementViewModel SelectedElement
+        private BaseElementViewModel? _selectedElement;
+        public BaseElementViewModel? SelectedElement
         {
             get => _selectedElement;
             set => SetProperty(ref _selectedElement, value);
         }
 
+        private BulkEditViewModel? _bulkEdit;
+        public BulkEditViewModel? BulkEdit
+        {
+            get => _bulkEdit;
+            set => SetProperty(ref _bulkEdit, value);
+        }
+
         public ICommand SelectCommand { get; }
+        public ICommand DeleteCommand { get; }
+        public ICommand CopyCommand { get; }
+        public ICommand PasteCommand { get; }
+
+        private List<BaseElementViewModel> _clipboard = new List<BaseElementViewModel>();
 
         public MainViewModel()
         {
@@ -298,14 +312,171 @@ namespace RailmlEditor.ViewModels
 
             SelectCommand = new RelayCommand(param => 
             {
-                if (param is BaseElementViewModel element)
+                if (param is BaseElementViewModel vm)
                 {
-                    SelectedElement = element;
+                    bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
+                    if (!isMulti)
+                    {
+                        foreach (var el in Elements) el.IsSelected = (el == vm);
+                    }
+                    else
+                    {
+                        vm.IsSelected = !vm.IsSelected;
+                    }
                 }
             });
 
+            DeleteCommand = new RelayCommand(_ => DeleteSelected());
+            CopyCommand = new RelayCommand(_ => CopySelected());
+            PasteCommand = new RelayCommand(_ => PasteElements());
+
             // Test Data
             // Test Data Removed
+        }
+
+        private void DeleteSelected()
+        {
+            var toRemove = SelectedElements.ToList();
+            foreach (var el in toRemove)
+            {
+                Elements.Remove(el);
+            }
+        }
+
+        private void CopySelected()
+        {
+            _clipboard.Clear();
+            foreach (var el in SelectedElements)
+            {
+                _clipboard.Add(CloneElement(el));
+            }
+        }
+
+        private void PasteElements()
+        {
+            if (!_clipboard.Any()) return;
+
+            // Clear current selection to select newly pasted items
+            foreach (var el in Elements) el.IsSelected = false;
+
+            foreach (var el in _clipboard)
+            {
+                var clone = CloneElement(el);
+                
+                // Offset position
+                clone.X += 20;
+                clone.Y += 20;
+                
+                if (clone is TrackViewModel track)
+                {
+                    track.X2 += 20;
+                    track.Y2 += 20;
+                    if (track is CurvedTrackViewModel curved)
+                    {
+                        curved.MX += 20;
+                        curved.MY += 20;
+                    }
+                    clone.Id = GetNextId("T");
+                }
+                else if (clone is SignalViewModel signal)
+                {
+                    clone.Id = GetNextId("S");
+                }
+                else if (clone is SwitchViewModel sw)
+                {
+                    clone.Id = GetNextId("P");
+                    if (sw.MX.HasValue) sw.MX += 20;
+                    if (sw.MY.HasValue) sw.MY += 20;
+                }
+
+                clone.IsSelected = true;
+                Elements.Add(clone);
+            }
+
+            // Update clipboard for next paste (cumulative offset)
+            for (int i = 0; i < _clipboard.Count; i++)
+            {
+                _clipboard[i].X += 20;
+                _clipboard[i].Y += 20;
+                if (_clipboard[i] is TrackViewModel t)
+                {
+                    t.X2 += 20;
+                    t.Y2 += 20;
+                    if (t is CurvedTrackViewModel c)
+                    {
+                        c.MX += 20;
+                        c.MY += 20;
+                    }
+                }
+                else if (_clipboard[i] is SwitchViewModel sw)
+                {
+                    if (sw.MX.HasValue) sw.MX += 20;
+                    if (sw.MY.HasValue) sw.MY += 20;
+                }
+            }
+        }
+
+        private BaseElementViewModel CloneElement(BaseElementViewModel el)
+        {
+            if (el is CurvedTrackViewModel curved)
+            {
+                return new CurvedTrackViewModel
+                {
+                    Id = curved.Id,
+                    Name = curved.Name,
+                    Description = curved.Description,
+                    Type = curved.Type,
+                    MainDir = curved.MainDir,
+                    X = curved.X,
+                    Y = curved.Y,
+                    X2 = curved.X2,
+                    Y2 = curved.Y2,
+                    MX = curved.MX,
+                    MY = curved.MY
+                };
+            }
+            if (el is TrackViewModel track)
+            {
+                return new TrackViewModel
+                {
+                    Id = track.Id,
+                    Name = track.Name,
+                    Description = track.Description,
+                    Type = track.Type,
+                    MainDir = track.MainDir,
+                    X = track.X,
+                    Y = track.Y,
+                    X2 = track.X2,
+                    Y2 = track.Y2
+                };
+            }
+            if (el is SignalViewModel signal)
+            {
+                return new SignalViewModel
+                {
+                    Id = signal.Id,
+                    Name = signal.Name,
+                    Type = signal.Type,
+                    Function = signal.Function,
+                    Direction = signal.Direction,
+                    RelatedTrackId = signal.RelatedTrackId,
+                    X = signal.X,
+                    Y = signal.Y
+                };
+            }
+            if (el is SwitchViewModel sw)
+            {
+                return new SwitchViewModel
+                {
+                    Id = sw.Id,
+                    Name = sw.Name,
+                    X = sw.X,
+                    Y = sw.Y,
+                    MX = sw.MX,
+                    MY = sw.MY
+                };
+            }
+            return null;
         }
 
         private void InitializeTreeCategories()
@@ -368,9 +539,33 @@ namespace RailmlEditor.ViewModels
         {
             if (e.PropertyName == nameof(BaseElementViewModel.IsSelected))
             {
-                if (sender is BaseElementViewModel vm && vm.IsSelected)
+                if (sender is BaseElementViewModel vm)
                 {
-                    SelectedElement = vm;
+                    if (vm.IsSelected)
+                    {
+                        if (!SelectedElements.Contains(vm)) SelectedElements.Add(vm);
+                    }
+                    else
+                    {
+                        SelectedElements.Remove(vm);
+                    }
+
+                    // Update primary SelectedElement or BulkEdit for Property Grid
+                    if (SelectedElements.Count == 1)
+                    {
+                        SelectedElement = SelectedElements[0];
+                        BulkEdit = null;
+                    }
+                    else if (SelectedElements.Count > 1)
+                    {
+                        SelectedElement = null;
+                        BulkEdit = new BulkEditViewModel(SelectedElements);
+                    }
+                    else
+                    {
+                        SelectedElement = null;
+                        BulkEdit = null;
+                    }
                 }
             }
             else if (e.PropertyName == nameof(SignalViewModel.Direction)) // Handle Direction Change
@@ -492,6 +687,18 @@ namespace RailmlEditor.ViewModels
                     Elements.Add(newSwitch);
                 }
             }
+        }
+        public string GetNextId(string prefix)
+        {
+            int max = 0;
+            foreach (var el in Elements)
+            {
+                if (el.Id != null && el.Id.StartsWith(prefix) && int.TryParse(el.Id.Substring(prefix.Length), out int num))
+                {
+                    if (num > max) max = num;
+                }
+            }
+            return $"{prefix}{max + 1:D3}";
         }
     }
 }

@@ -150,21 +150,14 @@ namespace RailmlEditor
 
         private string GetNextId(string prefix)
         {
-            int max = 0;
-            foreach(var el in _viewModel.Elements)
-            {
-                if (el.Id != null && el.Id.StartsWith(prefix) && int.TryParse(el.Id.Substring(prefix.Length), out int n))
-                {
-                    if (n > max) max = n;
-                }
-            }
-            return $"{prefix}{max + 1:D3}";
+            return _viewModel.GetNextId(prefix);
         }
 
 
         // Selection & Panning State
         private bool _isSelecting = false;
         private Point _selectionStartPoint;
+        private Point _selectionStartLogicalPoint;
         private bool _isPanning = false;
         private Point _panStartPoint;
 
@@ -175,6 +168,7 @@ namespace RailmlEditor
                 // Start Selection
                 _isSelecting = true;
                 _selectionStartPoint = e.GetPosition(OverlayCanvas);
+                _selectionStartLogicalPoint = e.GetPosition(MainDesigner);
                 
                 // Reset styling
                 Canvas.SetLeft(SelectionBox, _selectionStartPoint.X);
@@ -183,8 +177,9 @@ namespace RailmlEditor
                 SelectionBox.Height = 0;
                 SelectionBox.Visibility = Visibility.Visible;
 
-                // Clear existing selection unless Ctrl is pressed (standard behavior, though not explicitly requested, good practice)
-                if ((Keyboard.Modifiers & ModifierKeys.Control) == 0)
+                // Clear existing selection unless Ctrl or Shift is pressed
+                bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
+                if (!isMulti)
                 {
                     foreach (var element in _viewModel.Elements)
                     {
@@ -193,8 +188,8 @@ namespace RailmlEditor
                     _viewModel.SelectedElement = null;
                 }
                 
-                MainGrid.Focus();
-                MainGrid.CaptureMouse();
+                MainDesigner.Focus();
+                MainDesigner.CaptureMouse();
                 e.Handled = true;
             }
             else if (e.ChangedButton == MouseButton.Middle)
@@ -203,9 +198,9 @@ namespace RailmlEditor
                 _isPanning = true;
                 _panStartPoint = e.GetPosition(MainGrid); // Initial point, acts as "Last Point"
                 
-                MainGrid.Focus();
-                MainGrid.CaptureMouse();
-                MainGrid.Cursor = Cursors.SizeAll;
+                MainDesigner.Focus();
+                MainDesigner.CaptureMouse();
+                MainDesigner.Cursor = Cursors.SizeAll;
                 e.Handled = true;
             }
         }
@@ -274,33 +269,79 @@ namespace RailmlEditor
             {
                 _isSelecting = false;
                 SelectionBox.Visibility = Visibility.Collapsed;
-                MainGrid.ReleaseMouseCapture();
+                MainDesigner.ReleaseMouseCapture();
 
                 // Perform Selection Logic
-                double x = Canvas.GetLeft(SelectionBox);
-                double y = Canvas.GetTop(SelectionBox);
-                double w = SelectionBox.Width;
-                double h = SelectionBox.Height;
-                Rect selectionRect = new Rect(x, y, w, h);
+                Point logicalEnd = e.GetPosition(MainDesigner);
+                Rect selectionRect = new Rect(_selectionStartLogicalPoint, logicalEnd);
+
+                bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
+                if (!isMulti)
+                {
+                    foreach (var el in _viewModel.Elements) el.IsSelected = false;
+                }
 
                 foreach (var element in _viewModel.Elements)
                 {
-                    // Simple hit testing: center point or bounding box? 
-                    // Let's assume point containment (X,Y) for now or simple intersection.
-                    // Since elements have different shapes, let's use their X,Y as top-left approx.
-                    // Better interaction: Check if element bounds intersect selection rect.
-                    // For now, let's check if the element's (X,Y) is inside.
-                    if (selectionRect.Contains(new Point(element.X, element.Y)))
+                    bool hit = false;
+                    // Check intersection with a small bounding box around primary anchor point (X, Y)
+                    Rect anchorBounds = new Rect(element.X - 5, element.Y - 5, 10, 10);
+                    if (selectionRect.IntersectsWith(anchorBounds))
                     {
-                        element.IsSelected = true;
+                        hit = true;
                     }
+                    else if (element is TrackViewModel track)
+                    {
+                        // Check end point for tracks
+                        Rect endBounds = new Rect(track.X2 - 5, track.Y2 - 5, 10, 10);
+                        if (selectionRect.IntersectsWith(endBounds))
+                        {
+                            hit = true;
+                        }
+                        
+                        // Check intersection with the line segment
+                        if (!hit) hit = IntersectsLine(selectionRect, new Point(track.X, track.Y), new Point(track.X2, track.Y2));
+
+                        if (track is CurvedTrackViewModel curved)
+                        {
+                            // Check midpoint for curved tracks
+                            Rect midBounds = new Rect(curved.MX - 5, curved.MY - 5, 10, 10);
+                            if (selectionRect.IntersectsWith(midBounds))
+                            {
+                                hit = true;
+                            }
+                            
+                            // Check both segments of curved track
+                            if (!hit)
+                            {
+                                hit = IntersectsLine(selectionRect, new Point(curved.X, curved.Y), new Point(curved.MX, curved.MY)) ||
+                                      IntersectsLine(selectionRect, new Point(curved.MX, curved.MY), new Point(curved.X2, curved.Y2));
+                            }
+                        }
+                    }
+                    else if (element is SwitchViewModel sw)
+                    {
+                        // Also check for the "Point Tag" if it has specific coordinates or default offset
+                        double tagX = sw.MX ?? (sw.X - 15.0);
+                        double tagY = sw.MY ?? (sw.Y + 7.0);
+                        Rect tagBounds = new Rect(tagX, tagY, 35, 12);
+                        if (selectionRect.IntersectsWith(tagBounds)) hit = true;
+                    }
+                    else if (element is SignalViewModel)
+                    {
+                        // Signal icon is roughly 20x10.
+                        Rect signalBounds = new Rect(element.X - 10, element.Y - 5, 20, 10);
+                        if (selectionRect.IntersectsWith(signalBounds)) hit = true;
+                    }
+
+                    if (hit) element.IsSelected = true;
                 }
             }
             else if (_isPanning)
             {
                 _isPanning = false;
-                MainGrid.ReleaseMouseCapture();
-                MainGrid.Cursor = Cursors.Arrow;
+                MainDesigner.ReleaseMouseCapture();
+                MainDesigner.Cursor = Cursors.Arrow;
             }
         }
 
@@ -331,45 +372,41 @@ namespace RailmlEditor
                     // Allow selection but prevent drag
                      if (e.ChangedButton == MouseButton.Left)
                     {
-                        if (!viewModel.IsSelected && (Keyboard.Modifiers & ModifierKeys.Control) == 0)
+                        bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
+                        if (!viewModel.IsSelected && !isMulti)
                         {
                             foreach (var el in _viewModel.Elements) el.IsSelected = false;
                             viewModel.IsSelected = true;
                         }
-                        else if ((Keyboard.Modifiers & ModifierKeys.Control) != 0)
+                        else if (isMulti)
                         {
                              viewModel.IsSelected = !viewModel.IsSelected;
                         }
+                        e.Handled = true;
                     }
-                    e.Handled = true;
                     return;
                 }
 
-                _isDragging = true;
-                _draggedControl = element;
-                _startPoint = e.GetPosition(MainDesigner);
-                // _originalElementPos won't be enough for multi-select, we need original positions for ALL selected items.
-                // But for now, we can calculate deltas from start point.
-                
                 if (e.ChangedButton == MouseButton.Left)
                 {
-                    // If not already selected and Ctrl not pressed, select only this.
-                    if (!viewModel.IsSelected && (Keyboard.Modifiers & ModifierKeys.Control) == 0)
+                    _isDragging = true;
+                    _draggedControl = element;
+                    _startPoint = e.GetPosition(MainDesigner);
+                    
+                    bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
+                    // If not already selected and multi-select modifier not pressed, select only this.
+                    if (!viewModel.IsSelected && !isMulti)
                     {
                         foreach (var el in _viewModel.Elements) el.IsSelected = false;
                         viewModel.IsSelected = true;
                     }
-                    else if ((Keyboard.Modifiers & ModifierKeys.Control) != 0)
+                    else if (isMulti)
                     {
-                         viewModel.IsSelected = !viewModel.IsSelected;
+                        viewModel.IsSelected = !viewModel.IsSelected;
                     }
                     
                     if (viewModel.IsSelected)
                     {
-                        _isDragging = true;
-                        _draggedControl = element;
-                        _startPoint = e.GetPosition(MainDesigner);
-                        
                         _originalPositions.Clear();
                         foreach (var el in _viewModel.Elements)
                         {
@@ -382,8 +419,7 @@ namespace RailmlEditor
 
                     _viewModel.SelectedElement = viewModel; // Keep this for property grid focus
                     
-                    MainGrid.Focus();
-                    // element.CaptureMouse(); // Capturing usually handled by parent or implicit? Explicit for dragging.
+                    MainDesigner.Focus();
                     element.CaptureMouse();
                     e.Handled = true;
                 }
@@ -657,7 +693,8 @@ namespace RailmlEditor
             if (sender is FrameworkElement el && el.DataContext is SwitchViewModel swVm)
             {
                 // Selection Logic
-                if ((Keyboard.Modifiers & ModifierKeys.Control) == 0)
+                bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
+                if (!isMulti)
                 {
                     if (!swVm.IsSelected)
                     {
@@ -749,27 +786,50 @@ namespace RailmlEditor
             }
         }
 
+
+        private void TreeViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is TreeViewItem item && item.DataContext is BaseElementViewModel viewModel)
+            {
+                bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
+                if (!isMulti)
+                {
+                    foreach (var el in _viewModel.Elements) el.IsSelected = (el == viewModel);
+                }
+                else
+                {
+                    viewModel.IsSelected = !viewModel.IsSelected;
+                }
+                _viewModel.SelectedElement = viewModel;
+                e.Handled = true; 
+            }
+        }
+
+        private bool IntersectsLine(Rect rect, Point p1, Point p2)
+        {
+            if (rect.Contains(p1) || rect.Contains(p2)) return true;
+            Point topLeft = rect.TopLeft;
+            Point topRight = rect.TopRight;
+            Point bottomLeft = rect.BottomLeft;
+            Point bottomRight = rect.BottomRight;
+            return LineIntersectsLine(p1, p2, topLeft, topRight) ||
+                   LineIntersectsLine(p1, p2, topRight, bottomRight) ||
+                   LineIntersectsLine(p1, p2, bottomRight, bottomLeft) ||
+                   LineIntersectsLine(p1, p2, bottomLeft, topLeft);
+        }
+
+        private bool LineIntersectsLine(Point a1, Point a2, Point b1, Point b2)
+        {
+            double d = (a2.X - a1.X) * (b2.Y - b1.Y) - (a2.Y - a1.Y) * (b2.X - b1.X);
+            if (d == 0) return false;
+            double u = ((b1.X - a1.X) * (b2.Y - b1.Y) - (b1.Y - a1.Y) * (b2.X - b1.X)) / d;
+            double v = ((b1.X - a1.X) * (a2.Y - a1.Y) - (b1.Y - a1.Y) * (a2.X - a1.X)) / d;
+            return u >= 0 && u <= 1 && v >= 0 && v <= 1;
+        }
+
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.V && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-            {
-                if (_viewModel.SelectedElement != null)
-                {
-                    if (Clipboard.ContainsText())
-                    {
-                        try
-                        {
-                            string text = Clipboard.GetText();
-                            _viewModel.SelectedElement.Name = text;
-                            e.Handled = true;
-                        }
-                        catch 
-                        { 
-                            // Ignore clipboard access errors 
-                        }
-                    }
-                }
-            }
+            // KeyBindings handle Delete, Ctrl+C, Ctrl+V now.
         }
     }
 }

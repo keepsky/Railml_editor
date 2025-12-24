@@ -4,6 +4,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:RailmlEditor" mc:Ignorable="d" Title="MainWindow" Height="450" Width="800" KeyDown="Window_KeyDown">
+    <Window.InputBindings>
+        <KeyBinding Key="Delete" Command="{Binding DeleteCommand}"/>
+        <KeyBinding Key="C" Modifiers="Control" Command="{Binding CopyCommand}"/>
+        <KeyBinding Key="V" Modifiers="Control" Command="{Binding PasteCommand}"/>
+    </Window.InputBindings>
     <Window.Resources>
         <local:DiffConverter x:Key="DiffConverter"/>
         <local:AngleConverter x:Key="AngleConverter"/>
@@ -545,7 +550,8 @@
                             <TreeView.ItemContainerStyle>
                                 <Style TargetType="TreeViewItem">
                                     <Setter Property="IsExpanded" Value="True"/>
-                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=OneWay}"/>
+                                    <EventSetter Event="PreviewMouseLeftButtonDown" Handler="TreeViewItem_PreviewMouseLeftButtonDown"/>
                                 </Style>
                             </TreeView.ItemContainerStyle>
                         </TreeView>
@@ -560,7 +566,17 @@
                     <DockPanel>
                         <TextBlock Text="Properties" DockPanel.Dock="Top" FontWeight="Bold" Margin="0,0,0,10"/>
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <ContentControl Content="{Binding SelectedElement}" Grid.IsSharedSizeScope="True">
+                            <ContentControl Grid.IsSharedSizeScope="True">
+                                <ContentControl.Style>
+                                    <Style TargetType="ContentControl">
+                                        <Setter Property="Content" Value="{Binding SelectedElement}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedElement}" Value="{x:Null}">
+                                                <Setter Property="Content" Value="{Binding BulkEdit}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ContentControl.Style>
                                 <ContentControl.Resources>
                                     <Style TargetType="TextBlock" x:Key="PropLabel">
                                         <Setter Property="FontWeight" Value="SemiBold"/>
@@ -571,6 +587,57 @@
                                         <Setter Property="VerticalAlignment" Value="Center"/>
                                         <Setter Property="Margin" Value="0,0,0,5"/>
                                     </Style>
+
+                                    <Style TargetType="ComboBox" x:Key="PropCombo">
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="Margin" Value="0,0,0,5"/>
+                                    </Style>
+
+                                    <!-- Bulk Edit Properties -->
+                                    <DataTemplate DataType="{x:Type local:ViewModels.BulkEditViewModel}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Text="Selection" Style="{StaticResource PropLabel}" Grid.Row="0" Grid.Column="0"/>
+                                            <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Margin="0,0,0,5"/>
+
+                                            <TextBlock Text="Name" Style="{StaticResource PropLabel}" Grid.Row="1" Grid.Column="0"/>
+                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PropValue}" Grid.Row="1" Grid.Column="1"/>
+
+                                            <!-- Track specific bulk edits -->
+                                            <TextBlock Text="Description" Style="{StaticResource PropLabel}" Grid.Row="2" Grid.Column="0" Visibility="{Binding HasTracks, Converter={StaticResource BoolToVis}}"/>
+                                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PropValue}" Grid.Row="2" Grid.Column="1" Visibility="{Binding HasTracks, Converter={StaticResource BoolToVis}}"/>
+
+                                            <TextBlock Text="Type" Style="{StaticResource PropLabel}" Grid.Row="3" Grid.Column="0" Visibility="{Binding HasTracks, Converter={StaticResource BoolToVis}}"/>
+                                            <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding Type}" Style="{StaticResource PropCombo}" Grid.Row="3" Grid.Column="1" Visibility="{Binding HasTracks, Converter={StaticResource BoolToVis}}"/>
+
+                                            <TextBlock Text="MainDir" Style="{StaticResource PropLabel}" Grid.Row="4" Grid.Column="0" Visibility="{Binding HasTracks, Converter={StaticResource BoolToVis}}"/>
+                                            <ComboBox ItemsSource="{Binding AvailableMainDirs}" SelectedItem="{Binding MainDir}" Style="{StaticResource PropCombo}" Grid.Row="4" Grid.Column="1" Visibility="{Binding HasTracks, Converter={StaticResource BoolToVis}}"/>
+
+                                            <!-- Signal specific bulk edits -->
+                                            <TextBlock Text="Signal Type" Style="{StaticResource PropLabel}" Grid.Row="5" Grid.Column="0" Visibility="{Binding HasSignals, Converter={StaticResource BoolToVis}}"/>
+                                            <ComboBox ItemsSource="{Binding SignalTypes}" SelectedItem="{Binding SignalType}" Style="{StaticResource PropCombo}" Grid.Row="5" Grid.Column="1" Visibility="{Binding HasSignals, Converter={StaticResource BoolToVis}}"/>
+
+                                            <TextBlock Text="Function" Style="{StaticResource PropLabel}" Grid.Row="6" Grid.Column="0" Visibility="{Binding HasSignals, Converter={StaticResource BoolToVis}}"/>
+                                            <ComboBox ItemsSource="{Binding SignalFunctions}" SelectedItem="{Binding SignalFunction}" Style="{StaticResource PropCombo}" Grid.Row="6" Grid.Column="1" Visibility="{Binding HasSignals, Converter={StaticResource BoolToVis}}"/>
+
+                                            <TextBlock Text="Direction" Style="{StaticResource PropLabel}" Grid.Row="7" Grid.Column="0" Visibility="{Binding HasSignals, Converter={StaticResource BoolToVis}}"/>
+                                            <ComboBox ItemsSource="{Binding Directions}" SelectedItem="{Binding Direction}" Style="{StaticResource PropCombo}" Grid.Row="7" Grid.Column="1" Visibility="{Binding HasSignals, Converter={StaticResource BoolToVis}}"/>
+                                        </Grid>
+                                    </DataTemplate>
 
                                     <!-- Track Properties -->
                                     <DataTemplate DataType="{x:Type local:ViewModels.TrackViewModel}">
@@ -766,9 +833,9 @@
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="LightGray"/>
 
             <!-- Main Canvas Area -->
-            <Grid Grid.Column="2" x:Name="MainGrid" Background="Transparent" MouseDown="MainGrid_MouseDown" MouseMove="MainGrid_MouseMove" MouseUp="MainGrid_MouseUp" Focusable="True" KeyDown="MainGrid_KeyDown">
+            <Grid Grid.Column="2" x:Name="MainGrid" Background="Transparent" Focusable="False">
                 <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" PreviewMouseWheel="MainScrollViewer_PreviewMouseWheel">
-                    <ItemsControl x:Name="MainDesigner" ItemsSource="{Binding Elements}" Background="{StaticResource GridBackgroundBrush}" Width="2000" Height="2000" AllowDrop="True" Drop="MainDesigner_Drop">
+                    <ItemsControl x:Name="MainDesigner" ItemsSource="{Binding Elements}" Background="{StaticResource GridBackgroundBrush}" Width="2000" Height="2000" AllowDrop="True" Drop="MainDesigner_Drop" MouseDown="MainGrid_MouseDown" MouseMove="MainGrid_MouseMove" MouseUp="MainGrid_MouseUp" Focusable="True" KeyDown="MainGrid_KeyDown">
                         <ItemsControl.LayoutTransform>
                             <ScaleTransform x:Name="MainScaleTransform" ScaleX="1" ScaleY="1"/>
                         </ItemsControl.LayoutTransform>

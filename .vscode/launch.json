@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Core Launch (desktop)",
+            "type": "dotnet",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/RailmlEditor/bin/Debug/net10.0-windows/RailmlEditor.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/RailmlEditor",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        }
+    ]
+}
