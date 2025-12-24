@@ -11,6 +11,7 @@
         <!-- <local:BezierConverter x:Key="BezierConverter"/> -->
         <local:SegmentLengthConverter x:Key="SegmentLengthConverter"/>
         <local:TagPositionConverter x:Key="TagPos"/>
+        <local:MidPointConverter x:Key="MidPoint"/>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
         <!-- Grid Background Brush (10px dots) -->
@@ -89,6 +90,25 @@
                         </ControlTemplate>
                     </Thumb.Template>
                 </Thumb>
+
+                <!-- Track Name Display (6px, centered for plain tracks) -->
+                <TextBlock Text="{Binding Name}" FontSize="6" Foreground="Black">
+                    <Canvas.Left>
+                        <MultiBinding Converter="{StaticResource MidPoint}">
+                            <Binding Path="X2"/>
+                            <Binding Path="X"/>
+                        </MultiBinding>
+                    </Canvas.Left>
+                    <Canvas.Top>
+                        <MultiBinding Converter="{StaticResource MidPoint}">
+                            <Binding Path="Y2"/>
+                            <Binding Path="Y"/>
+                        </MultiBinding>
+                    </Canvas.Top>
+                    <TextBlock.RenderTransform>
+                        <TranslateTransform X="-15" Y="-4"/>
+                    </TextBlock.RenderTransform>
+                </TextBlock>
             </Canvas>
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:ViewModels.SwitchViewModel}">
