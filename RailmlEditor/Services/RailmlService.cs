@@ -271,6 +271,19 @@ namespace RailmlEditor.Services
                         });
                     }
 
+                    if (rVm.ReleaseSections.Any())
+                    {
+                        r.ReleaseGroup = new ReleaseGroup();
+                        foreach (var rsV in rVm.ReleaseSections)
+                        {
+                            r.ReleaseGroup.TrackSectionRefList.Add(new TrackSectionRef
+                            {
+                                Ref = rsV.TrackRef,
+                                FlankProtection = rsV.FlankProtection
+                            });
+                        }
+                    }
+
                     railml.Infrastructure.Routes.RouteList.Add(r);
                 }
             }
@@ -531,6 +544,19 @@ namespace RailmlEditor.Services
                                     SwitchRef = s.SwitchRef,
                                     SwitchPosition = s.SwitchPosition,
                                     RemoveCommand = new RelayCommand(p => rVm.OverlapSwitchAndPositions.Remove(p as SwitchPositionViewModel))
+                                });
+                            }
+                        }
+
+                        if (r.ReleaseGroup?.TrackSectionRefList != null)
+                        {
+                            foreach (var rs in r.ReleaseGroup.TrackSectionRefList)
+                            {
+                                rVm.ReleaseSections.Add(new ReleaseSectionViewModel
+                                {
+                                    TrackRef = rs.Ref,
+                                    FlankProtection = rs.FlankProtection,
+                                    RemoveCommand = new RelayCommand(p => rVm.ReleaseSections.Remove(p as ReleaseSectionViewModel))
                                 });
                             }
                         }

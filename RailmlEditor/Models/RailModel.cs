@@ -251,6 +251,24 @@ namespace RailmlEditor.Models
 
         [XmlElement(ElementName = "overlapSwitchAndPosition")]
         public List<SwitchAndPosition> OverlapSwitchAndPositionList { get; set; } = new List<SwitchAndPosition>();
+
+        [XmlElement(ElementName = "releaseGroup")]
+        public ReleaseGroup ReleaseGroup { get; set; }
+    }
+
+    public class ReleaseGroup
+    {
+        [XmlElement(ElementName = "trackSectionRef")]
+        public List<TrackSectionRef> TrackSectionRefList { get; set; } = new List<TrackSectionRef>();
+    }
+
+    public class TrackSectionRef
+    {
+        [XmlAttribute(AttributeName = "ref")]
+        public string Ref { get; set; }
+
+        [XmlAttribute(AttributeName = "flankProtection")]
+        public bool FlankProtection { get; set; }
     }
 
     public class SwitchAndPosition

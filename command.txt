@@ -1,3 +1,7 @@
+<route>에 아래 태그를 추가하고 railml에서 <route><releaseGroup><trackSectionRef>의 하위 태그로 사용자가 입력한 list를 추가되도록 구현
+Release Section : list 형태로 여러줄에 걸쳐서 입력 받을수 있도록 (+) 버튼을 누르면 아래의 속성들을 입력할수 있도록 구현
+	ref : track.id
+	flankProtection : (true, false) list에서 선택
 ======================
 좌측 탐색창에 route를 추가
 툴바에서 route 버튼을 누르면 탐색창에 신규 route를 추가하고 해당 route id를 선택하면 속성창에서 아래의 값들을 입력할수 있도록 수정해줘

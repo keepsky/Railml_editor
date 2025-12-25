@@ -407,9 +407,11 @@ namespace RailmlEditor.ViewModels
 
         public ObservableCollection<SwitchPositionViewModel> SwitchAndPositions { get; } = new();
         public ObservableCollection<SwitchPositionViewModel> OverlapSwitchAndPositions { get; } = new();
+        public ObservableCollection<ReleaseSectionViewModel> ReleaseSections { get; } = new();
 
         public ICommand AddSwitchPositionCommand { get; }
         public ICommand AddOverlapSwitchPositionCommand { get; }
+        public ICommand AddReleaseSectionCommand { get; }
 
         public List<string> AvailableProceedSpeeds { get; } = new() { "R", "YY", "Y", "YG", "G" };
 
@@ -417,10 +419,24 @@ namespace RailmlEditor.ViewModels
         {
             AddSwitchPositionCommand = new RelayCommand(_ => SwitchAndPositions.Add(new SwitchPositionViewModel { RemoveCommand = new RelayCommand(p => SwitchAndPositions.Remove(p as SwitchPositionViewModel)) }));
             AddOverlapSwitchPositionCommand = new RelayCommand(_ => OverlapSwitchAndPositions.Add(new SwitchPositionViewModel { RemoveCommand = new RelayCommand(p => OverlapSwitchAndPositions.Remove(p as SwitchPositionViewModel)) }));
+            AddReleaseSectionCommand = new RelayCommand(_ => ReleaseSections.Add(new ReleaseSectionViewModel { RemoveCommand = new RelayCommand(p => ReleaseSections.Remove(p as ReleaseSectionViewModel)) }));
         }
 
         public override double X { get => 0; set { } }
         public override double Y { get => 0; set { } }
+    }
+
+    public class ReleaseSectionViewModel : ObservableObject
+    {
+        private string _trackRef;
+        public string TrackRef { get => _trackRef; set => SetProperty(ref _trackRef, value); }
+
+        private bool _flankProtection;
+        public bool FlankProtection { get => _flankProtection; set => SetProperty(ref _flankProtection, value); }
+
+        public ICommand RemoveCommand { get; set; }
+
+        public List<bool> AvailableProtections { get; } = new() { true, false };
     }
 
     public class CategoryViewModel : ObservableObject
@@ -651,6 +667,8 @@ namespace RailmlEditor.ViewModels
                     nr.SwitchAndPositions.Add(new SwitchPositionViewModel { SwitchRef = s.SwitchRef, SwitchPosition = s.SwitchPosition, RemoveCommand = new RelayCommand(p => nr.SwitchAndPositions.Remove(p as SwitchPositionViewModel)) });
                 foreach (var s in r.OverlapSwitchAndPositions)
                     nr.OverlapSwitchAndPositions.Add(new SwitchPositionViewModel { SwitchRef = s.SwitchRef, SwitchPosition = s.SwitchPosition, RemoveCommand = new RelayCommand(p => nr.OverlapSwitchAndPositions.Remove(p as SwitchPositionViewModel)) });
+                foreach (var s in r.ReleaseSections)
+                    nr.ReleaseSections.Add(new ReleaseSectionViewModel { TrackRef = s.TrackRef, FlankProtection = s.FlankProtection, RemoveCommand = new RelayCommand(p => nr.ReleaseSections.Remove(p as ReleaseSectionViewModel)) });
                 return nr;
             }
             return null;
