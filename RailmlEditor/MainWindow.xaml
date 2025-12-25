@@ -218,6 +218,20 @@
                 </Canvas>
             </Viewbox>
         </ControlTemplate>
+        <!-- Double Icon Template (from double.svg) -->
+        <ControlTemplate x:Key="DoubleIcon" TargetType="Control">
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="320" Height="200">
+                    <Rectangle Canvas.Left="0" Canvas.Top="0" Width="320" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <Rectangle Canvas.Left="0" Canvas.Top="160" Width="320" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <Rectangle Canvas.Left="41.46" Canvas.Top="79.57" Width="237.07" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
+                        <Rectangle.RenderTransform>
+                            <RotateTransform Angle="225"/>
+                        </Rectangle.RenderTransform>
+                    </Rectangle>
+                </Canvas>
+            </Viewbox>
+        </ControlTemplate>
 
         <DataTemplate DataType="{x:Type local:ViewModels.SignalViewModel}">
             <!-- Fixed Layout Grid: Matches Icon Size (20x10) -->
@@ -599,6 +613,10 @@
                     <!-- Track Icon using Rectangle -->
                     <Rectangle Width="24" Height="4" Fill="White" Stroke="Black" StrokeThickness="1" RadiusX="2" RadiusY="2"/>
                     <Button.Tag>Track</Button.Tag>
+                </Button>
+                <Button Click="Toolbox_Click" ToolTip="Double" Style="{StaticResource ToolBarButtonStyle}">
+                    <Control Template="{StaticResource DoubleIcon}" Width="28" Height="17"/>
+                    <Button.Tag>Double</Button.Tag>
                 </Button>
                 <Button Click="Toolbox_Click" ToolTip="Corner" Style="{StaticResource ToolBarButtonStyle}">
                     <!-- Point Icon from point.svg -->

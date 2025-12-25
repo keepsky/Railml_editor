@@ -105,6 +105,11 @@ namespace RailmlEditor
                         Id = GetNextId("R")
                     };
                 }
+                else if (type == "Double")
+                {
+                    // Placeholder for Double track feature
+                }
+                
 
                 if (newElement != null)
                 {
@@ -152,6 +157,10 @@ namespace RailmlEditor
                     {
                         Id = GetNextId("R")
                     };
+                }
+                else if (type == "Double")
+                {
+                    // Placeholder for Double track feature
                 }
 
                 if (newElement != null)
