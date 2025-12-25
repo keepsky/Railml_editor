@@ -194,6 +194,31 @@
             </Viewbox>
         </ControlTemplate>
 
+        <!-- Route Icon Template -->
+        <ControlTemplate x:Key="RouteIcon">
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="235" Height="86">
+                    <!-- Background Tracks (Gray) -->
+                    <Path Data="M 9 72 L 229 72" Stroke="#b3b3b3" StrokeThickness="9" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                    <Path Data="M 30 72 L 50 42" Stroke="#b3b3b3" StrokeThickness="9" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                    <Path Data="M 49 42 L 189 42" Stroke="#b3b3b3" StrokeThickness="9" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                    <Path Data="M 210 72 L 190 42" Stroke="#b3b3b3" StrokeThickness="9" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                    <Path Data="M 80 42 L 100 12" Stroke="#b3b3b3" StrokeThickness="9" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                    <Path Data="M 99 12 L 179 12" Stroke="#b3b3b3" StrokeThickness="9" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                    <!-- Node Markers -->
+                    <Ellipse Canvas.Left="26" Canvas.Top="69" Width="6" Height="6" Fill="#b3b3b3"/>
+                    <Ellipse Canvas.Left="46" Canvas.Top="39" Width="6" Height="6" Fill="#b3b3b3"/>
+                    <Ellipse Canvas.Left="76" Canvas.Top="39" Width="6" Height="6" Fill="#b3b3b3"/>
+                    <Ellipse Canvas.Left="96" Canvas.Top="9" Width="6" Height="6" Fill="#b3b3b3"/>
+                    <Ellipse Canvas.Left="176" Canvas.Top="9" Width="6" Height="6" Fill="#b3b3b3"/>
+                    <!-- Foreground Route (Red) -->
+                    <Path Data="M 9 72 L 30 72 L 50 42 L 80 42 L 100 12 L 180 12" Stroke="#ff0000" StrokeThickness="5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Opacity="0.8"/>
+                    <Ellipse Canvas.Left="27.5" Canvas.Top="70.5" Width="3" Height="3" Fill="#ff0000"/>
+                    <Ellipse Canvas.Left="48.5" Canvas.Top="40.5" Width="3" Height="3" Fill="#ff0000"/>
+                </Canvas>
+            </Viewbox>
+        </ControlTemplate>
+
         <DataTemplate DataType="{x:Type local:ViewModels.SignalViewModel}">
             <!-- Fixed Layout Grid: Matches Icon Size (20x10) -->
             <!-- ClipToBounds="False" is CRITICAL because text is positioned outside (negative coordinates) -->
@@ -488,18 +513,22 @@
 
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar>
-                <Button Click="Toolbox_Click" ToolTip="Track" Style="{StaticResource ToolBarButtonStyle}">
-                    <!-- Track Icon using Rectangle -->
-                    <Rectangle Width="24" Height="4" Fill="White" Stroke="Black" StrokeThickness="1" RadiusX="2" RadiusY="2"/>
-                    <Button.Tag>Track</Button.Tag>
-                </Button>
-                <!-- Switch Button REMOVED -->
                 <Button Click="Toolbox_Click" ToolTip="Signal" Style="{StaticResource ToolBarButtonStyle}">
                     <!-- Signal Icon using ControlTemplate -->
                     <Control Template="{StaticResource SignalIcon}" Width="28" Height="14"/>
                     <Button.Tag>Signal</Button.Tag>
                 </Button>
-                <Button Click="Toolbox_Click" ToolTip="Point" Style="{StaticResource ToolBarButtonStyle}">
+                <Button Click="Toolbox_Click" ToolTip="Route" Style="{StaticResource ToolBarButtonStyle}">
+                    <!-- Route Icon from route.svg -->
+                    <Control Template="{StaticResource RouteIcon}" Width="28" Height="16"/>
+                    <Button.Tag>Route</Button.Tag>
+                </Button>
+                <Button Click="Toolbox_Click" ToolTip="Track" Style="{StaticResource ToolBarButtonStyle}">
+                    <!-- Track Icon using Rectangle -->
+                    <Rectangle Width="24" Height="4" Fill="White" Stroke="Black" StrokeThickness="1" RadiusX="2" RadiusY="2"/>
+                    <Button.Tag>Track</Button.Tag>
+                </Button>
+                <Button Click="Toolbox_Click" ToolTip="Corner" Style="{StaticResource ToolBarButtonStyle}">
                     <!-- Point Icon from point.svg -->
                     <Control Template="{StaticResource PointIcon}" Width="28" Height="16"/>
                     <Button.Tag>CurvedTrack</Button.Tag>
