@@ -182,6 +182,12 @@ namespace RailmlEditor.Models
         [XmlAttribute(AttributeName = "pos")]
         public double Pos { get; set; }
 
+        [XmlAttribute(AttributeName = "trackContinueCourse")]
+        public string TrackContinueCourse { get; set; }
+
+        [XmlAttribute(AttributeName = "normalPosition")]
+        public string NormalPosition { get; set; }
+
         [XmlElement(ElementName = "screenPos", Namespace = "http://www.sehwa.co.kr/railml")]
         public ScreenPos ScreenPos { get; set; }
 

@@ -1,4 +1,27 @@
+현재 switch(point)가 생성되는 아래 (1), (2) 두 경우에 대해서 각각에 대해서 조건을 확인하고 수정해줘
+(1) 하나의 <trackEnd>와 두개 이상의 <trackBegin> 좌표가 겹치는 경우
+(1-a) switch 좌표 밑에 "principle track 선택" 제목의 팝업 메뉴를 띄우고 <trackBegin>이 속한 track 들의 id(name) 형태로 모두 보여주고 사용자가 마우스로 선택 
+(1-b) 미선택시 마지막 track 이동은 취소하여 원위치로 복귀
+(1-c) 하나의 <trackEnd>가 속한 track을 entering track으로 정의하고, 1-a에서 사용자가 선택한 track이 principle track이 되고 나머지들는 diverging track으로 정의
+(1-d) entering track의 <trackEnd>와 principle track의 <trackBegin>은 각각 하위에 <connection>태그로 연결
+(1-e) principle track 하위에 <connections><switch> 태그를 추가하고 switch의 pos 속성값은 0으로 설정(trackBegin 의미), switch의 trackContinueCourse 속성과 normalPosition 속성은 속성윈도우에서 (straight, left, right, other) 중에 하나를 선택할수 있게 수정(기본 값은 straight) 
+(1-f) <switch> 하위의 <connection> 태그에는 diverging track들에 대해서 ref속성값을 추가하고 orientation 속성값은 "outgoing"으로 설정하고, course 속성은 속성 윈도우에서 (straight, left, right) 중에 하나를 선택할수 있게 수정
 
+(2) 하나의 <trackBegin>과 두개 이상의 <trackEnd> 좌표가 겹치는 경우
+(2-a) switch 좌표 밑에 "principle track 선택" 제목의 팝업 메뉴를 띄우고 <trackEnd>가 속한 track 들의 id(name) 형태로 모두 보여주고 사용자가 마우스 선택
+(2-b) 미선택시 마지막 track 이동은 취소하여 원위치로 복귀
+(2-c) 하나의 <trackBegin>이 속한 track을 entering track으로 정의하고 2-a에서 사용자가 선택한 track이 principle track이 되고 나머지들는 diverging track으로 정의
+(2-d) entering track의 <trackBegin>과 principle track의 <trackEnd>은 각각 하위에 <connection>태그로 연결
+(2-e) entering track 하위에 <connections><switch> 태그를 추가하고, switch의 pos 속성값은 0으로 설정(trackBegin 의미), switch의 trackContinueCourse 속성과 normalPosition 속성은 속성윈도우에서 (straight, left, right, other) 중에 하나를 선택할수 있게 수정(기본 값은 straight)
+(2-f) <switch> 하위의 <connection> 태그에는 diverging track들에 대해서 ref속성값을 추가하고 orientation 속성값은 "incoming"으로 설정하고, course 속성은 속성 윈도우에서 (straight, left, right) 중에 하나를 선택할수 있게 수정
+======================
+track에 hasSwitch라는 boolean 속성을 추가하고 선택할수 있도록 추가하고 hasSwitch가 enable 인경우 해당 track에 trackContinueCourse라는 속성을 표시하고 아래의 값들에서 선택할수 있도록 추가해줘
+straight, 
+left, 
+right, 
+other
+사용자가 track의 좌표를 이동함에 따라서 track이 switch를 가질수 없는 조건이 되면 hasSwitch는 자동으로 diable 값으로 변경되도록 반영해줘
+======================
 signal, track에 대해서 마우스 선택하여 복사, 붙여넣기 기능을 추가하고
 여러개의 요소를 다중 선택하는 경우 공통 속성을 일괄 편집할수 있도록 수정해줘
 여러개의 요소를 다중 선택해서 del키를 누르면 해당 요소들을 삭제하는 기능도 추가해줘

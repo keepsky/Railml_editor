@@ -15,6 +15,7 @@ namespace RailmlEditor
         {
             InitializeComponent();
             _viewModel = new MainViewModel();
+            _viewModel.PrincipleTrackSelectionRequested += OnPrincipleTrackSelectionRequested;
             this.DataContext = _viewModel;
         }
 
@@ -599,6 +600,63 @@ namespace RailmlEditor
         private void Thumb_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
              _viewModel.UpdateProximitySwitches();
+        }
+
+        private void OnPrincipleTrackSelectionRequested(SwitchBranchInfo info)
+        {
+            // Simple approach: show a ContextMenu at mouse position
+            var menu = new ContextMenu();
+            var header = new MenuItem { Header = "principle track 선택", IsEnabled = false, FontWeight = FontWeights.Bold };
+            menu.Items.Add(header);
+
+            foreach (var cand in info.Candidates)
+            {
+                var item = new MenuItem { Header = $"{cand.Id}({cand.Name ?? "unnamed"})" };
+                item.Click += (s, e) => { 
+                    info.Callback(cand); 
+                };
+                menu.Items.Add(item);
+            }
+
+            menu.Closed += (s, e) =>
+            {
+                // If nothing was selected (Callback not called with non-null), we should rollback
+                // Actually, the Callback handles adding the switch. 
+                // We need to know if it COMPLETED.
+                // Let's check if the switch was added to the collection.
+                if (!_viewModel.Elements.Contains(info.Switch))
+                {
+                    RollbackMove();
+                }
+            };
+
+            menu.IsOpen = true;
+        }
+
+        private void RollbackMove()
+        {
+            foreach (var kvp in _originalPositions)
+            {
+                var element = kvp.Key;
+                var orig = kvp.Value;
+                
+                double shiftX = orig.X - element.X;
+                double shiftY = orig.Y - element.Y;
+
+                element.X = orig.X;
+                element.Y = orig.Y;
+
+                if (element is TrackViewModel trackVm)
+                {
+                    trackVm.X2 += shiftX;
+                    trackVm.Y2 += shiftY;
+                    if (trackVm is CurvedTrackViewModel curved)
+                    {
+                        curved.MX += shiftX;
+                        curved.MY += shiftY;
+                    }
+                }
+            }
         }
 
         private void Item_MouseUp(object sender, MouseButtonEventArgs e)

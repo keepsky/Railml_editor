@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 using RailmlEditor.Models;
 
@@ -60,6 +61,7 @@ namespace RailmlEditor.ViewModels
 
         public bool IsCurved => this is CurvedTrackViewModel;
         
+
         public System.Collections.Generic.List<string> AvailableMainDirs { get; } = new System.Collections.Generic.List<string> 
         { 
             "up", "down", "none" 
@@ -67,6 +69,7 @@ namespace RailmlEditor.ViewModels
 
         public ICommand FlipHorizontallyCommand { get; }
         public ICommand FlipVerticallyCommand { get; }
+
 
         public TrackViewModel()
         {
@@ -110,6 +113,7 @@ namespace RailmlEditor.ViewModels
             get => _mainDir;
             set => SetProperty(ref _mainDir, value);
         }
+
         
         public override double X
         {
@@ -212,6 +216,52 @@ namespace RailmlEditor.ViewModels
             get => _my;
             set => SetProperty(ref _my, value);
         }
+
+        private string _trackContinueCourse = "straight";
+        public string TrackContinueCourse
+        {
+            get => _trackContinueCourse;
+            set => SetProperty(ref _trackContinueCourse, value);
+        }
+
+        private string _normalPosition = "straight";
+        public string NormalPosition
+        {
+            get => _normalPosition;
+            set => SetProperty(ref _normalPosition, value);
+        }
+
+        public ObservableCollection<DivergingConnectionViewModel> DivergingConnections { get; } = new();
+
+        public List<string> AvailableCourses { get; } = new() { "straight", "left", "right", "other" };
+
+        // Logic data
+        public string? PrincipleTrackId { get; set; }
+        public string? EnteringTrackId { get; set; }
+        public List<string> DivergingTrackIds { get; } = new();
+        public bool IsScenario1 { get; set; } // true: End -> multiple Begins, false: Begin -> multiple Ends
+    }
+
+    public class DivergingConnectionViewModel : ObservableObject
+    {
+        public string TrackId { get; set; }
+        public string DisplayName { get; set; }
+
+        private string _course = "straight";
+        public string Course
+        {
+            get => _course;
+            set => SetProperty(ref _course, value);
+        }
+
+        public List<string> AvailableCourses { get; } = new() { "straight", "left", "right" };
+    }
+
+    public class SwitchBranchInfo
+    {
+        public SwitchViewModel Switch { get; set; }
+        public List<TrackViewModel> Candidates { get; set; }
+        public Action<TrackViewModel?> Callback { get; set; }
     }
 
     public class SignalViewModel : BaseElementViewModel
@@ -300,6 +350,8 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _bulkEdit, value);
         }
 
+        public event Action<SwitchBranchInfo>? PrincipleTrackSelectionRequested;
+
         public ICommand SelectCommand { get; }
         public ICommand DeleteCommand { get; }
         public ICommand CopyCommand { get; }
@@ -335,6 +387,7 @@ namespace RailmlEditor.ViewModels
             // Test Data
             // Test Data Removed
         }
+
 
         private void DeleteSelected()
         {
@@ -593,100 +646,129 @@ namespace RailmlEditor.ViewModels
         }
         public void UpdateProximitySwitches()
         {
-            // 1. Collect all endpoints
             var tracks = Elements.OfType<TrackViewModel>().ToList();
-            var points = new System.Collections.Generic.List<(double X, double Y, string TrackId)>();
+            var points = new List<(double X, double Y, string TrackId, bool isEnd)>();
 
             foreach (var t in tracks)
             {
-                points.Add((t.X, t.Y, t.Id));
-                points.Add((t.X2, t.Y2, t.Id));
+                points.Add((t.X, t.Y, t.Id, false));
+                points.Add((t.X2, t.Y2, t.Id, true));
             }
 
-            // 2. Cluster points (Simple greedy clustering or just iterate)
-            // We want unique locations where count > 2.
-            var clusters = new System.Collections.Generic.List<(double X, double Y, int Count)>();
-            var processedIndices = new System.Collections.Generic.HashSet<int>();
+            var clusters = new List<(double X, double Y, List<(string TrackId, bool isEnd)> Members)>();
+            var processedIndices = new HashSet<int>();
 
             for (int i = 0; i < points.Count; i++)
             {
                 if (processedIndices.Contains(i)) continue;
 
+                var members = new List<(string TrackId, bool isEnd)> { (points[i].TrackId, points[i].isEnd) };
                 double sumX = points[i].X;
                 double sumY = points[i].Y;
-                int count = 1;
                 processedIndices.Add(i);
 
-                // Find neighbors
                 for (int j = i + 1; j < points.Count; j++)
                 {
                     if (processedIndices.Contains(j)) continue;
 
-                    double dist = System.Math.Sqrt(System.Math.Pow(points[i].X - points[j].X, 2) + System.Math.Pow(points[i].Y - points[j].Y, 2));
-                    if (dist < 5.0) // Tolerance
+                    double dist = Math.Sqrt(Math.Pow(points[i].X - points[j].X, 2) + Math.Pow(points[i].Y - points[j].Y, 2));
+                    if (dist < 5.0)
                     {
                         sumX += points[j].X;
                         sumY += points[j].Y;
-                        count++;
+                        members.Add((points[j].TrackId, points[j].isEnd));
                         processedIndices.Add(j);
                     }
                 }
 
-                if (count > 2)
+                if (members.Count > 2)
                 {
-                    clusters.Add((sumX / count, sumY / count, count));
-                }
-            }
+                    // Check if Scenario 1 or 2
+                    // Scenario 1: One End, multiple Begins
+                    // Scenario 2: One Begin, multiple Ends
+                    int endCount = members.Count(m => m.isEnd);
+                    int beginCount = members.Count(m => !m.isEnd);
 
-            // 3. Reconcile Switches
-            var existingSwitches = Elements.OfType<SwitchViewModel>().ToList();
-            var switchesToRemove = new System.Collections.Generic.List<SwitchViewModel>();
-
-            // Check existing switches validity
-            foreach (var sw in existingSwitches)
-            {
-                bool isValid = false;
-                foreach (var c in clusters)
-                {
-                    double dist = System.Math.Sqrt(System.Math.Pow(sw.X - c.X, 2) + System.Math.Pow(sw.Y - c.Y, 2));
-                    if (dist < 10.0)
+                    if ((endCount == 1 && beginCount >= 2) || (beginCount == 1 && endCount >= 2))
                     {
-                        isValid = true;
-                        break;
+                        clusters.Add((sumX / members.Count, sumY / members.Count, members));
                     }
                 }
-                if (!isValid) switchesToRemove.Add(sw);
             }
 
-            foreach (var sw in switchesToRemove)
-            {
-                Elements.Remove(sw);
-            }
+            var existingSwitches = Elements.OfType<SwitchViewModel>().ToList();
+            var switchesToRemove = existingSwitches.Where(sw => !clusters.Any(c => Math.Sqrt(Math.Pow(sw.X - c.X, 2) + Math.Pow(sw.Y - c.Y, 2)) < 10.0)).ToList();
 
-            // Determine Next ID based on existing Switches only
+            foreach (var sw in switchesToRemove) Elements.Remove(sw);
+
             int maxId = 0;
             foreach (var sw in Elements.OfType<SwitchViewModel>())
             {
                 if (sw.Id.StartsWith("P") && int.TryParse(sw.Id.Substring(1), out int num))
-                {
-                     if (num > maxId) maxId = num;
-                }
+                    if (num > maxId) maxId = num;
             }
 
-            // Check clusters for missing switches
             foreach (var c in clusters)
             {
-                if (!Elements.OfType<SwitchViewModel>().Any(sw => System.Math.Sqrt(System.Math.Pow(sw.X - c.X, 2) + System.Math.Pow(sw.Y - c.Y, 2)) < 10.0))
+                var sw = Elements.OfType<SwitchViewModel>().FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - c.X, 2) + Math.Pow(s.Y - c.Y, 2)) < 10.0);
+                if (sw == null)
                 {
                     maxId++;
-                    var newSwitch = new SwitchViewModel
+                    sw = new SwitchViewModel
                     {
                         Id = $"P{maxId:D3}",
-                        Name = $"P{maxId:D3}", // Auto-assign Name as ID for visibility
+                        Name = $"P{maxId:D3}",
                         X = c.X,
                         Y = c.Y
                     };
-                    Elements.Add(newSwitch);
+
+                    int endCount = c.Members.Count(m => m.isEnd);
+                    int beginCount = c.Members.Count(m => !m.isEnd);
+                    sw.IsScenario1 = (endCount == 1);
+
+                    var enteringMember = sw.IsScenario1 ? c.Members.First(m => m.isEnd) : c.Members.First(m => !m.isEnd);
+                    var candidateMembers = sw.IsScenario1 ? c.Members.Where(m => !m.isEnd).ToList() : c.Members.Where(m => m.isEnd).ToList();
+
+                    var candidates = candidateMembers.Select(m => Elements.OfType<TrackViewModel>().First(t => t.Id == m.TrackId)).ToList();
+
+                    PrincipleTrackSelectionRequested?.Invoke(new SwitchBranchInfo
+                    {
+                        Switch = sw,
+                        Candidates = candidates,
+                        Callback = (principle) =>
+                        {
+                            if (principle != null)
+                            {
+                                sw.EnteringTrackId = enteringMember.TrackId;
+                                sw.PrincipleTrackId = principle.Id;
+                                sw.DivergingTrackIds.Clear();
+                                sw.DivergingConnections.Clear();
+                                foreach (var cand in candidates)
+                                {
+                                    if (cand.Id != principle.Id)
+                                    {
+                                        sw.DivergingTrackIds.Add(cand.Id);
+                                        sw.DivergingConnections.Add(new DivergingConnectionViewModel
+                                        {
+                                            TrackId = cand.Id,
+                                            DisplayName = $"{cand.Id}({cand.Name ?? "unnamed"})"
+                                        });
+                                    }
+                                }
+                                Elements.Add(sw);
+                            }
+                            else
+                            {
+                                // Notify UI to rollback move (handled in MainWindow.xaml.cs)
+                            }
+                        }
+                    });
+                }
+                else
+                {
+                    // Existing switch, update its position just in case
+                    sw.X = c.X;
+                    sw.Y = c.Y;
                 }
             }
         }

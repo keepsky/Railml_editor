@@ -136,20 +136,11 @@ namespace RailmlEditor.Services
 
                 if (overlappingNodes.Count > 0)
                 {
-                    // Identify Parent Track
                     var parentTrack = nodeToTrack[nodeA];
-                    if (parentTrack.TrackTopology.Connections == null)
-                        parentTrack.TrackTopology.Connections = new Connections();
-
-                    // Logic Change: Add to TrackTopology.Connections instead of nodeA.Connections
-                    
-                    // bool isTrackEnd = nodeA.Id.EndsWith("_end");
-                    
                     if (overlappingNodes.Count == 1)
                     {
                          foreach (var nodeB in overlappingNodes)
                          {
-                             // Simple Connection
                              if(!nodeA.ConnectionList.Any(c => c.Ref == nodeB.Id))
                              {
                                  nodeA.ConnectionList.Add(new Connection 
@@ -163,43 +154,75 @@ namespace RailmlEditor.Services
                     else
                     {
                          // Switch Connection
-                         // Check if switch already exists (by Ref?) - basic check
-                         // Assuming strictly one switch per node for simplified logic
-                         // Ensure Connections object exists
-                         if (parentTrack.TrackTopology.Connections == null) 
-                             parentTrack.TrackTopology.Connections = new Connections();
-
-                         // Check if switch already added for this node
-                         string expectedSwitchId = $"sw_{nodeA.Id}";
-                         // Also check if we should use existing ID from ViewModel?
-                         var switchVmForCheck = viewModel.Elements.OfType<SwitchViewModel>()
-                                 .FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - (nodeA.ScreenPos?.X ?? 0), 2) + Math.Pow(s.Y - (nodeA.ScreenPos?.Y ?? 0), 2)) < 5.0);
-                         if (switchVmForCheck != null) expectedSwitchId = switchVmForCheck.Id;
-
-                         if (!parentTrack.TrackTopology.Connections.Switches.Any(s => s.Id == expectedSwitchId))
+                         var nodeCoordX = nodeA.ScreenPos?.X ?? 0;
+                         var nodeCoordY = nodeA.ScreenPos?.Y ?? 0;
+                         var swVm = viewModel.Elements.OfType<SwitchViewModel>()
+                                 .FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - nodeCoordX, 2) + Math.Pow(s.Y - nodeCoordY, 2)) < 5.0);
+                         
+                         if (swVm != null)
                          {
-                             // Identify Switch VM
-                             double switchPos = nodeA.Pos; 
+                             // Find the entering, principle, and diverging tracks in this cluster
+                             // We already have swVm.EnteringTrackId, swVm.PrincipleTrackId, swVm.DivergingTrackIds
+                             
+                             bool isEnteringNode = (parentTrack.Id == GetRailmlId(swVm.EnteringTrackId));
+                             bool isPrincipleNode = (parentTrack.Id == GetRailmlId(swVm.PrincipleTrackId));
 
-                             var switchObj = new Switch
+                             // (1-d) & (2-d) bidirectional connection between entering and principle
+                             if (isEnteringNode || isPrincipleNode)
                              {
-                                 Id = expectedSwitchId,
-                                 AdditionalName = new AdditionalName { Name = switchVmForCheck?.Name },
-                                 Pos = switchPos,
-                                 ScreenPos = (switchVmForCheck?.MX.HasValue == true && switchVmForCheck?.MY.HasValue == true)
-                                     ? new ScreenPos { X = switchVmForCheck.MX.Value, XSpecified = true, Y = switchVmForCheck.MY.Value, YSpecified = true }
-                                     : null
-                             };
-
-                             foreach (var nodeB in overlappingNodes)
-                             {
-                                 switchObj.ConnectionList.Add(new Connection
+                                 var targetId = isEnteringNode ? $"{GetRailmlId(swVm.PrincipleTrackId)}_{(swVm.IsScenario1 ? "begin" : "end")}" 
+                                                               : $"{GetRailmlId(swVm.EnteringTrackId)}_{(swVm.IsScenario1 ? "end" : "begin")}";
+                                 
+                                 if (!nodeA.ConnectionList.Any(c => c.Ref == targetId))
                                  {
-                                     Id = $"conn_{nodeA.Id}_to_{nodeB.Id}",
-                                     Ref = nodeB.Id
-                                 });
+                                     nodeA.ConnectionList.Add(new Connection 
+                                     { 
+                                         Id = $"conn_{nodeA.Id}_to_{targetId}",
+                                         Ref = targetId 
+                                     });
+                                 }
                              }
-                             parentTrack.TrackTopology.Connections.Switches.Add(switchObj);
+
+                             // (1-e) & (2-e) Identify where the <switch> tag goes
+                             bool shouldHostSwitch = swVm.IsScenario1 ? isPrincipleNode : isEnteringNode;
+                             if (shouldHostSwitch)
+                             {
+                                 if (parentTrack.TrackTopology.Connections == null) 
+                                     parentTrack.TrackTopology.Connections = new Connections();
+
+                                 if (!parentTrack.TrackTopology.Connections.Switches.Any(s => s.Id == swVm.Id))
+                                 {
+                                     var switchObj = new Switch
+                                     {
+                                         Id = swVm.Id,
+                                         Pos = 0, // as requested
+                                         TrackContinueCourse = swVm.TrackContinueCourse,
+                                         NormalPosition = swVm.NormalPosition,
+                                         AdditionalName = new AdditionalName { Name = swVm.Name },
+                                         ScreenPos = (swVm.MX.HasValue && swVm.MY.HasValue)
+                                             ? new ScreenPos { X = swVm.MX.Value, XSpecified = true, Y = swVm.MY.Value, YSpecified = true }
+                                             : null
+                                     };
+
+                                     // (1-f) & (2-f) adding diverging connections
+                                     foreach (var divId in swVm.DivergingTrackIds)
+                                     {
+                                         var divNodeSuffix = swVm.IsScenario1 ? "begin" : "end";
+                                         var divRefId = $"{GetRailmlId(divId)}_{divNodeSuffix}";
+                                         
+                                         var connVm = swVm.DivergingConnections.FirstOrDefault(dc => dc.TrackId == divId);
+
+                                         switchObj.ConnectionList.Add(new Connection
+                                         {
+                                             Id = $"conn_{swVm.Id}_to_{divRefId}",
+                                             Ref = divRefId,
+                                             Orientation = swVm.IsScenario1 ? "outgoing" : "incoming",
+                                             Course = connVm?.Course ?? "straight"
+                                         });
+                                     }
+                                     parentTrack.TrackTopology.Connections.Switches.Add(switchObj);
+                                 }
+                             }
                          }
                     }
                 }
@@ -291,34 +314,80 @@ namespace RailmlEditor.Services
                         {
                             foreach (var sw in track.TrackTopology.Connections.Switches)
                             {
-                                if (!viewModel.Elements.Any(e => e.Id == sw.Id))
+                                var switchVm = viewModel.Elements.OfType<SwitchViewModel>().FirstOrDefault(e => e.Id == sw.Id);
+                                if (switchVm == null)
                                 {
-                                    // Calculate Position based on 'pos' attribute
+                                    // Calculate Position
                                     double pos = sw.Pos;
                                     double startX = trackVm.X;
                                     double startY = trackVm.Y;
                                     double endX = trackVm.X2;
                                     double endY = trackVm.Y2;
-                                    
-                                    // Use TrackViewModel Length if available, or calculate distance
                                     double length = Math.Sqrt(Math.Pow(endX - startX, 2) + Math.Pow(endY - startY, 2));
-                                    if (length < 0.1) length = 1; // Avoid divide by zero
-
-                                    // Linear Interpolation for X/Y
+                                    if (length < 0.1) length = 1;
                                     double ratio = pos / length;
                                     double swX = startX + ratio * (endX - startX);
                                     double swY = startY + ratio * (endY - startY);
 
-                                    var switchVm = new SwitchViewModel
+                                    switchVm = new SwitchViewModel
                                     {
                                         Id = sw.Id,
                                         Name = sw.AdditionalName?.Name,
                                         X = swX,
                                         Y = swY,
                                         MX = (sw.ScreenPos != null && sw.ScreenPos.XSpecified) ? sw.ScreenPos.X : (double?)null,
-                                        MY = (sw.ScreenPos != null && sw.ScreenPos.YSpecified) ? sw.ScreenPos.Y : (double?)null
+                                        MY = (sw.ScreenPos != null && sw.ScreenPos.YSpecified) ? sw.ScreenPos.Y : (double?)null,
+                                        TrackContinueCourse = sw.TrackContinueCourse ?? "straight",
+                                        NormalPosition = sw.NormalPosition ?? "straight"
                                     };
                                     viewModel.Elements.Add(switchVm);
+                                }
+
+                                // Topological reconstruction
+                                var firstConn = sw.ConnectionList.FirstOrDefault();
+                                if (firstConn != null)
+                                {
+                                    switchVm.IsScenario1 = (firstConn.Orientation == "outgoing");
+                                    if (switchVm.IsScenario1)
+                                    {
+                                        switchVm.PrincipleTrackId = track.Id;
+                                        // Entering track is the one connected to principle track begin
+                                        var beginNode = track.TrackTopology?.TrackBegin;
+                                        if (beginNode?.ConnectionList != null)
+                                        {
+                                            var enteringConn = beginNode.ConnectionList.FirstOrDefault();
+                                            if (enteringConn != null) 
+                                            {
+                                                switchVm.EnteringTrackId = enteringConn.Ref.Split('_')[0]; // Simple recovery
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        switchVm.EnteringTrackId = track.Id;
+                                        // Principle track is the one connected to entering track begin
+                                        var beginNode = track.TrackTopology?.TrackBegin;
+                                        if (beginNode?.ConnectionList != null)
+                                        {
+                                            var principleConn = beginNode.ConnectionList.FirstOrDefault();
+                                            if (principleConn != null)
+                                            {
+                                                switchVm.PrincipleTrackId = principleConn.Ref.Split('_')[0];
+                                            }
+                                        }
+                                    }
+
+                                    foreach (var c in sw.ConnectionList)
+                                    {
+                                        var divId = c.Ref.Split('_')[0];
+                                        switchVm.DivergingTrackIds.Add(divId);
+                                        switchVm.DivergingConnections.Add(new DivergingConnectionViewModel
+                                        {
+                                            TrackId = divId,
+                                            DisplayName = divId, // Re-load name later if needed
+                                            Course = c.Course ?? "straight"
+                                        });
+                                    }
                                 }
                             }
                         }
@@ -374,7 +443,6 @@ namespace RailmlEditor.Services
                     }
                 }
 
-                // Removed global Signal loading loop
             }
         }
         private string GetRailmlId(string id)
