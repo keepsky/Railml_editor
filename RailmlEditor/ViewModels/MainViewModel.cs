@@ -245,7 +245,45 @@ namespace RailmlEditor.ViewModels
     public class DivergingConnectionViewModel : ObservableObject
     {
         public string TrackId { get; set; }
-        public string DisplayName { get; set; }
+
+        private string _displayName;
+        public string DisplayName
+        {
+            get => _displayName;
+            set => SetProperty(ref _displayName, value);
+        }
+
+        private TrackViewModel? _targetTrack;
+        public TrackViewModel? TargetTrack
+        {
+            get => _targetTrack;
+            set
+            {
+                if (_targetTrack != null) _targetTrack.PropertyChanged -= Track_PropertyChanged;
+                _targetTrack = value;
+                if (_targetTrack != null)
+                {
+                    _targetTrack.PropertyChanged += Track_PropertyChanged;
+                    UpdateDisplayName();
+                }
+            }
+        }
+
+        private void Track_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(BaseElementViewModel.Name) || e.PropertyName == nameof(BaseElementViewModel.Id))
+            {
+                UpdateDisplayName();
+            }
+        }
+
+        private void UpdateDisplayName()
+        {
+            if (TargetTrack != null)
+            {
+                DisplayName = $"{TargetTrack.Id}({TargetTrack.Name ?? "unnamed"})";
+            }
+        }
 
         private string _course = "straight";
         public string Course
@@ -580,6 +618,12 @@ namespace RailmlEditor.ViewModels
         private void RemoveFromCategory(BaseElementViewModel item)
         {
              item.PropertyChanged -= Element_PropertyChanged;
+             if (SelectedElements.Contains(item))
+             {
+                 SelectedElements.Remove(item);
+                 UpdateSelectionState();
+             }
+
              foreach(var cat in TreeCategories)
              {
                  if (cat.Items.Contains(item))
@@ -604,23 +648,7 @@ namespace RailmlEditor.ViewModels
                     {
                         SelectedElements.Remove(vm);
                     }
-
-                    // Update primary SelectedElement or BulkEdit for Property Grid
-                    if (SelectedElements.Count == 1)
-                    {
-                        SelectedElement = SelectedElements[0];
-                        BulkEdit = null;
-                    }
-                    else if (SelectedElements.Count > 1)
-                    {
-                        SelectedElement = null;
-                        BulkEdit = new BulkEditViewModel(SelectedElements);
-                    }
-                    else
-                    {
-                        SelectedElement = null;
-                        BulkEdit = null;
-                    }
+                    UpdateSelectionState();
                 }
             }
             else if (e.PropertyName == nameof(SignalViewModel.Direction)) // Handle Direction Change
@@ -642,6 +670,25 @@ namespace RailmlEditor.ViewModels
                         }
                     }
                 }
+            }
+        }
+
+        private void UpdateSelectionState()
+        {
+            if (SelectedElements.Count == 1)
+            {
+                SelectedElement = SelectedElements[0];
+                BulkEdit = null;
+            }
+            else if (SelectedElements.Count > 1)
+            {
+                SelectedElement = null;
+                BulkEdit = new BulkEditViewModel(SelectedElements);
+            }
+            else
+            {
+                SelectedElement = null;
+                BulkEdit = null;
             }
         }
         public void UpdateProximitySwitches()
@@ -751,7 +798,7 @@ namespace RailmlEditor.ViewModels
                                         sw.DivergingConnections.Add(new DivergingConnectionViewModel
                                         {
                                             TrackId = cand.Id,
-                                            DisplayName = $"{cand.Id}({cand.Name ?? "unnamed"})"
+                                            TargetTrack = cand
                                         });
                                     }
                                 }

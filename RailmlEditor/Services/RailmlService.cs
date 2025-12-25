@@ -454,7 +454,7 @@ namespace RailmlEditor.Services
                     var track = viewModel.Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == dc.TrackId);
                     if (track != null)
                     {
-                        dc.DisplayName = $"{track.Id}({track.Name ?? "unnamed"})";
+                        dc.TargetTrack = track;
                     }
                 }
             }

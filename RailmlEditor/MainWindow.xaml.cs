@@ -859,6 +859,11 @@ namespace RailmlEditor
                     viewModel.IsSelected = !viewModel.IsSelected;
                 }
                 _viewModel.SelectedElement = viewModel;
+                
+                // Ensure visual focus/highlight
+                item.IsSelected = true; 
+                item.Focus();
+                
                 e.Handled = true; 
             }
         }
