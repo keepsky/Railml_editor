@@ -2,46 +2,43 @@
 <railml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:sehwa="http://www.sehwa.co.kr/railml" version="2.5" xmlns="http://www.railml.org/schemas/2013">
   <infrastructure>
     <tracks>
-      <track id="T001" code="plain" hasSwitch="false">
+      <track id="T001" code="plain">
         <trackTopology>
           <trackBegin pos="0" id="T001_begin">
-            <sehwa:screenPos x="160" y="330" />
+            <sehwa:screenPos x="270" y="360" />
           </trackBegin>
           <trackEnd pos="100" id="T001_end">
-            <sehwa:screenPos x="260" y="330" />
+            <connection id="conn_T001_end_to_T002_begin" ref="T002_begin" />
+            <sehwa:screenPos x="370" y="360" />
+          </trackEnd>
+        </trackTopology>
+      </track>
+      <track id="T002" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T002_begin">
+            <connection id="conn_T002_begin_to_T001_end" ref="T001_end" />
+            <sehwa:screenPos x="370" y="360" />
+          </trackBegin>
+          <trackEnd pos="100" id="T002_end">
+            <sehwa:screenPos x="470" y="360" />
           </trackEnd>
           <connections>
-            <switch id="P001" pos="100">
-              <additionalName name="21" />
-              <connection id="conn_T001_end_to_T002_begin" ref="T002_begin" />
-              <connection id="conn_T001_end_to_T003_begin" ref="T003_begin" />
+            <switch id="P001" pos="0" trackContinueCourse="straight" normalPosition="straight">
+              <additionalName name="51" />
+              <connection id="conn_P001_to_T003_end" ref="T003_end" orientation="incoming" course="left" />
             </switch>
           </connections>
         </trackTopology>
       </track>
-      <track id="T002" code="plain" hasSwitch="true" trackContinueCourse="straight">
-        <trackTopology>
-          <trackBegin pos="0" id="T002_begin">
-            <connection id="conn_T002_begin_to_T001_end" ref="T001_end" />
-            <sehwa:screenPos x="260" y="330" />
-          </trackBegin>
-          <trackEnd pos="100" id="T002_end">
-            <sehwa:screenPos x="360" y="330" />
-          </trackEnd>
-          <connections />
-        </trackTopology>
-      </track>
-      <track id="T003" code="corner" hasSwitch="false">
+      <track id="T003" code="corner">
         <trackTopology>
           <trackBegin pos="0" id="T003_begin">
-            <connection id="conn_T003_begin_to_T001_end" ref="T001_end" />
-            <sehwa:screenPos x="260" y="330" />
+            <sehwa:screenPos x="240" y="300" />
           </trackBegin>
-          <trackEnd pos="114" id="T003_end">
-            <sehwa:screenPos x="350" y="270" />
+          <trackEnd pos="154" id="T003_end">
+            <sehwa:screenPos x="370" y="360" />
           </trackEnd>
-          <connections />
-          <sehwa:cornerPos x="320" y="270" />
+          <sehwa:cornerPos x="310" y="300" />
         </trackTopology>
       </track>
     </tracks>

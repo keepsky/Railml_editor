@@ -121,9 +121,6 @@ namespace RailmlEditor.Services
                 foreach(var nodeB in allNodes)
                 {
                     if(nodeA == nodeB) continue;
-                    bool isBeginA = nodeA.Id.EndsWith("_begin");
-                    bool isBeginB = nodeB.Id.EndsWith("_begin");
-                    if (isBeginA == isBeginB) continue; 
 
                     double ax = nodeA.ScreenPos?.X ?? 0;
                     double ay = nodeA.ScreenPos?.Y ?? 0;
@@ -131,7 +128,7 @@ namespace RailmlEditor.Services
                     double by = nodeB.ScreenPos?.Y ?? 0;
 
                     double dist = Math.Sqrt(Math.Pow(ax - bx, 2) + Math.Pow(ay - by, 2));
-                    if(dist < 1.0) overlappingNodes.Add(nodeB);
+                    if(dist < 5.0) overlappingNodes.Add(nodeB);
                 }
 
                 if (overlappingNodes.Count > 0)
@@ -139,8 +136,12 @@ namespace RailmlEditor.Services
                     var parentTrack = nodeToTrack[nodeA];
                     if (overlappingNodes.Count == 1)
                     {
+                         bool isBeginA = nodeA.Id.EndsWith("_begin");
                          foreach (var nodeB in overlappingNodes)
                          {
+                             bool isBeginB = nodeB.Id.EndsWith("_begin");
+                             if (isBeginA == isBeginB) continue; 
+
                              if(!nodeA.ConnectionList.Any(c => c.Ref == nodeB.Id))
                              {
                                  nodeA.ConnectionList.Add(new Connection 
@@ -443,6 +444,19 @@ namespace RailmlEditor.Services
                     }
                 }
 
+            }
+
+            // Post-process to update DisplayNames in DivergingConnections
+            foreach (var sw in viewModel.Elements.OfType<SwitchViewModel>())
+            {
+                foreach (var dc in sw.DivergingConnections)
+                {
+                    var track = viewModel.Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == dc.TrackId);
+                    if (track != null)
+                    {
+                        dc.DisplayName = $"{track.Id}({track.Name ?? "unnamed"})";
+                    }
+                }
             }
         }
         private string GetRailmlId(string id)
