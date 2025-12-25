@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:local="clr-namespace:RailmlEditor" mc:Ignorable="d" Title="MainWindow" Height="450" Width="800" KeyDown="Window_KeyDown">
+    xmlns:local="clr-namespace:RailmlEditor" mc:Ignorable="d" Title="MainWindow" Height="900" Width="1300" KeyDown="Window_KeyDown">
     <Window.InputBindings>
         <KeyBinding Key="Delete" Command="{Binding DeleteCommand}"/>
         <KeyBinding Key="C" Modifiers="Control" Command="{Binding CopyCommand}"/>
@@ -65,7 +65,7 @@
                 </Rectangle>
 
                 <!-- Start Thumb -->
-                <Thumb DragDelta="StartThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted" Canvas.Left="-6" Canvas.Top="-6" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
+                <Thumb Panel.ZIndex="100" Width="12" Height="12" DragDelta="StartThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted" Canvas.Left="-6" Canvas.Top="-6" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
                     <Thumb.Template>
                         <ControlTemplate>
                             <Ellipse Width="12" Height="12" Fill="Red" Stroke="White" StrokeThickness="1"/>
@@ -74,7 +74,7 @@
                 </Thumb>
 
                 <!-- End Thumb -->
-                <Thumb DragDelta="EndThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
+                <Thumb Panel.ZIndex="100" Width="12" Height="12" DragDelta="EndThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
                     <Canvas.Left>
                         <MultiBinding Converter="{StaticResource DiffConverter}">
                             <Binding Path="X2"/>
@@ -98,7 +98,7 @@
                 </Thumb>
 
                 <!-- Track Name Display (6px, perfectly centered horizontally) -->
-                <Grid>
+                <Grid IsHitTestVisible="False">
                     <Canvas.Left>
                         <MultiBinding Converter="{StaticResource MidPoint}">
                             <Binding Path="X2"/>
@@ -111,7 +111,7 @@
                             <Binding Path="Y"/>
                         </MultiBinding>
                     </Canvas.Top>
-                    <TextBlock Text="{Binding Name}" FontSize="6" Foreground="Black" Width="200" TextAlignment="Center" Margin="-100,-4,0,0"/>
+                    <TextBlock Text="{Binding Name}" FontSize="6" Foreground="Black" Width="200" TextAlignment="Center" Margin="-100,-4,0,0" IsHitTestVisible="False"/>
                 </Grid>
             </Canvas>
         </DataTemplate>
@@ -257,7 +257,6 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-
             </Grid>
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:ViewModels.CurvedTrackViewModel}">
@@ -343,7 +342,7 @@
                 </Rectangle>
 
                 <!-- Start Thumb -->
-                <Thumb DragDelta="StartThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted" Canvas.Left="-6" Canvas.Top="-6" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
+                <Thumb Panel.ZIndex="100" Width="12" Height="12" DragDelta="StartThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted" Canvas.Left="-6" Canvas.Top="-6" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
                     <Thumb.Template>
                         <ControlTemplate>
                             <Ellipse Width="12" Height="12" Fill="Red" Stroke="White" StrokeThickness="1"/>
@@ -352,7 +351,7 @@
                 </Thumb>
 
                 <!-- Mid Thumb (Relative Position) -->
-                <Thumb DragDelta="MidThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted" Canvas.Left="-6" Canvas.Top="-6" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
+                <Thumb Panel.ZIndex="100" Width="12" Height="12" DragDelta="MidThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted" Canvas.Left="-6" Canvas.Top="-6" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
                     <!-- Translate by MX - X, MY - Y -->
                     <Thumb.RenderTransform>
                         <TranslateTransform>
@@ -378,7 +377,7 @@
                 </Thumb>
 
                 <!-- End Thumb -->
-                <Thumb DragDelta="EndThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
+                <Thumb Panel.ZIndex="100" Width="12" Height="12" DragDelta="EndThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
                     <Canvas.Left>
                         <MultiBinding Converter="{StaticResource DiffConverter}">
                             <Binding Path="X2"/>
@@ -402,7 +401,7 @@
                 </Thumb>
 
                 <!-- Track Name Display (6px, centered at Mid point of 1st segment and upright-rotated) -->
-                <Grid>
+                <Grid IsHitTestVisible="False">
                     <Canvas.Left>
                         <MultiBinding Converter="{StaticResource MidPoint}">
                             <Binding Path="MX"/>
@@ -415,7 +414,7 @@
                             <Binding Path="Y"/>
                         </MultiBinding>
                     </Canvas.Top>
-                    <TextBlock Text="{Binding Name}" FontSize="6" Foreground="Black" Width="200" TextAlignment="Center" Margin="-100,-4,0,0" RenderTransformOrigin="0.5,0.5">
+                    <TextBlock Text="{Binding Name}" FontSize="6" Foreground="Black" Width="200" TextAlignment="Center" Margin="-100,-4,0,0" RenderTransformOrigin="0.5,0.5" IsHitTestVisible="False">
                         <TextBlock.RenderTransform>
                             <RotateTransform>
                                 <RotateTransform.Angle>

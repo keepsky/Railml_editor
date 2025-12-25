@@ -119,6 +119,7 @@ namespace RailmlEditor.ViewModels
                 if (base.X != value)
                 {
                     base.X = value;
+                    OnPropertyChanged(nameof(X));
                     OnPropertyChanged(nameof(Length));
                 }
             }
@@ -132,6 +133,7 @@ namespace RailmlEditor.ViewModels
                 if (base.Y != value)
                 {
                     base.Y = value;
+                    OnPropertyChanged(nameof(Y));
                     OnPropertyChanged(nameof(Length));
                 }
             }

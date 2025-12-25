@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using RailmlEditor.ViewModels;
+using System.Windows.Media;
 
 namespace RailmlEditor
 {
@@ -161,8 +162,19 @@ namespace RailmlEditor
         private bool _isPanning = false;
         private Point _panStartPoint;
 
+        // Thumb Drag State (Absolute)
+        private Point _dragStartMousePos;
+        private double _dragStartElementX;
+        private double _dragStartElementY;
+        private double _dragStartElementX2;
+        private double _dragStartElementY2;
+        private double _dragStartElementMX;
+        private double _dragStartElementMY;
+
         private void MainGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (Mouse.Captured != null) return;
+            
             if (e.ChangedButton == MouseButton.Left)
             {
                 // Start Selection
@@ -223,12 +235,17 @@ namespace RailmlEditor
             else if (_isPanning)
             {
                 var curPos = e.GetPosition(MainGrid);
-                var deltaX = curPos.X - _panStartPoint.X;
-                var deltaY = curPos.Y - _panStartPoint.Y;
+                // Divide screen delta by current scale to get logical delta
+                var deltaX = (curPos.X - _panStartPoint.X) / MainScaleTransform.ScaleX;
+                var deltaY = (curPos.Y - _panStartPoint.Y) / MainScaleTransform.ScaleY;
 
-                if (Math.Abs(deltaX) >= 10 || Math.Abs(deltaY) >= 10)
+                if (Math.Abs(deltaX) >= 1.0 || Math.Abs(deltaY) >= 1.0)
                 {
-                    double snapX = Math.Round(deltaX / 10.0) * 10.0;
+                    double snapX = Math.Round(deltaX); // Snap to logical units? Or keep previous 10px snap?
+                    // User might want to keep the 10px snap even when zoomed. 
+                    // Let's stick to the 10px logical snap but make movement smooth relative to mouse.
+                    
+                    snapX = Math.Round(deltaX / 10.0) * 10.0;
                     double snapY = Math.Round(deltaY / 10.0) * 10.0;
 
                     if (snapX != 0 || snapY != 0)
@@ -364,6 +381,12 @@ namespace RailmlEditor
 
         private void Item_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (IsOrInsideThumb(e.OriginalSource as DependencyObject))
+            {
+                e.Handled = true; 
+                return;
+            }
+
             if (sender is FrameworkElement element && element.DataContext is BaseElementViewModel viewModel)
             {
                 // Prevent Switch Dragging
@@ -515,36 +538,35 @@ namespace RailmlEditor
             }
         }
 
-        private double _thumbAccX;
-        private double _thumbAccY;
+
 
         private void Thumb_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
         {
-            _thumbAccX = 0;
-            _thumbAccY = 0;
+            _dragStartMousePos = Mouse.GetPosition(MainDesigner);
+            if (sender is FrameworkElement thumb && thumb.DataContext is TrackViewModel track)
+            {
+                _dragStartElementX = track.X;
+                _dragStartElementY = track.Y;
+                _dragStartElementX2 = track.X2;
+                _dragStartElementY2 = track.Y2;
+                if (track is CurvedTrackViewModel curved)
+                {
+                    _dragStartElementMX = curved.MX;
+                    _dragStartElementMY = curved.MY;
+                }
+            }
         }
 
         private void StartThumb_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
         {
             if (sender is FrameworkElement thumb && thumb.DataContext is TrackViewModel track)
             {
-                _thumbAccX += e.HorizontalChange;
-                _thumbAccY += e.VerticalChange;
+                Point currentMousePos = Mouse.GetPosition(MainDesigner);
+                double totalDeltaX = (currentMousePos.X - _dragStartMousePos.X);
+                double totalDeltaY = (currentMousePos.Y - _dragStartMousePos.Y);
 
-                if (Math.Abs(_thumbAccX) >= 10 || Math.Abs(_thumbAccY) >= 10)
-                {
-                    double snapX = Math.Round(_thumbAccX / 10.0) * 10.0;
-                    double snapY = Math.Round(_thumbAccY / 10.0) * 10.0;
-
-                    if (snapX != 0 || snapY != 0)
-                    {
-                        track.X += snapX;
-                        track.Y += snapY;
-                        
-                        _thumbAccX -= snapX;
-                        _thumbAccY -= snapY;
-                    }
-                }
+                track.X = Math.Round((_dragStartElementX + totalDeltaX) / 10.0) * 10.0;
+                track.Y = Math.Round((_dragStartElementY + totalDeltaY) / 10.0) * 10.0;
             }
         }
 
@@ -552,23 +574,12 @@ namespace RailmlEditor
         {
              if (sender is FrameworkElement thumb && thumb.DataContext is TrackViewModel track)
             {
-                _thumbAccX += e.HorizontalChange;
-                _thumbAccY += e.VerticalChange;
+                Point currentMousePos = Mouse.GetPosition(MainDesigner);
+                double totalDeltaX = (currentMousePos.X - _dragStartMousePos.X);
+                double totalDeltaY = (currentMousePos.Y - _dragStartMousePos.Y);
 
-                if (Math.Abs(_thumbAccX) >= 10 || Math.Abs(_thumbAccY) >= 10)
-                {
-                    double snapX = Math.Round(_thumbAccX / 10.0) * 10.0;
-                    double snapY = Math.Round(_thumbAccY / 10.0) * 10.0;
-
-                    if (snapX != 0 || snapY != 0)
-                    {
-                         track.X2 += snapX;
-                         track.Y2 += snapY;
-
-                        _thumbAccX -= snapX;
-                        _thumbAccY -= snapY;
-                    }
-                }
+                track.X2 = Math.Round((_dragStartElementX2 + totalDeltaX) / 10.0) * 10.0;
+                track.Y2 = Math.Round((_dragStartElementY2 + totalDeltaY) / 10.0) * 10.0;
             }
         }
 
@@ -576,23 +587,12 @@ namespace RailmlEditor
         {
              if (sender is FrameworkElement thumb && thumb.DataContext is CurvedTrackViewModel curved)
              {
-                 _thumbAccX += e.HorizontalChange;
-                 _thumbAccY += e.VerticalChange;
+                Point currentMousePos = Mouse.GetPosition(MainDesigner);
+                double totalDeltaX = (currentMousePos.X - _dragStartMousePos.X);
+                double totalDeltaY = (currentMousePos.Y - _dragStartMousePos.Y);
 
-                 if (Math.Abs(_thumbAccX) >= 10 || Math.Abs(_thumbAccY) >= 10)
-                 {
-                     double snapX = Math.Round(_thumbAccX / 10.0) * 10.0;
-                     double snapY = Math.Round(_thumbAccY / 10.0) * 10.0;
-
-                     if (snapX != 0 || snapY != 0)
-                     {
-                          curved.MX += snapX;
-                          curved.MY += snapY;
-
-                         _thumbAccX -= snapX;
-                         _thumbAccY -= snapY;
-                     }
-                 }
+                curved.MX = Math.Round((_dragStartElementMX + totalDeltaX) / 10.0) * 10.0;
+                curved.MY = Math.Round((_dragStartElementMY + totalDeltaY) / 10.0) * 10.0;
              }
         }
 
@@ -803,6 +803,16 @@ namespace RailmlEditor
                 _viewModel.SelectedElement = viewModel;
                 e.Handled = true; 
             }
+        }
+
+        private bool IsOrInsideThumb(DependencyObject? obj)
+        {
+            while (obj != null)
+            {
+                if (obj is System.Windows.Controls.Primitives.Thumb) return true;
+                obj = VisualTreeHelper.GetParent(obj);
+            }
+            return false;
         }
 
         private bool IntersectsLine(Rect rect, Point p1, Point p2)
