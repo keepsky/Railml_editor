@@ -1,3 +1,26 @@
+======================
+좌측 탐색창에 route를 추가
+툴바에서 route 버튼을 누르면 탐색창에 신규 route를 추가하고 해당 route id를 선택하면 속성창에서 아래의 값들을 입력할수 있도록 수정해줘
+아래 (1)~(11)은 railml에서 <infrastructure><routes><route>의 속성으로 추가되고
+아래 (12), (13)은 railml에서 <infrastructure><routes><route>의 하위 태그로 사용자가 입력한 list를 추가되도록 구현
+(1) id : 자동 생성 (R001, R002, ...)
+(2) name (string) : 사용자 입력
+(3) code (string) : 사용자 입력
+(4) description (string) : 사용자 입력
+(5) approachPointRef : track.id
+(6) entryRef : signal.id
+(7) exitRef : signal.id
+(8) overlapEndRef : track.id
+(9) proceedSpeed : R,YY,Y,YG,G list에서 선택 (entryRef의 signal type에 따라 달라짐)
+(10) releaseTriggerHead (boolean) : true, false
+(11) releaseTriggerRef : Reference to the trigger point for the overlap release timer
+(12) <switchAndPosition> : list 형태로 여러줄에 걸쳐서 입력 받을수 있도록 (+) 버튼을 누르면 아래의 속성들을 입력할수 있도록 구현
+	switchRef : switch.id
+	switchPosition : (normal, reverse) list에서 선택
+(13) <overlapSwitchAndPosition> : list 형태로 여러줄에 걸쳐서 입력 받을수 있도록 (+) 버튼을 누르면 아래의 속성들을 입력할수 있도록 구현
+	switchRef : switch.id
+	switchPosition : (normal, reverse) list에서 선택
+======================
 현재 switch(point)가 생성되는 아래 (1), (2) 두 경우에 대해서 각각에 대해서 조건을 확인하고 수정해줘
 (1) 하나의 <trackEnd>와 두개 이상의 <trackBegin> 좌표가 겹치는 경우
 (1-a) switch 좌표 밑에 "principle track 선택" 제목의 팝업 메뉴를 띄우고 <trackBegin>이 속한 track 들의 id(name) 형태로 모두 보여주고 사용자가 마우스로 선택 
