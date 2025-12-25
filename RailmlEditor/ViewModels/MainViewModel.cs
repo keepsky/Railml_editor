@@ -361,6 +361,68 @@ namespace RailmlEditor.ViewModels
     }
 
 
+    public class SwitchPositionViewModel : ObservableObject
+    {
+        private string _switchRef;
+        public string SwitchRef { get => _switchRef; set => SetProperty(ref _switchRef, value); }
+
+        private string _switchPosition = "normal";
+        public string SwitchPosition { get => _switchPosition; set => SetProperty(ref _switchPosition, value); }
+
+        public List<string> AvailablePositions { get; } = new() { "normal", "reverse" };
+
+        public ICommand RemoveCommand { get; set; }
+    }
+
+    public class RouteViewModel : BaseElementViewModel
+    {
+        public override string TypeName => "Route";
+
+        private string _code;
+        public string Code { get => _code; set => SetProperty(ref _code, value); }
+
+        private string _description;
+        public string Description { get => _description; set => SetProperty(ref _description, value); }
+
+        private string _approachPointRef;
+        public string ApproachPointRef { get => _approachPointRef; set => SetProperty(ref _approachPointRef, value); }
+
+        private string _entryRef;
+        public string EntryRef { get => _entryRef; set => SetProperty(ref _entryRef, value); }
+
+        private string _exitRef;
+        public string ExitRef { get => _exitRef; set => SetProperty(ref _exitRef, value); }
+
+        private string _overlapEndRef;
+        public string OverlapEndRef { get => _overlapEndRef; set => SetProperty(ref _overlapEndRef, value); }
+
+        private string _proceedSpeed = "R";
+        public string ProceedSpeed { get => _proceedSpeed; set => SetProperty(ref _proceedSpeed, value); }
+
+        private bool _releaseTriggerHead;
+        public bool ReleaseTriggerHead { get => _releaseTriggerHead; set => SetProperty(ref _releaseTriggerHead, value); }
+
+        private string _releaseTriggerRef;
+        public string ReleaseTriggerRef { get => _releaseTriggerRef; set => SetProperty(ref _releaseTriggerRef, value); }
+
+        public ObservableCollection<SwitchPositionViewModel> SwitchAndPositions { get; } = new();
+        public ObservableCollection<SwitchPositionViewModel> OverlapSwitchAndPositions { get; } = new();
+
+        public ICommand AddSwitchPositionCommand { get; }
+        public ICommand AddOverlapSwitchPositionCommand { get; }
+
+        public List<string> AvailableProceedSpeeds { get; } = new() { "R", "YY", "Y", "YG", "G" };
+
+        public RouteViewModel()
+        {
+            AddSwitchPositionCommand = new RelayCommand(_ => SwitchAndPositions.Add(new SwitchPositionViewModel { RemoveCommand = new RelayCommand(p => SwitchAndPositions.Remove(p as SwitchPositionViewModel)) }));
+            AddOverlapSwitchPositionCommand = new RelayCommand(_ => OverlapSwitchAndPositions.Add(new SwitchPositionViewModel { RemoveCommand = new RelayCommand(p => OverlapSwitchAndPositions.Remove(p as SwitchPositionViewModel)) }));
+        }
+
+        public override double X { get => 0; set { } }
+        public override double Y { get => 0; set { } }
+    }
+
     public class CategoryViewModel : ObservableObject
     {
         public string Title { get; set; }
@@ -569,6 +631,28 @@ namespace RailmlEditor.ViewModels
                     MY = sw.MY
                 };
             }
+            if (el is RouteViewModel r)
+            {
+                var nr = new RouteViewModel
+                {
+                    Id = r.Id,
+                    Name = r.Name,
+                    Code = r.Code,
+                    Description = r.Description,
+                    ApproachPointRef = r.ApproachPointRef,
+                    EntryRef = r.EntryRef,
+                    ExitRef = r.ExitRef,
+                    OverlapEndRef = r.OverlapEndRef,
+                    ProceedSpeed = r.ProceedSpeed,
+                    ReleaseTriggerHead = r.ReleaseTriggerHead,
+                    ReleaseTriggerRef = r.ReleaseTriggerRef
+                };
+                foreach (var s in r.SwitchAndPositions)
+                    nr.SwitchAndPositions.Add(new SwitchPositionViewModel { SwitchRef = s.SwitchRef, SwitchPosition = s.SwitchPosition, RemoveCommand = new RelayCommand(p => nr.SwitchAndPositions.Remove(p as SwitchPositionViewModel)) });
+                foreach (var s in r.OverlapSwitchAndPositions)
+                    nr.OverlapSwitchAndPositions.Add(new SwitchPositionViewModel { SwitchRef = s.SwitchRef, SwitchPosition = s.SwitchPosition, RemoveCommand = new RelayCommand(p => nr.OverlapSwitchAndPositions.Remove(p as SwitchPositionViewModel)) });
+                return nr;
+            }
             return null;
         }
 
@@ -577,6 +661,7 @@ namespace RailmlEditor.ViewModels
             TreeCategories.Add(new CategoryViewModel { Title = "Track" });
             TreeCategories.Add(new CategoryViewModel { Title = "Signal" });
             TreeCategories.Add(new CategoryViewModel { Title = "Point" });
+            TreeCategories.Add(new CategoryViewModel { Title = "Route" });
         }
 
         private void Elements_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -608,6 +693,7 @@ namespace RailmlEditor.ViewModels
              if (item is TrackViewModel || item is CurvedTrackViewModel) catTitle = "Track";
              else if (item is SignalViewModel) catTitle = "Signal";
              else if (item is SwitchViewModel) catTitle = "Point";
+             else if (item is RouteViewModel) catTitle = "Route";
              
              var cat = TreeCategories.FirstOrDefault(c => c.Title == catTitle);
              cat?.Items.Add(item);

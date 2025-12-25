@@ -230,6 +230,52 @@ namespace RailmlEditor.Services
             }
 
 
+            // 4. Create Routes
+            var routeList = viewModel.Elements.OfType<RouteViewModel>().ToList();
+            if (routeList.Any())
+            {
+                railml.Infrastructure.Routes = new Routes();
+                foreach (var rVm in routeList)
+                {
+                    var r = new Route
+                    {
+                        Id = rVm.Id,
+                        Name = rVm.Name,
+                        Code = rVm.Code,
+                        Description = rVm.Description,
+                        ApproachPointRef = rVm.ApproachPointRef,
+                        EntryRef = rVm.EntryRef,
+                        ExitRef = rVm.ExitRef,
+                        OverlapEndRef = rVm.OverlapEndRef,
+                        ProceedSpeed = rVm.ProceedSpeed,
+                        ReleaseTriggerHead = rVm.ReleaseTriggerHead,
+                        ReleaseTriggerHeadSpecified = true,
+                        ReleaseTriggerRef = rVm.ReleaseTriggerRef
+                    };
+
+                    foreach (var sV in rVm.SwitchAndPositions)
+                    {
+                        r.SwitchAndPositionList.Add(new SwitchAndPosition
+                        {
+                            SwitchRef = sV.SwitchRef,
+                            SwitchPosition = sV.SwitchPosition
+                        });
+                    }
+
+                    foreach (var sV in rVm.OverlapSwitchAndPositions)
+                    {
+                        r.OverlapSwitchAndPositionList.Add(new SwitchAndPosition
+                        {
+                            SwitchRef = sV.SwitchRef,
+                            SwitchPosition = sV.SwitchPosition
+                        });
+                    }
+
+                    railml.Infrastructure.Routes.RouteList.Add(r);
+                }
+            }
+
+
             // Serialize
             try
             {
@@ -441,6 +487,55 @@ namespace RailmlEditor.Services
                                 viewModel.Elements.Add(signalVm);
                             }
                         }
+                    }
+                }
+
+                if (railml?.Infrastructure?.Routes?.RouteList != null)
+                {
+                    foreach (var r in railml.Infrastructure.Routes.RouteList)
+                    {
+                        var rVm = new RouteViewModel
+                        {
+                            Id = r.Id,
+                            Name = r.Name,
+                            Code = r.Code,
+                            Description = r.Description,
+                            ApproachPointRef = r.ApproachPointRef,
+                            EntryRef = r.EntryRef,
+                            ExitRef = r.ExitRef,
+                            OverlapEndRef = r.OverlapEndRef,
+                            ProceedSpeed = r.ProceedSpeed ?? "R",
+                            ReleaseTriggerHead = r.ReleaseTriggerHead,
+                            ReleaseTriggerRef = r.ReleaseTriggerRef
+                        };
+
+                        if (r.SwitchAndPositionList != null)
+                        {
+                            foreach (var s in r.SwitchAndPositionList)
+                            {
+                                rVm.SwitchAndPositions.Add(new SwitchPositionViewModel
+                                {
+                                    SwitchRef = s.SwitchRef,
+                                    SwitchPosition = s.SwitchPosition,
+                                    RemoveCommand = new RelayCommand(p => rVm.SwitchAndPositions.Remove(p as SwitchPositionViewModel))
+                                });
+                            }
+                        }
+
+                        if (r.OverlapSwitchAndPositionList != null)
+                        {
+                            foreach (var s in r.OverlapSwitchAndPositionList)
+                            {
+                                rVm.OverlapSwitchAndPositions.Add(new SwitchPositionViewModel
+                                {
+                                    SwitchRef = s.SwitchRef,
+                                    SwitchPosition = s.SwitchPosition,
+                                    RemoveCommand = new RelayCommand(p => rVm.OverlapSwitchAndPositions.Remove(p as SwitchPositionViewModel))
+                                });
+                            }
+                        }
+
+                        viewModel.Elements.Add(rVm);
                     }
                 }
 

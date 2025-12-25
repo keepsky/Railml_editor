@@ -98,6 +98,13 @@ namespace RailmlEditor
                         Y2 = my
                     };
                 }
+                else if (type == "Route")
+                {
+                    newElement = new RouteViewModel
+                    {
+                        Id = GetNextId("R")
+                    };
+                }
 
                 if (newElement != null)
                 {
@@ -137,6 +144,13 @@ namespace RailmlEditor
                         Id = GetNextId("S"),
                         X = dropPosition.X,
                         Y = dropPosition.Y
+                    };
+                }
+                else if (type == "Route")
+                {
+                    newElement = new RouteViewModel
+                    {
+                        Id = GetNextId("R")
                     };
                 }
 

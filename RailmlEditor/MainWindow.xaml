@@ -853,6 +853,7 @@
                                                 <RowDefinition Height="Auto"/>
                                                 <RowDefinition Height="Auto"/>
                                                 <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
                                             </Grid.RowDefinitions>
 
                                             <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
@@ -878,6 +879,110 @@
 
                                             <TextBlock Text="Bind Track" Grid.Row="7" Grid.Column="0" Style="{StaticResource PropLabel}"/>
                                             <TextBox Text="{Binding RelatedTrackId}" Grid.Row="7" Grid.Column="1" Style="{StaticResource PropValue}" IsReadOnly="True"/>
+                                        </Grid>
+                                    </DataTemplate>
+
+                                    <!-- Route Properties -->
+                                    <DataTemplate DataType="{x:Type local:ViewModels.RouteViewModel}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Id}" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" IsReadOnly="True" Foreground="Gray"/>
+
+                                            <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <TextBlock Text="Code" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Code, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <TextBlock Text="Description" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <TextBlock Text="ApproachP" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding ApproachPointRef, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <TextBlock Text="EntrySignal" Grid.Row="5" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding EntryRef, UpdateSourceTrigger=PropertyChanged}" Grid.Row="5" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <TextBlock Text="ExitSignal" Grid.Row="6" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding ExitRef, UpdateSourceTrigger=PropertyChanged}" Grid.Row="6" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <TextBlock Text="OverlapEnd" Grid.Row="7" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding OverlapEndRef, UpdateSourceTrigger=PropertyChanged}" Grid.Row="7" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <TextBlock Text="Speed" Grid.Row="8" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <ComboBox ItemsSource="{Binding AvailableProceedSpeeds}" SelectedItem="{Binding ProceedSpeed, UpdateSourceTrigger=PropertyChanged}" Grid.Row="8" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
+
+                                            <TextBlock Text="RelTriggerH" Grid.Row="9" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <CheckBox IsChecked="{Binding ReleaseTriggerHead, UpdateSourceTrigger=PropertyChanged}" Grid.Row="9" Grid.Column="1" VerticalAlignment="Center" Margin="0,0,0,5"/>
+
+                                            <TextBlock Text="RelTriggerRef" Grid.Row="10" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding ReleaseTriggerRef, UpdateSourceTrigger=PropertyChanged}" Grid.Row="10" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <StackPanel Grid.Row="11" Grid.ColumnSpan="2" Margin="0,10,0,0">
+                                                <Grid Margin="0,0,0,5">
+                                                    <TextBlock Text="Switches" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                    <Button Content="+" Command="{Binding AddSwitchPositionCommand}" HorizontalAlignment="Right" Width="20" Height="20"/>
+                                                </Grid>
+                                                <ItemsControl ItemsSource="{Binding SwitchAndPositions}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Grid Margin="0,2">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBox Text="{Binding SwitchRef, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,5,0" Tag="SwitchRef"/>
+                                                                <ComboBox Grid.Column="1" ItemsSource="{Binding AvailablePositions}" SelectedItem="{Binding SwitchPosition, UpdateSourceTrigger=PropertyChanged}" Width="70" Margin="0,0,5,0"/>
+                                                                <Button Grid.Column="2" Content="-" Command="{Binding RemoveCommand}" CommandParameter="{Binding}" Width="20" Height="20"/>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Row="12" Grid.ColumnSpan="2" Margin="0,10,0,0">
+                                                <Grid Margin="0,0,0,5">
+                                                    <TextBlock Text="OverlapSw" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                    <Button Content="+" Command="{Binding AddOverlapSwitchPositionCommand}" HorizontalAlignment="Right" Width="20" Height="20"/>
+                                                </Grid>
+                                                <ItemsControl ItemsSource="{Binding OverlapSwitchAndPositions}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Grid Margin="0,2">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBox Text="{Binding SwitchRef, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,5,0"/>
+                                                                <ComboBox Grid.Column="1" ItemsSource="{Binding AvailablePositions}" SelectedItem="{Binding SwitchPosition, UpdateSourceTrigger=PropertyChanged}" Width="70" Margin="0,0,5,0"/>
+                                                                <Button Grid.Column="2" Content="-" Command="{Binding RemoveCommand}" CommandParameter="{Binding}" Width="20" Height="20"/>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
                                         </Grid>
                                     </DataTemplate>
 

@@ -24,6 +24,9 @@ namespace RailmlEditor.Models
     {
         [XmlElement(ElementName = "tracks")]
         public Tracks Tracks { get; set; }
+
+        [XmlElement(ElementName = "routes")]
+        public Routes Routes { get; set; }
     }
 
     public class Tracks
@@ -196,6 +199,67 @@ namespace RailmlEditor.Models
 
         [XmlElement(ElementName = "connection")]
         public List<Connection> ConnectionList { get; set; } = new List<Connection>();
+    }
+
+
+    public class Routes
+    {
+        [XmlElement(ElementName = "route")]
+        public List<Route> RouteList { get; set; } = new List<Route>();
+    }
+
+    public class Route
+    {
+        [XmlAttribute(AttributeName = "id")]
+        public string Id { get; set; }
+
+        [XmlAttribute(AttributeName = "name")]
+        public string Name { get; set; }
+
+        [XmlAttribute(AttributeName = "code")]
+        public string Code { get; set; }
+
+        [XmlAttribute(AttributeName = "description")]
+        public string Description { get; set; }
+
+        [XmlAttribute(AttributeName = "approachPointRef")]
+        public string ApproachPointRef { get; set; }
+
+        [XmlAttribute(AttributeName = "entryRef")]
+        public string EntryRef { get; set; }
+
+        [XmlAttribute(AttributeName = "exitRef")]
+        public string ExitRef { get; set; }
+
+        [XmlAttribute(AttributeName = "overlapEndRef")]
+        public string OverlapEndRef { get; set; }
+
+        [XmlAttribute(AttributeName = "proceedSpeed")]
+        public string ProceedSpeed { get; set; }
+
+        [XmlAttribute(AttributeName = "releaseTriggerHead")]
+        public bool ReleaseTriggerHead { get; set; }
+
+        [XmlIgnore]
+        public bool ReleaseTriggerHeadSpecified { get; set; }
+
+        [XmlAttribute(AttributeName = "releaseTriggerRef")]
+        public string ReleaseTriggerRef { get; set; }
+
+        [XmlElement(ElementName = "switchAndPosition")]
+        public List<SwitchAndPosition> SwitchAndPositionList { get; set; } = new List<SwitchAndPosition>();
+
+        [XmlElement(ElementName = "overlapSwitchAndPosition")]
+        public List<SwitchAndPosition> OverlapSwitchAndPositionList { get; set; } = new List<SwitchAndPosition>();
+    }
+
+    public class SwitchAndPosition
+    {
+        [XmlAttribute(AttributeName = "switchRef")]
+        public string SwitchRef { get; set; }
+
+        [XmlAttribute(AttributeName = "switchPosition")]
+        public string SwitchPosition { get; set; }
     }
 
 
