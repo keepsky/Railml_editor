@@ -196,16 +196,34 @@
             </Viewbox>
         </ControlTemplate>
 
+        <!-- CornerIcon Template (from corner.svg) -->
+        <ControlTemplate x:Key="CornerIcon">
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="284" Height="177">
+                    <!-- Rect (Diagonal) x=-17, y=68.32, rotate=-45 -->
+                    <Rectangle Canvas.Left="-17" Canvas.Top="68.32" Width="210" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
+                        <Rectangle.RenderTransform>
+                            <RotateTransform Angle="-45"/>
+                        </Rectangle.RenderTransform>
+                    </Rectangle>
+                    <!-- Rect (Top Right) x=129, y=8, w=154 -->
+                    <Rectangle Canvas.Left="129" Canvas.Top="8" Width="154" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                </Canvas>
+            </Viewbox>
+        </ControlTemplate>
+
         <!-- CornerRIcon Template (mirrored version of Corner/Point icon) -->
         <ControlTemplate x:Key="CornerRIcon">
             <Viewbox Stretch="Uniform">
                 <Canvas Width="320" Height="177">
-                    <!-- Mirror vertically: Top line -->
-                    <Rectangle Canvas.Left="0" Canvas.Top="8" Width="320" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
-                    <!-- Mirror vertically: Bottom Right line -->
-                    <Rectangle Canvas.Left="166" Canvas.Top="129" Width="154" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
-                    <!-- Mirror vertically: Diagonal -->
-                    <Rectangle Canvas.Left="20" Canvas.Top="68.32" Width="210" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
+                    <!-- Rect (Bottom) x=0, y=129, w=320 -->
+                    <Rectangle Canvas.Left="0" Canvas.Top="129" Width="320" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <!-- Rect (Top Left) x=0, y=8, w=154 -->
+                    <Rectangle Canvas.Left="0" Canvas.Top="8" Width="154" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <!-- Rect (Diagonal) x=95, y=68.32, w=210, rotate=45 -->
+                    <!-- In SVG: transform="rotate(45,200,88.32)". In XAML RenderTransformOrigin="0.5,0.5" is often different. -->
+                    <!-- Let's try matching the SVG's more absolute placement if possible, or just pivot. -->
+                    <Rectangle Canvas.Left="95" Canvas.Top="68.32" Width="210" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
                         <Rectangle.RenderTransform>
                             <RotateTransform Angle="45"/>
                         </Rectangle.RenderTransform>
@@ -712,13 +730,17 @@
                     <Button.Tag>Track</Button.Tag>
                 </Button>
                 <Button Click="Toolbox_Click" ToolTip="Corner" Style="{StaticResource ToolBarButtonStyle}">
+                    <Control Template="{StaticResource CornerIcon}" Width="28" Height="16"/>
+                    <Button.Tag>Corner</Button.Tag>
+                </Button>
+                <Button Click="Toolbox_Click" ToolTip="Single" Style="{StaticResource ToolBarButtonStyle}">
                     <!-- Point Icon from point.svg -->
                     <Control Template="{StaticResource PointIcon}" Width="28" Height="16"/>
-                    <Button.Tag>CurvedTrack</Button.Tag>
+                    <Button.Tag>Single</Button.Tag>
                 </Button>
-                <Button Click="Toolbox_Click" ToolTip="CornerR" Style="{StaticResource ToolBarButtonStyle}">
+                <Button Click="Toolbox_Click" ToolTip="SingleR" Style="{StaticResource ToolBarButtonStyle}">
                     <Control Template="{StaticResource CornerRIcon}" Width="28" Height="16"/>
-                    <Button.Tag>CornerR</Button.Tag>
+                    <Button.Tag>SingleR</Button.Tag>
                 </Button>
                 <Button Click="Toolbox_Click" ToolTip="Double" Style="{StaticResource ToolBarButtonStyle}">
                     <Control Template="{StaticResource DoubleIcon}" Width="28" Height="17"/>

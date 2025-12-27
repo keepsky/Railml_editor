@@ -81,39 +81,29 @@ namespace RailmlEditor
                         Y = defaultPos.Y
                     };
                 }
-                else if (type == "CurvedTrack")
+                else if (type == "Corner")
                 {
-                    double mx = defaultPos.X + 60;
-                    double my = defaultPos.Y - 60;
+                    double mx = defaultPos.X + 20;
+                    double my = defaultPos.Y - 40;
                     newElement = new CurvedTrackViewModel
                     {
                         Id = GetNextId("T"),
                         Code = "corner",
                         X = defaultPos.X,
                         Y = defaultPos.Y,
-                        // Length removed to avoid overriding X2 logic if Length setter affects it
-                        // Set MX, MY, X2, Y2 explicitly
                         MX = mx,
                         MY = my,
-                        X2 = mx + 30,
+                        X2 = mx + 10,
                         Y2 = my
                     };
                 }
-                else if (type == "CornerR")
+                else if (type == "Single")
                 {
-                    double mx = defaultPos.X + 60;
-                    double my = defaultPos.Y + 60;
-                    newElement = new CurvedTrackViewModel
-                    {
-                        Id = GetNextId("T"),
-                        Code = "corner",
-                        X = defaultPos.X,
-                        Y = defaultPos.Y,
-                        MX = mx,
-                        MY = my,
-                        X2 = mx + 30,
-                        Y2 = my
-                    };
+                    _viewModel.AddDoubleTrack("single.railml");
+                }
+                else if (type == "SingleR")
+                {
+                    _viewModel.AddDoubleTrack("singleR.railml");
                 }
                 else if (type == "Route")
                 {
@@ -161,10 +151,30 @@ namespace RailmlEditor
                         Length = 100 // Default Length
                     };
                 }
-                else if (type == "CurvedTrack")
+                else if (type == "Corner")
+                {
+                    double mx = dropPosition.X + 20;
+                    double my = dropPosition.Y - 40;
+                    newElement = new CurvedTrackViewModel
+                    {
+                        Id = GetNextId("T"),
+                        Code = "corner",
+                        X = dropPosition.X,
+                        Y = dropPosition.Y,
+                        MX = mx,
+                        MY = my,
+                        X2 = mx + 10,
+                        Y2 = my
+                    };
+                }
+                else if (type == "Single")
+                {
+                    // Do nothing
+                }
+                else if (type == "SingleR")
                 {
                     double mx = dropPosition.X + 60;
-                    double my = dropPosition.Y - 60;
+                    double my = dropPosition.Y + 60;
                     newElement = new CurvedTrackViewModel
                     {
                         Id = GetNextId("T"),
@@ -552,6 +562,11 @@ namespace RailmlEditor
                              curved.MX += shiftX;
                              curved.MY += shiftY;
                          }
+                    }
+                    else if (element is SwitchViewModel sw)
+                    {
+                        if (sw.MX.HasValue) sw.MX += shiftX;
+                        if (sw.MY.HasValue) sw.MY += shiftY;
                     }
                 }
                 
