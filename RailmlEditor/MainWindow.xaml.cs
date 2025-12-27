@@ -99,6 +99,22 @@ namespace RailmlEditor
                         Y2 = my
                     };
                 }
+                else if (type == "CornerR")
+                {
+                    double mx = defaultPos.X + 60;
+                    double my = defaultPos.Y + 60;
+                    newElement = new CurvedTrackViewModel
+                    {
+                        Id = GetNextId("T"),
+                        Code = "corner",
+                        X = defaultPos.X,
+                        Y = defaultPos.Y,
+                        MX = mx,
+                        MY = my,
+                        X2 = mx + 30,
+                        Y2 = my
+                    };
+                }
                 else if (type == "Route")
                 {
                     newElement = new RouteViewModel
@@ -109,6 +125,10 @@ namespace RailmlEditor
                 else if (type == "Double")
                 {
                     _viewModel.AddDoubleTrack("double.railml");
+                }
+                else if (type == "DoubleR")
+                {
+                    _viewModel.AddDoubleTrack("doubleR.railml");
                 }
                 
 

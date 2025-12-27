@@ -196,6 +196,24 @@
             </Viewbox>
         </ControlTemplate>
 
+        <!-- CornerRIcon Template (mirrored version of Corner/Point icon) -->
+        <ControlTemplate x:Key="CornerRIcon">
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="320" Height="177">
+                    <!-- Mirror vertically: Top line -->
+                    <Rectangle Canvas.Left="0" Canvas.Top="8" Width="320" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <!-- Mirror vertically: Bottom Right line -->
+                    <Rectangle Canvas.Left="166" Canvas.Top="129" Width="154" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <!-- Mirror vertically: Diagonal -->
+                    <Rectangle Canvas.Left="20" Canvas.Top="68.32" Width="210" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
+                        <Rectangle.RenderTransform>
+                            <RotateTransform Angle="45"/>
+                        </Rectangle.RenderTransform>
+                    </Rectangle>
+                </Canvas>
+            </Viewbox>
+        </ControlTemplate>
+
         <!-- Route Icon Template -->
         <ControlTemplate x:Key="RouteIcon">
             <Viewbox Stretch="Uniform">
@@ -229,6 +247,21 @@
                     <Rectangle Canvas.Left="41.46" Canvas.Top="79.57" Width="237.07" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
                         <Rectangle.RenderTransform>
                             <RotateTransform Angle="225"/>
+                        </Rectangle.RenderTransform>
+                    </Rectangle>
+                </Canvas>
+            </Viewbox>
+        </ControlTemplate>
+
+        <!-- DoubleRIcon Template (mirrored version of double.svg) -->
+        <ControlTemplate x:Key="DoubleRIcon" TargetType="Control">
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="320" Height="200">
+                    <Rectangle Canvas.Left="0" Canvas.Top="0" Width="320" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <Rectangle Canvas.Left="0" Canvas.Top="160" Width="320" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <Rectangle Canvas.Left="41.46" Canvas.Top="79.57" Width="237.07" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
+                        <Rectangle.RenderTransform>
+                            <RotateTransform Angle="135"/>
                         </Rectangle.RenderTransform>
                     </Rectangle>
                 </Canvas>
@@ -663,29 +696,37 @@
 
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar>
-                <Button Click="Toolbox_Click" ToolTip="Signal" Style="{StaticResource ToolBarButtonStyle}">
-                    <!-- Signal Icon using ControlTemplate -->
-                    <Control Template="{StaticResource SignalIcon}" Width="28" Height="14"/>
-                    <Button.Tag>Signal</Button.Tag>
-                </Button>
                 <Button Click="Toolbox_Click" ToolTip="Route" Style="{StaticResource ToolBarButtonStyle}">
                     <!-- Route Icon from route.svg -->
                     <Control Template="{StaticResource RouteIcon}" Width="28" Height="16"/>
                     <Button.Tag>Route</Button.Tag>
+                </Button>
+                <Button Click="Toolbox_Click" ToolTip="Signal" Style="{StaticResource ToolBarButtonStyle}">
+                    <!-- Signal Icon using ControlTemplate -->
+                    <Control Template="{StaticResource SignalIcon}" Width="28" Height="14"/>
+                    <Button.Tag>Signal</Button.Tag>
                 </Button>
                 <Button Click="Toolbox_Click" ToolTip="Track" Style="{StaticResource ToolBarButtonStyle}">
                     <!-- Track Icon using Rectangle -->
                     <Rectangle Width="24" Height="4" Fill="White" Stroke="Black" StrokeThickness="1" RadiusX="2" RadiusY="2"/>
                     <Button.Tag>Track</Button.Tag>
                 </Button>
-                <Button Click="Toolbox_Click" ToolTip="Double" Style="{StaticResource ToolBarButtonStyle}">
-                    <Control Template="{StaticResource DoubleIcon}" Width="28" Height="17"/>
-                    <Button.Tag>Double</Button.Tag>
-                </Button>
                 <Button Click="Toolbox_Click" ToolTip="Corner" Style="{StaticResource ToolBarButtonStyle}">
                     <!-- Point Icon from point.svg -->
                     <Control Template="{StaticResource PointIcon}" Width="28" Height="16"/>
                     <Button.Tag>CurvedTrack</Button.Tag>
+                </Button>
+                <Button Click="Toolbox_Click" ToolTip="CornerR" Style="{StaticResource ToolBarButtonStyle}">
+                    <Control Template="{StaticResource CornerRIcon}" Width="28" Height="16"/>
+                    <Button.Tag>CornerR</Button.Tag>
+                </Button>
+                <Button Click="Toolbox_Click" ToolTip="Double" Style="{StaticResource ToolBarButtonStyle}">
+                    <Control Template="{StaticResource DoubleIcon}" Width="28" Height="17"/>
+                    <Button.Tag>Double</Button.Tag>
+                </Button>
+                <Button Click="Toolbox_Click" ToolTip="DoubleR" Style="{StaticResource ToolBarButtonStyle}">
+                    <Control Template="{StaticResource DoubleRIcon}" Width="28" Height="17"/>
+                    <Button.Tag>DoubleR</Button.Tag>
                 </Button>
             </ToolBar>
         </ToolBarTray>
