@@ -114,6 +114,13 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _mainDir, value);
         }
 
+        private string? _code;
+        public string? Code
+        {
+            get => _code;
+            set => SetProperty(ref _code, value);
+        }
+
         
         public override double X
         {
@@ -145,7 +152,7 @@ namespace RailmlEditor.ViewModels
 
         // End Point relative to X,Y? No, let's store absolute properties.
         private double _x2;
-        public double X2
+        public virtual double X2
         {
             get => _x2;
             set 
@@ -158,7 +165,7 @@ namespace RailmlEditor.ViewModels
         }
 
         private double _y2;
-        public double Y2
+        public virtual double Y2
         {
             get => _y2;
             set 

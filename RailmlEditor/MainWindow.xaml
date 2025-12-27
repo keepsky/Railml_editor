@@ -103,11 +103,13 @@
                         <MultiBinding Converter="{StaticResource MidPoint}">
                             <Binding Path="X2"/>
                             <Binding Path="X"/>
+                            <Binding Path="X"/>
                         </MultiBinding>
                     </Canvas.Left>
                     <Canvas.Top>
                         <MultiBinding Converter="{StaticResource MidPoint}">
                             <Binding Path="Y2"/>
+                            <Binding Path="Y"/>
                             <Binding Path="Y"/>
                         </MultiBinding>
                     </Canvas.Top>
@@ -439,17 +441,33 @@
                     </Thumb.Template>
                 </Thumb>
 
-                <!-- Track Name Display (6px, centered at Mid point of 1st segment and upright-rotated) -->
+                <!-- Track Name Display for 1st segment (X,Y to MX,MY) -->
                 <Grid IsHitTestVisible="False">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Code}" Value="corner"/>
+                                        <Condition Binding="{Binding Segment1LengthGreaterThan2}" Value="False"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
                     <Canvas.Left>
                         <MultiBinding Converter="{StaticResource MidPoint}">
                             <Binding Path="MX"/>
+                            <Binding Path="X"/>
                             <Binding Path="X"/>
                         </MultiBinding>
                     </Canvas.Left>
                     <Canvas.Top>
                         <MultiBinding Converter="{StaticResource MidPoint}">
                             <Binding Path="MY"/>
+                            <Binding Path="Y"/>
                             <Binding Path="Y"/>
                         </MultiBinding>
                     </Canvas.Top>
@@ -462,6 +480,52 @@
                                         <Binding Path="Y"/>
                                         <Binding Path="MX"/>
                                         <Binding Path="MY"/>
+                                    </MultiBinding>
+                                </RotateTransform.Angle>
+                            </RotateTransform>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+                </Grid>
+
+                <!-- Track Name Display for 2nd segment (MX,MY to X2,Y2) -->
+                <Grid IsHitTestVisible="False">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Code}" Value="corner"/>
+                                        <Condition Binding="{Binding Segment2LengthGreaterThan1}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <Canvas.Left>
+                        <MultiBinding Converter="{StaticResource MidPoint}">
+                            <Binding Path="X2"/>
+                            <Binding Path="MX"/>
+                            <Binding Path="X"/>
+                        </MultiBinding>
+                    </Canvas.Left>
+                    <Canvas.Top>
+                        <MultiBinding Converter="{StaticResource MidPoint}">
+                            <Binding Path="Y2"/>
+                            <Binding Path="MY"/>
+                            <Binding Path="Y"/>
+                        </MultiBinding>
+                    </Canvas.Top>
+                    <TextBlock Text="{Binding Name}" FontSize="6" Foreground="Black" Width="200" TextAlignment="Center" Margin="-100,-4,0,0" RenderTransformOrigin="0.5,0.5" IsHitTestVisible="False" FontWeight="Bold">
+                        <TextBlock.RenderTransform>
+                            <RotateTransform>
+                                <RotateTransform.Angle>
+                                    <MultiBinding Converter="{StaticResource ReadableAngle}">
+                                        <Binding Path="MX"/>
+                                        <Binding Path="MY"/>
+                                        <Binding Path="X2"/>
+                                        <Binding Path="Y2"/>
                                     </MultiBinding>
                                 </RotateTransform.Angle>
                             </RotateTransform>

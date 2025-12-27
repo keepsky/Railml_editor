@@ -35,7 +35,7 @@ namespace RailmlEditor.Services
                     Description = element.Description,
                     Type = element.Type,
                     MainDir = element.MainDir,
-                    Code = isCurved ? "corner" : "plain",
+                    Code = element.Code ?? (isCurved ? "corner" : "plain"),
                     TrackTopology = new TrackTopology
                     {
                         TrackBegin = new TrackNode 
@@ -351,6 +351,7 @@ namespace RailmlEditor.Services
                         trackVm.Description = track.Description;
                         trackVm.Type = track.Type;
                         trackVm.MainDir = track.MainDir;
+                        trackVm.Code = track.Code;
                         trackVm.X = track.TrackTopology?.TrackBegin?.ScreenPos?.X ?? 0;
                         trackVm.Y = track.TrackTopology?.TrackBegin?.ScreenPos?.Y ?? 0;
                         

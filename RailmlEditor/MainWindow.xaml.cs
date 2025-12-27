@@ -88,6 +88,7 @@ namespace RailmlEditor
                     newElement = new CurvedTrackViewModel
                     {
                         Id = GetNextId("T"),
+                        Code = "corner",
                         X = defaultPos.X,
                         Y = defaultPos.Y,
                         // Length removed to avoid overriding X2 logic if Length setter affects it
@@ -140,7 +141,22 @@ namespace RailmlEditor
                         Length = 100 // Default Length
                     };
                 }
-                // Switch Removed from Toolbox but ViewModel logic remains if needed
+                else if (type == "CurvedTrack")
+                {
+                    double mx = dropPosition.X + 60;
+                    double my = dropPosition.Y - 60;
+                    newElement = new CurvedTrackViewModel
+                    {
+                        Id = GetNextId("T"),
+                        Code = "corner",
+                        X = dropPosition.X,
+                        Y = dropPosition.Y,
+                        MX = mx,
+                        MY = my,
+                        X2 = mx + 30,
+                        Y2 = my
+                    };
+                }
                 
                 else if (type == "Signal")
                 {
