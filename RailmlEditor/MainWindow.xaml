@@ -223,9 +223,30 @@
                     <!-- Rect (Top Left) x=0, y=8, w=154 -->
                     <Rectangle Canvas.Left="0" Canvas.Top="8" Width="154" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
                     <!-- Rect (Diagonal) x=95, y=68.32, w=210, rotate=45 -->
-                    <!-- In SVG: transform="rotate(45,200,88.32)". In XAML RenderTransformOrigin="0.5,0.5" is often different. -->
-                    <!-- Let's try matching the SVG's more absolute placement if possible, or just pivot. -->
                     <Rectangle Canvas.Left="95" Canvas.Top="68.32" Width="210" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
+                        <Rectangle.RenderTransform>
+                            <RotateTransform Angle="45"/>
+                        </Rectangle.RenderTransform>
+                    </Rectangle>
+                </Canvas>
+            </Viewbox>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="CrossIcon">
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="320" Height="200">
+                    <!-- Rect 2 (horizontal bottom) -->
+                    <Rectangle Canvas.Left="0" Canvas.Top="160" Width="320" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <!-- Rect 3 (horizontal top) -->
+                    <Rectangle Canvas.Left="0" Canvas.Top="0" Width="320" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <!-- Rect 1 (diagonal -45) -->
+                    <Rectangle Canvas.Left="41.47" Canvas.Top="79.58" Width="237.07" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
+                        <Rectangle.RenderTransform>
+                            <RotateTransform Angle="-45"/>
+                        </Rectangle.RenderTransform>
+                    </Rectangle>
+                    <!-- Rect 4 (diagonal 45) -->
+                    <Rectangle Canvas.Left="41.46" Canvas.Top="79.58" Width="237.07" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
                         <Rectangle.RenderTransform>
                             <RotateTransform Angle="45"/>
                         </Rectangle.RenderTransform>
@@ -754,6 +775,10 @@
                 <Button Click="Toolbox_Click" ToolTip="DoubleR" Style="{StaticResource ToolBarButtonStyle}">
                     <Control Template="{StaticResource DoubleRIcon}" Width="28" Height="17"/>
                     <Button.Tag>DoubleR</Button.Tag>
+                </Button>
+                <Button Click="Toolbox_Click" ToolTip="Cross" Style="{StaticResource ToolBarButtonStyle}">
+                    <Control Template="{StaticResource CrossIcon}" Width="28" Height="16"/>
+                    <Button.Tag>Cross</Button.Tag>
                 </Button>
             </ToolBar>
         </ToolBarTray>

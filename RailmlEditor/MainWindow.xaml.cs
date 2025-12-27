@@ -122,6 +122,10 @@ namespace RailmlEditor
                 {
                     _viewModel.AddDoubleTrack("doubleR.railml");
                 }
+                else if (type == "Cross")
+                {
+                    _viewModel.AddDoubleTrack("cross.railml");
+                }
                 
 
                 if (newElement != null)
