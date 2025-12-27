@@ -594,6 +594,45 @@ namespace RailmlEditor.ViewModels
             }
         }
 
+        public void AddDoubleTrack(string filePath)
+        {
+            string finalPath = filePath;
+            if (!System.IO.File.Exists(finalPath))
+            {
+                // Try parent directory
+                string parentPath = System.IO.Path.Combine("..", filePath);
+                if (System.IO.File.Exists(parentPath))
+                {
+                    finalPath = parentPath;
+                }
+                else
+                {
+                    // Try one more level up or common asset folder if needed
+                    string grandparentPath = System.IO.Path.Combine("..", "..", filePath);
+                    if (System.IO.File.Exists(grandparentPath))
+                    {
+                        finalPath = grandparentPath;
+                    }
+                }
+            }
+
+            var service = new RailmlEditor.Services.RailmlService();
+            var snippet = service.LoadSnippet(finalPath, this);
+
+            if (snippet.Count > 0)
+            {
+                // Deselect current
+                foreach (var el in Elements) el.IsSelected = false;
+
+                foreach (var el in snippet)
+                {
+                    el.IsSelected = true;
+                    Elements.Add(el);
+                }
+                UpdateSelectionState();
+            }
+        }
+
         private BaseElementViewModel CloneElement(BaseElementViewModel el)
         {
             if (el is CurvedTrackViewModel curved)

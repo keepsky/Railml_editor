@@ -307,6 +307,195 @@ namespace RailmlEditor.Services
         }
 
 
+        public System.Collections.Generic.List<BaseElementViewModel> LoadSnippet(string path, MainViewModel viewModel)
+        {
+            var newElements = new System.Collections.Generic.List<BaseElementViewModel>();
+            XmlSerializer serializer = new XmlSerializer(typeof(Railml));
+            
+            Railml? railml = null;
+            try
+            {
+                using (FileStream fs = new FileStream(path, FileMode.Open))
+                {
+                    railml = (Railml?)serializer.Deserialize(fs);
+                }
+            }
+            catch
+            {
+                return newElements;
+            }
+
+            if (railml?.Infrastructure?.Tracks?.TrackList == null) return newElements;
+
+            var idMap = new System.Collections.Generic.Dictionary<string, string>();
+            
+            // Track local counters to avoid duplicates within snippet
+            var trackCounter = 0;
+            var pointCounter = 0;
+
+            // Helper to get next ID factoring in local counter
+            string GetNextSnippetId(string prefix, ref int localCounter)
+            {
+                int max = 0;
+                foreach (var el in viewModel.Elements)
+                {
+                    if (el.Id != null && el.Id.StartsWith(prefix) && int.TryParse(el.Id.Substring(prefix.Length), out int num))
+                    {
+                        if (num > max) max = num;
+                    }
+                }
+                localCounter++;
+                return $"{prefix}{max + localCounter:D3}";
+            }
+
+            // First pass: Create ID mapping
+            foreach (var track in railml.Infrastructure.Tracks.TrackList)
+            {
+                if (!idMap.ContainsKey(track.Id))
+                {
+                    idMap[track.Id] = GetNextSnippetId("T", ref trackCounter);
+                }
+
+                if (track.TrackTopology?.Connections?.Switches != null)
+                {
+                    foreach (var sw in track.TrackTopology.Connections.Switches)
+                    {
+                        if (!idMap.ContainsKey(sw.Id))
+                        {
+                            idMap[sw.Id] = GetNextSnippetId("P", ref pointCounter);
+                        }
+                    }
+                }
+            }
+
+            // Second pass: Create ViewModels
+            foreach (var track in railml.Infrastructure.Tracks.TrackList)
+            {
+                TrackViewModel trackVm;
+                if (track.Code == "corner" && track.TrackTopology?.CornerPos != null)
+                {
+                    trackVm = new CurvedTrackViewModel
+                    {
+                        MX = track.TrackTopology.CornerPos.X,
+                        MY = track.TrackTopology.CornerPos.Y
+                    };
+                }
+                else
+                {
+                    trackVm = new TrackViewModel();
+                }
+
+                trackVm.Id = idMap[track.Id];
+                trackVm.Name = track.Name;
+                trackVm.Description = track.Description;
+                trackVm.Type = track.Type;
+                trackVm.MainDir = track.MainDir;
+                trackVm.Code = track.Code;
+                trackVm.X = track.TrackTopology?.TrackBegin?.ScreenPos?.X ?? 0;
+                trackVm.Y = track.TrackTopology?.TrackBegin?.ScreenPos?.Y ?? 0;
+                
+                if (track.TrackTopology?.TrackEnd != null)
+                {
+                    trackVm.X2 = track.TrackTopology.TrackEnd.ScreenPos?.X ?? 0;
+                    trackVm.Y2 = track.TrackTopology.TrackEnd.ScreenPos?.Y ?? 0;
+                }
+                else
+                {
+                    trackVm.Length = 100;
+                }
+
+                newElements.Add(trackVm);
+
+                // Load Switches
+                if (track.TrackTopology?.Connections?.Switches != null)
+                {
+                    foreach (var sw in track.TrackTopology.Connections.Switches)
+                    {
+                        // Calculate geometric position on track
+                        double pos = sw.Pos;
+                        double startX = trackVm.X;
+                        double startY = trackVm.Y;
+                        double endX = trackVm.X2;
+                        double endY = trackVm.Y2;
+                        double length = Math.Sqrt(Math.Pow(endX - startX, 2) + Math.Pow(endY - startY, 2));
+                        if (length < 0.1) length = 1;
+                        double ratio = pos / length;
+                        double swX = startX + ratio * (endX - startX);
+                        double swY = startY + ratio * (endY - startY);
+                        
+                        var switchVm = new SwitchViewModel
+                        {
+                            Id = idMap[sw.Id],
+                            Name = sw.AdditionalName?.Name,
+                            X = swX,
+                            Y = swY,
+                            MX = (sw.ScreenPos != null && sw.ScreenPos.XSpecified) ? sw.ScreenPos.X : (double?)null,
+                            MY = (sw.ScreenPos != null && sw.ScreenPos.YSpecified) ? sw.ScreenPos.Y : (double?)null,
+                            TrackContinueCourse = sw.TrackContinueCourse ?? "straight",
+                            NormalPosition = sw.NormalPosition ?? "straight"
+                        };
+
+                        // Reconstruction logic
+                        var firstConn = sw.ConnectionList.FirstOrDefault();
+                        if (firstConn != null)
+                        {
+                            switchVm.IsScenario1 = (firstConn.Orientation == "outgoing");
+                            if (switchVm.IsScenario1)
+                            {
+                                switchVm.PrincipleTrackId = trackVm.Id;
+                                var beginNode = track.TrackTopology?.TrackBegin;
+                                var enteringConn = beginNode?.ConnectionList?.FirstOrDefault();
+                                if (enteringConn != null)
+                                {
+                                    var oldRef = enteringConn.Ref.Split('_')[0];
+                                    if (idMap.ContainsKey(oldRef)) switchVm.EnteringTrackId = idMap[oldRef];
+                                }
+                            }
+                            else
+                            {
+                                switchVm.EnteringTrackId = trackVm.Id;
+                                var beginNode = track.TrackTopology?.TrackBegin;
+                                var principleConn = beginNode?.ConnectionList?.FirstOrDefault();
+                                if (principleConn != null)
+                                {
+                                    var oldRef = principleConn.Ref.Split('_')[0];
+                                    if (idMap.ContainsKey(oldRef)) switchVm.PrincipleTrackId = idMap[oldRef];
+                                }
+                            }
+
+                            foreach (var c in sw.ConnectionList)
+                            {
+                                var oldDivId = c.Ref.Split('_')[0];
+                                if (idMap.ContainsKey(oldDivId))
+                                {
+                                    var newDivId = idMap[oldDivId];
+                                    switchVm.DivergingTrackIds.Add(newDivId);
+                                    switchVm.DivergingConnections.Add(new DivergingConnectionViewModel
+                                    {
+                                        TrackId = newDivId,
+                                        DisplayName = newDivId,
+                                        Course = c.Course ?? "straight"
+                                    });
+                                }
+                            }
+                        }
+                        newElements.Add(switchVm);
+                    }
+                }
+            }
+
+            // Fix cross-references within snippet
+            foreach (var sw in newElements.OfType<SwitchViewModel>())
+            {
+                foreach (var dc in sw.DivergingConnections)
+                {
+                    dc.TargetTrack = newElements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == dc.TrackId);
+                }
+            }
+
+            return newElements;
+        }
+
         public void Load(string path, MainViewModel viewModel)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(Railml));

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<railml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:sehwa="http://www.sehwa.co.kr/railml" version="2.5" xmlns="http://www.railml.org/schemas/2013">
+  <infrastructure>
+    <tracks>
+      <track id="T001" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T001_begin">
+            <sehwa:screenPos x="80" y="110" />
+          </trackBegin>
+          <trackEnd pos="10" id="T001_end">
+            <connection id="conn_T001_end_to_T002_begin" ref="T002_begin" />
+            <sehwa:screenPos x="90" y="110" />
+          </trackEnd>
+        </trackTopology>
+      </track>
+      <track id="T002" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T002_begin">
+            <connection id="conn_T002_begin_to_T001_end" ref="T001_end" />
+            <sehwa:screenPos x="90" y="110" />
+          </trackBegin>
+          <trackEnd pos="30" id="T002_end">
+            <sehwa:screenPos x="120" y="110" />
+          </trackEnd>
+          <connections>
+            <switch id="P001" pos="0" trackContinueCourse="straight" normalPosition="straight">
+              <sehwa:screenPos x="85" y="90" />
+              <additionalName name="P001" />
+              <connection id="conn_P001_to_T003_begin" ref="T003_begin" orientation="outgoing" course="straight" />
+            </switch>
+          </connections>
+        </trackTopology>
+      </track>
+      <track id="T003" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T003_begin">
+            <sehwa:screenPos x="90" y="110" />
+          </trackBegin>
+          <trackEnd pos="22" id="T003_end">
+            <connection id="conn_T003_end_to_T004_begin" ref="T004_begin" />
+            <sehwa:screenPos x="100" y="130" />
+          </trackEnd>
+        </trackTopology>
+      </track>
+      <track id="T004" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T004_begin">
+            <connection id="conn_T004_begin_to_T003_end" ref="T003_end" />
+            <sehwa:screenPos x="100" y="130" />
+          </trackBegin>
+          <trackEnd pos="22" id="T004_end">
+            <sehwa:screenPos x="110" y="150" />
+          </trackEnd>
+        </trackTopology>
+      </track>
+      <track id="T005" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T005_begin">
+            <sehwa:screenPos x="80" y="150" />
+          </trackBegin>
+          <trackEnd pos="30" id="T005_end">
+            <connection id="conn_T005_end_to_T006_begin" ref="T006_begin" />
+            <sehwa:screenPos x="110" y="150" />
+          </trackEnd>
+        </trackTopology>
+      </track>
+      <track id="T006" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T006_begin">
+            <connection id="conn_T006_begin_to_T005_end" ref="T005_end" />
+            <sehwa:screenPos x="110" y="150" />
+          </trackBegin>
+          <trackEnd pos="10" id="T006_end">
+            <sehwa:screenPos x="120" y="150" />
+          </trackEnd>
+          <connections>
+            <switch id="P002" pos="0" trackContinueCourse="straight" normalPosition="straight">
+              <sehwa:screenPos x="105" y="155" />
+              <additionalName name="P002" />
+              <connection id="conn_P002_to_T004_end" ref="T004_end" orientation="incoming" course="straight" />
+            </switch>
+          </connections>
+        </trackTopology>
+      </track>
+    </tracks>
+  </infrastructure>
+</railml>

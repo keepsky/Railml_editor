@@ -108,7 +108,7 @@ namespace RailmlEditor
                 }
                 else if (type == "Double")
                 {
-                    // Placeholder for Double track feature
+                    _viewModel.AddDoubleTrack("double.railml");
                 }
                 
 
