@@ -111,7 +111,7 @@
                             <Binding Path="Y"/>
                         </MultiBinding>
                     </Canvas.Top>
-                    <TextBlock Text="{Binding Name}" FontSize="6" Foreground="Black" Width="200" TextAlignment="Center" Margin="-100,-4,0,0" IsHitTestVisible="False"/>
+                    <TextBlock Text="{Binding Name}" FontSize="6" Foreground="Black" Width="200" TextAlignment="Center" Margin="-100,-4,0,0" IsHitTestVisible="False" FontWeight="Bold"/>
                 </Grid>
             </Canvas>
         </DataTemplate>
@@ -150,7 +150,7 @@
 
                     <!-- Text Name in Right Round Box -->
                     <!-- Box starts at 81 * 0.146 = 11.8px. Width 160 * 0.146 = 23.4px. -->
-                    <TextBlock Text="{Binding Name}" Margin="12,0,0,0" Width="23" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Foreground="Black" FontWeight="Bold" FontSize="10"/>
+                    <TextBlock Text="{Binding Name}" Margin="12,0,0,0" Width="23" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Foreground="Black" FontWeight="Bold" FontSize="6"/>
                 </Grid>
 
                 <!-- Selecting Logic Aid (Transparent Hit Box around center?) -->
@@ -263,7 +263,7 @@
                 <!-- Aligns Right Edge to Grid Left (0) with 2px gap -->
                 <!-- Use RenderTransform instead of Margin to avoid layout collapse (20px width - 22px margin < 0) -->
                 <!-- Align Right (at 20). Translate -22 -> Right Edge at -2. -->
-                <TextBlock Text="{Binding Name}" FontSize="8" VerticalAlignment="Center" HorizontalAlignment="Right">
+                <TextBlock Text="{Binding Name}" FontSize="6" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="Bold">
                     <TextBlock.RenderTransform>
                         <TranslateTransform X="-22"/>
                     </TextBlock.RenderTransform>
@@ -284,7 +284,7 @@
                 <!-- Flipped Icon is at -20..0. Text starts at 0. -->
                 <!-- HorizontalAlignment="Left" -> Left Edge at 0. -->
                 <!-- Margin Left="0" -> X=0. -->
-                <TextBlock Text="{Binding Name}" FontSize="8" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,0,0">
+                <TextBlock Text="{Binding Name}" FontSize="6" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,0,0" FontWeight="Bold">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -453,7 +453,7 @@
                             <Binding Path="Y"/>
                         </MultiBinding>
                     </Canvas.Top>
-                    <TextBlock Text="{Binding Name}" FontSize="6" Foreground="Black" Width="200" TextAlignment="Center" Margin="-100,-4,0,0" RenderTransformOrigin="0.5,0.5" IsHitTestVisible="False">
+                    <TextBlock Text="{Binding Name}" FontSize="6" Foreground="Black" Width="200" TextAlignment="Center" Margin="-100,-4,0,0" RenderTransformOrigin="0.5,0.5" IsHitTestVisible="False" FontWeight="Bold">
                         <TextBlock.RenderTransform>
                             <RotateTransform>
                                 <RotateTransform.Angle>
