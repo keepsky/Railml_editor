@@ -24,6 +24,7 @@ namespace RailmlEditor
         private bool _isDragging;
         private FrameworkElement? _draggedControl;
         private System.Collections.Generic.Dictionary<BaseElementViewModel, Point> _originalPositions = new System.Collections.Generic.Dictionary<BaseElementViewModel, Point>();
+        private System.Collections.Generic.List<BaseElementViewModel>? _beforeDragSnapshot;
 
         private void Toolbox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -48,6 +49,7 @@ namespace RailmlEditor
         {
             if (sender is Button button)
             {
+                var oldState = _viewModel.TakeSnapshot();
                 string type = button.Tag.ToString();
                 Point defaultPos = new Point(100, 100);
 
@@ -125,9 +127,8 @@ namespace RailmlEditor
                 if (newElement != null)
                 {
                     _viewModel.Elements.Add(newElement);
-                    _viewModel.SelectedElement = newElement; 
-                    
                     if (newElement is TrackViewModel) _viewModel.UpdateProximitySwitches();
+                    _viewModel.AddHistory(oldState);
                 }
             }
         }
@@ -136,6 +137,7 @@ namespace RailmlEditor
         {
             if (e.Data.GetDataPresent(DataFormats.StringFormat))
             {
+                var oldState = _viewModel.TakeSnapshot();
                 string type = (string)e.Data.GetData(DataFormats.StringFormat);
                 Point dropPosition = e.GetPosition(MainDesigner);
 
@@ -215,6 +217,7 @@ namespace RailmlEditor
                     _viewModel.SelectedElement = newElement; // Auto Select
                     
                     if (newElement is TrackViewModel) _viewModel.UpdateProximitySwitches();
+                    _viewModel.AddHistory(oldState);
                 }
             }
         }
@@ -482,6 +485,7 @@ namespace RailmlEditor
 
                 if (e.ChangedButton == MouseButton.Left)
                 {
+                    _beforeDragSnapshot = _viewModel.TakeSnapshot();
                     _isDragging = true;
                     _draggedControl = element;
                     _startPoint = e.GetPosition(MainDesigner);
@@ -617,6 +621,7 @@ namespace RailmlEditor
 
         private void Thumb_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
         {
+            _beforeDragSnapshot = _viewModel.TakeSnapshot();
             _dragStartMousePos = Mouse.GetPosition(MainDesigner);
             if (sender is FrameworkElement thumb && thumb.DataContext is TrackViewModel track)
             {
@@ -674,6 +679,7 @@ namespace RailmlEditor
         private void Thumb_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
              _viewModel.UpdateProximitySwitches();
+             _viewModel.AddHistory(_beforeDragSnapshot);
         }
 
         private void OnPrincipleTrackSelectionRequested(SwitchBranchInfo info)
@@ -744,8 +750,8 @@ namespace RailmlEditor
                     _draggedControl = null;
                 }
                 
-                // Track moved -> Update topology
                 _viewModel.UpdateProximitySwitches();
+                _viewModel.AddHistory(_beforeDragSnapshot);
             }
         }
 

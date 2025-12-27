@@ -8,6 +8,8 @@
         <KeyBinding Key="Delete" Command="{Binding DeleteCommand}"/>
         <KeyBinding Key="C" Modifiers="Control" Command="{Binding CopyCommand}"/>
         <KeyBinding Key="V" Modifiers="Control" Command="{Binding PasteCommand}"/>
+        <KeyBinding Key="Z" Modifiers="Control" Command="{Binding UndoCommand}"/>
+        <KeyBinding Key="Y" Modifiers="Control" Command="{Binding RedoCommand}"/>
     </Window.InputBindings>
     <Window.Resources>
         <local:DiffConverter x:Key="DiffConverter"/>
@@ -708,7 +710,10 @@
                 <Separator/>
                 <MenuItem Header="Exit" Click="FileExit_Click"/>
             </MenuItem>
-            <MenuItem Header="Edit" />
+            <MenuItem Header="Edit">
+                <MenuItem Header="Un do" Command="{Binding UndoCommand}" InputGestureText="Ctrl+Z"/>
+                <MenuItem Header="Re do" Command="{Binding RedoCommand}" InputGestureText="Ctrl+Y"/>
+            </MenuItem>
             <MenuItem Header="View" />
         </Menu>
 

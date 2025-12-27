@@ -479,13 +479,24 @@ namespace RailmlEditor.ViewModels
         public ICommand DeleteCommand { get; }
         public ICommand CopyCommand { get; }
         public ICommand PasteCommand { get; }
+        public ICommand UndoCommand { get; }
+        public ICommand RedoCommand { get; }
 
         private List<BaseElementViewModel> _clipboard = new List<BaseElementViewModel>();
+
+        public UndoRedoManager History { get; } = new();
 
         public MainViewModel()
         {
             InitializeTreeCategories();
             Elements.CollectionChanged += Elements_CollectionChanged;
+            History.StateChanged += (s, e) => { 
+                (UndoCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (RedoCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            };
+
+            UndoCommand = new RelayCommand(_ => History.Undo(), _ => History.CanUndo);
+            RedoCommand = new RelayCommand(_ => History.Redo(), _ => History.CanRedo);
 
             SelectCommand = new RelayCommand(param => 
             {
@@ -514,11 +525,15 @@ namespace RailmlEditor.ViewModels
 
         private void DeleteSelected()
         {
+            var oldState = TakeSnapshot();
             var toRemove = SelectedElements.ToList();
+            if (!toRemove.Any()) return;
+
             foreach (var el in toRemove)
             {
                 Elements.Remove(el);
             }
+            AddHistory(oldState);
         }
 
         private void CopySelected()
@@ -533,6 +548,7 @@ namespace RailmlEditor.ViewModels
         private void PasteElements()
         {
             if (!_clipboard.Any()) return;
+            var oldState = TakeSnapshot();
 
             // Clear current selection to select newly pasted items
             foreach (var el in Elements) el.IsSelected = false;
@@ -570,6 +586,7 @@ namespace RailmlEditor.ViewModels
                 clone.IsSelected = true;
                 Elements.Add(clone);
             }
+            AddHistory(oldState);
 
             // Update clipboard for next paste (cumulative offset)
             for (int i = 0; i < _clipboard.Count; i++)
@@ -596,6 +613,7 @@ namespace RailmlEditor.ViewModels
 
         public void AddDoubleTrack(string filePath)
         {
+            var oldState = TakeSnapshot();
             string finalPath = filePath;
             if (!System.IO.File.Exists(finalPath))
             {
@@ -630,6 +648,7 @@ namespace RailmlEditor.ViewModels
                     Elements.Add(el);
                 }
                 UpdateSelectionState();
+                AddHistory(oldState);
             }
         }
 
@@ -718,6 +737,41 @@ namespace RailmlEditor.ViewModels
                 return nr;
             }
             return null;
+        }
+
+        public List<BaseElementViewModel> TakeSnapshot()
+        {
+            return Elements.Select(el => CloneElement(el)).ToList();
+        }
+
+        public void AddHistory(List<BaseElementViewModel> oldState)
+        {
+            var newState = TakeSnapshot();
+            History.Execute(new StateSnapshotAction(oldState, newState, RestoreState));
+        }
+
+        public void RestoreState(List<BaseElementViewModel> state)
+        {
+            // Capture selected IDs to restore selection if possible
+            var selectedIds = SelectedElements.Select(el => el.Id).ToList();
+
+            Elements.CollectionChanged -= Elements_CollectionChanged;
+            Elements.Clear();
+            foreach (var cat in TreeCategories) cat.Items.Clear();
+            SelectedElements.Clear();
+
+            foreach (var el in state)
+            {
+                var clone = CloneElement(el);
+                Elements.Add(clone);
+                AddToCategory(clone);
+                if (selectedIds.Contains(clone.Id))
+                {
+                    clone.IsSelected = true; // This will trigger Element_PropertyChanged and add to SelectedElements
+                }
+            }
+            Elements.CollectionChanged += Elements_CollectionChanged;
+            UpdateSelectionState();
         }
 
         private void InitializeTreeCategories()
