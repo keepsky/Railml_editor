@@ -115,7 +115,20 @@
                             <Binding Path="Y"/>
                         </MultiBinding>
                     </Canvas.Top>
-                    <TextBlock Text="{Binding Name}" FontSize="6" Foreground="Black" Width="200" TextAlignment="Center" Margin="-100,-4,0,0" IsHitTestVisible="False" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding Name}" FontSize="6" Foreground="Black" Width="200" TextAlignment="Center" Margin="-100,-4,0,0" RenderTransformOrigin="0.5,0.5" IsHitTestVisible="False" FontWeight="Bold">
+                        <TextBlock.RenderTransform>
+                            <RotateTransform>
+                                <RotateTransform.Angle>
+                                    <MultiBinding Converter="{StaticResource ReadableAngle}">
+                                        <Binding Path="X"/>
+                                        <Binding Path="Y"/>
+                                        <Binding Path="X2"/>
+                                        <Binding Path="Y2"/>
+                                    </MultiBinding>
+                                </RotateTransform.Angle>
+                            </RotateTransform>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
                 </Grid>
             </Canvas>
         </DataTemplate>
