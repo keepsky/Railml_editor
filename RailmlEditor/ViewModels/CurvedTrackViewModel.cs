@@ -41,22 +41,66 @@ namespace RailmlEditor.ViewModels
         public override double X
         {
             get => base.X;
-            set { base.X = value; OnPropertyChanged(nameof(Segment1Length)); OnPropertyChanged(nameof(Segment1LengthGreaterThan2)); OnPropertyChanged(nameof(Segment2LengthGreaterThan1)); }
+            set 
+            { 
+                if (base.X != value)
+                {
+                    base.X = value; 
+                    OnPropertyChanged(nameof(X));
+                    OnPropertyChanged(nameof(Length));
+                    OnPropertyChanged(nameof(Segment1Length)); 
+                    OnPropertyChanged(nameof(Segment1LengthGreaterThan2)); 
+                    OnPropertyChanged(nameof(Segment2LengthGreaterThan1)); 
+                }
+            }
         }
         public override double Y
         {
             get => base.Y;
-            set { base.Y = value; OnPropertyChanged(nameof(Segment1Length)); OnPropertyChanged(nameof(Segment1LengthGreaterThan2)); OnPropertyChanged(nameof(Segment2LengthGreaterThan1)); }
+            set 
+            { 
+                if (base.Y != value)
+                {
+                    base.Y = value; 
+                    OnPropertyChanged(nameof(Y));
+                    OnPropertyChanged(nameof(Length));
+                    OnPropertyChanged(nameof(Segment1Length)); 
+                    OnPropertyChanged(nameof(Segment1LengthGreaterThan2)); 
+                    OnPropertyChanged(nameof(Segment2LengthGreaterThan1)); 
+                }
+            }
         }
         public override double X2
         {
             get => base.X2;
-            set { base.X2 = value; OnPropertyChanged(nameof(Segment2Length)); OnPropertyChanged(nameof(Segment1LengthGreaterThan2)); OnPropertyChanged(nameof(Segment2LengthGreaterThan1)); }
+            set 
+            { 
+                if (base.X2 != value)
+                {
+                    base.X2 = value; 
+                    OnPropertyChanged(nameof(X2));
+                    OnPropertyChanged(nameof(Length));
+                    OnPropertyChanged(nameof(Segment2Length)); 
+                    OnPropertyChanged(nameof(Segment1LengthGreaterThan2)); 
+                    OnPropertyChanged(nameof(Segment2LengthGreaterThan1)); 
+                }
+            }
         }
         public override double Y2
         {
             get => base.Y2;
-            set { base.Y2 = value; OnPropertyChanged(nameof(Segment2Length)); OnPropertyChanged(nameof(Segment1LengthGreaterThan2)); OnPropertyChanged(nameof(Segment2LengthGreaterThan1)); }
+            set 
+            { 
+                if (base.Y2 != value)
+                {
+                    base.Y2 = value; 
+                    OnPropertyChanged(nameof(Y2));
+                    OnPropertyChanged(nameof(Length));
+                    OnPropertyChanged(nameof(Segment2Length)); 
+                    OnPropertyChanged(nameof(Segment1LengthGreaterThan2)); 
+                    OnPropertyChanged(nameof(Segment2LengthGreaterThan1)); 
+                }
+            }
         }
 
         public double Segment1Length => Math.Sqrt(Math.Pow(MX - X, 2) + Math.Pow(MY - Y, 2));

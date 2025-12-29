@@ -46,6 +46,13 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _isSelected, value);
         }
 
+        private bool _showCoordinates;
+        public bool ShowCoordinates
+        {
+            get => _showCoordinates;
+            set => SetProperty(ref _showCoordinates, value);
+        }
+
         public abstract string TypeName { get; }
     }
 
@@ -745,7 +752,8 @@ namespace RailmlEditor.ViewModels
                     X2 = curved.X2,
                     Y2 = curved.Y2,
                     MX = curved.MX,
-                    MY = curved.MY
+                    MY = curved.MY,
+                    ShowCoordinates = curved.ShowCoordinates
                 };
             }
             if (el is TrackViewModel track)
@@ -760,7 +768,8 @@ namespace RailmlEditor.ViewModels
                     X = track.X,
                     Y = track.Y,
                     X2 = track.X2,
-                    Y2 = track.Y2
+                    Y2 = track.Y2,
+                    ShowCoordinates = track.ShowCoordinates
                 };
             }
             if (el is SignalViewModel signal)
@@ -774,7 +783,8 @@ namespace RailmlEditor.ViewModels
                     Direction = signal.Direction,
                     RelatedTrackId = signal.RelatedTrackId,
                     X = signal.X,
-                    Y = signal.Y
+                    Y = signal.Y,
+                    ShowCoordinates = signal.ShowCoordinates
                 };
             }
             if (el is SwitchViewModel sw)
@@ -786,7 +796,8 @@ namespace RailmlEditor.ViewModels
                     X = sw.X,
                     Y = sw.Y,
                     MX = sw.MX,
-                    MY = sw.MY
+                    MY = sw.MY,
+                    ShowCoordinates = sw.ShowCoordinates
                 };
             }
             if (el is RouteViewModel r)
@@ -811,6 +822,7 @@ namespace RailmlEditor.ViewModels
                     nr.OverlapSwitchAndPositions.Add(new SwitchPositionViewModel { SwitchRef = s.SwitchRef, SwitchPosition = s.SwitchPosition, RemoveCommand = new RelayCommand(p => nr.OverlapSwitchAndPositions.Remove(p as SwitchPositionViewModel)) });
                 foreach (var s in r.ReleaseSections)
                     nr.ReleaseSections.Add(new ReleaseSectionViewModel { TrackRef = s.TrackRef, FlankProtection = s.FlankProtection, RemoveCommand = new RelayCommand(p => nr.ReleaseSections.Remove(p as ReleaseSectionViewModel)) });
+                nr.ShowCoordinates = r.ShowCoordinates;
                 return nr;
             }
             return null;
