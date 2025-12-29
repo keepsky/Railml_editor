@@ -101,11 +101,11 @@ namespace RailmlEditor
                 }
                 else if (type == "Single")
                 {
-                    _viewModel.AddDoubleTrack("single.railml");
+                    _viewModel.AddDoubleTrack("single.railml", defaultPos);
                 }
                 else if (type == "SingleR")
                 {
-                    _viewModel.AddDoubleTrack("singleR.railml");
+                    _viewModel.AddDoubleTrack("singleR.railml", defaultPos);
                 }
                 else if (type == "Route")
                 {
@@ -116,15 +116,15 @@ namespace RailmlEditor
                 }
                 else if (type == "Double")
                 {
-                    _viewModel.AddDoubleTrack("double.railml");
+                    _viewModel.AddDoubleTrack("double.railml", defaultPos);
                 }
                 else if (type == "DoubleR")
                 {
-                    _viewModel.AddDoubleTrack("doubleR.railml");
+                    _viewModel.AddDoubleTrack("doubleR.railml", defaultPos);
                 }
                 else if (type == "Cross")
                 {
-                    _viewModel.AddDoubleTrack("cross.railml");
+                    _viewModel.AddDoubleTrack("cross.railml", defaultPos);
                 }
                 
 
@@ -175,23 +175,11 @@ namespace RailmlEditor
                 }
                 else if (type == "Single")
                 {
-                    // Do nothing
+                    _viewModel.AddDoubleTrack("single.railml", dropPosition);
                 }
                 else if (type == "SingleR")
                 {
-                    double mx = dropPosition.X + 60;
-                    double my = dropPosition.Y + 60;
-                    newElement = new CurvedTrackViewModel
-                    {
-                        Id = GetNextId("T"),
-                        Code = "corner",
-                        X = dropPosition.X,
-                        Y = dropPosition.Y,
-                        MX = mx,
-                        MY = my,
-                        X2 = mx + 30,
-                        Y2 = my
-                    };
+                    _viewModel.AddDoubleTrack("singleR.railml", dropPosition);
                 }
                 
                 else if (type == "Signal")
@@ -212,7 +200,15 @@ namespace RailmlEditor
                 }
                 else if (type == "Double")
                 {
-                    // Placeholder for Double track feature
+                    _viewModel.AddDoubleTrack("double.railml", dropPosition);
+                }
+                else if (type == "DoubleR")
+                {
+                    _viewModel.AddDoubleTrack("doubleR.railml", dropPosition);
+                }
+                else if (type == "Cross")
+                {
+                    _viewModel.AddDoubleTrack("cross.railml", dropPosition);
                 }
 
                 if (newElement != null)

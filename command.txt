@@ -1,4 +1,5 @@
 
+======================
 code=corner인 track에서 track name을 표시하는 부분은 trackBegin~cornerPos 과 cornerPos~trackEnd 구간중에 길이가 긴 구간에 표시하도록 수정해줘
 ======================
 <route>에 아래 태그를 추가하고 railml에서 <route><releaseGroup><trackSectionRef>의 하위 태그로 사용자가 입력한 list를 추가되도록 구현

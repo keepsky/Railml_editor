@@ -611,27 +611,38 @@ namespace RailmlEditor.ViewModels
             }
         }
 
-        public void AddDoubleTrack(string filePath)
+        public void AddDoubleTrack(string filePath, Point? targetPos = null)
         {
             var oldState = TakeSnapshot();
             string finalPath = filePath;
             if (!System.IO.File.Exists(finalPath))
             {
-                // Try parent directory
-                string parentPath = System.IO.Path.Combine("..", filePath);
-                if (System.IO.File.Exists(parentPath))
+                // Better path resolution: search up to project root
+                string currentDir = System.AppDomain.CurrentDomain.BaseDirectory;
+                string? candidate = null;
+                
+                // Also search relative to CWD
+                string workingDir = System.IO.Directory.GetCurrentDirectory();
+                
+                var searchDirs = new[] { workingDir, currentDir };
+                foreach (var baseDir in searchDirs)
                 {
-                    finalPath = parentPath;
-                }
-                else
-                {
-                    // Try one more level up or common asset folder if needed
-                    string grandparentPath = System.IO.Path.Combine("..", "..", filePath);
-                    if (System.IO.File.Exists(grandparentPath))
+                    string probeRoot = baseDir;
+                    for (int i = 0; i < 5; i++)
                     {
-                        finalPath = grandparentPath;
+                        string probe = System.IO.Path.Combine(probeRoot, filePath);
+                        if (System.IO.File.Exists(probe))
+                        {
+                            candidate = probe;
+                            break;
+                        }
+                        probeRoot = System.IO.Path.GetDirectoryName(probeRoot);
+                        if (string.IsNullOrEmpty(probeRoot)) break;
                     }
+                    if (candidate != null) break;
                 }
+                
+                if (candidate != null) finalPath = candidate;
             }
 
             var service = new RailmlEditor.Services.RailmlService();
@@ -641,6 +652,72 @@ namespace RailmlEditor.ViewModels
             {
                 // Deselect current
                 foreach (var el in Elements) el.IsSelected = false;
+
+                if (targetPos.HasValue)
+                {
+                    // Calculate bounding box of snippet to center it at targetPos
+                    double minX = double.MaxValue, minY = double.MaxValue;
+                    double maxX = double.MinValue, maxY = double.MinValue;
+                    
+                    bool hasGeometry = false;
+                    foreach (var el in snippet)
+                    {
+                        if (el.X != 0 || el.Y != 0) // Basic check for geometry
+                        {
+                            minX = Math.Min(minX, el.X);
+                            minY = Math.Min(minY, el.Y);
+                            maxX = Math.Max(maxX, el.X);
+                            maxY = Math.Max(maxY, el.Y);
+                            
+                            if (el is TrackViewModel t)
+                            {
+                                minX = Math.Min(minX, t.X2);
+                                minY = Math.Min(minY, t.Y2);
+                                maxX = Math.Max(maxX, t.X2);
+                                maxY = Math.Max(maxY, t.Y2);
+                                
+                                if (t is CurvedTrackViewModel c)
+                                {
+                                    minX = Math.Min(minX, c.MX);
+                                    minY = Math.Min(minY, c.MY);
+                                    maxX = Math.Max(maxX, c.MX);
+                                    maxY = Math.Max(maxY, c.MY);
+                                }
+                            }
+                            hasGeometry = true;
+                        }
+                    }
+                    
+                    if (hasGeometry)
+                    {
+                        double centerX = (minX + maxX) / 2.0;
+                        double centerY = (minY + maxY) / 2.0;
+                        
+                        double dx = Math.Round((targetPos.Value.X - centerX) / 10.0) * 10.0;
+                        double dy = Math.Round((targetPos.Value.Y - centerY) / 10.0) * 10.0;
+                        
+                        foreach (var el in snippet)
+                        {
+                            el.X += dx;
+                            el.Y += dy;
+                            if (el is TrackViewModel t)
+                            {
+                                t.X2 += dx;
+                                t.Y2 += dy;
+                                if (t is CurvedTrackViewModel c)
+                                {
+                                    c.MX += dx;
+                                    c.MY += dy;
+                                }
+                            }
+                            else if (el is SwitchViewModel sw)
+                            {
+                                if (sw.MX.HasValue) sw.MX += dx;
+                                if (sw.MY.HasValue) sw.MY += dy;
+                            }
+                        }
+                    }
+                }
 
                 foreach (var el in snippet)
                 {
