@@ -22,6 +22,12 @@ namespace RailmlEditor.Models
 
     public class Infrastructure
     {
+        [XmlAttribute(AttributeName = "id")]
+        public string Id { get; set; }
+
+        [XmlAttribute(AttributeName = "name")]
+        public string Name { get; set; }
+
         [XmlElement(ElementName = "tracks")]
         public Tracks Tracks { get; set; }
 

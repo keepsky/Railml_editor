@@ -15,6 +15,8 @@ namespace RailmlEditor.Services
             {
                 Infrastructure = new Infrastructure
                 {
+                    Id = viewModel.ActiveInfrastructure.Id,
+                    Name = viewModel.ActiveInfrastructure.Name,
                     Tracks = new Tracks()
                 }
             };
@@ -502,7 +504,13 @@ namespace RailmlEditor.Services
             using (FileStream fs = new FileStream(path, FileMode.Open))
             {
                 var railml = (Railml?)serializer.Deserialize(fs);
-
+ 
+                if (railml?.Infrastructure != null)
+                {
+                    viewModel.ActiveInfrastructure.Id = railml.Infrastructure.Id ?? "inf001";
+                    viewModel.ActiveInfrastructure.Name = railml.Infrastructure.Name ?? "Default Infrastructure";
+                }
+                
                 viewModel.Elements.Clear();
 
                 if (railml?.Infrastructure?.Tracks?.TrackList != null)

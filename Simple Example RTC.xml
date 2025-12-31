@@ -1,0 +1,1124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<railml xmlns="https://www.railml.org/schemas/2018" xmlns:nor="http://www.jernbanedirektoratet.no/railml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.4" xsi:schemaLocation="https://www.railml.org/schemas/2018 https://schemas.railml.org/2018/railML-2.4/schema/railML.xsd http://www.jernbanedirektoratet.no/railml https://www.jernbanedirektoratet.no/globalassets/documenter/railml/norExtension.xsd">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:date>2025-12-31T07:56:50.956290939Z</dc:date>
+    <dc:source>railOscope https://railoscope.com</dc:source>
+    <dc:source>Simple Example+RTC rev264</dc:source>
+    <dc:source>infrastructureVisualization: For id="vis0" used coordinate system ortho: y-axis vertical from bottom to top, x-axis horizontal from left to right</dc:source>
+    <dc:language>no-NO</dc:language>
+    <dc:relation>norExtension.xsd_5.4</dc:relation>
+    <dc:source>https://railoscope.com/workspace/5c0e3000dc7adc0696c960e2?modelId=5c815c32137e0f14761f0bae&amp;revision=264</dc:source>
+    <!--Browsable url: https://railoscope.com/workspace/5c0e3000dc7adc0696c960e2?modelId=5c815c32137e0f14761f0bae&revision=264 -->
+    <dc:subject>Examples</dc:subject>
+    <dc:subject>Trunk</dc:subject>
+    <dc:creator>Torben Brand, Janne Moller</dc:creator>
+  </metadata>
+  <infrastructure id="inf0" name="Simple Example+RTC">
+    <nor:routes>
+      <nor:route entryRef="id53" exitRef="id56" id="id106" name="69P2---B02">
+        <nor:switchAndPosition switchPosition="straight" switchRef="sw25"/>
+      </nor:route>
+      <nor:route entryRef="id54" exitRef="id56" id="id107" name="69P1---B02">
+        <nor:switchAndPosition switchPosition="left" switchRef="sw32"/>
+        <nor:switchAndPosition switchPosition="right" switchRef="sw25"/>
+      </nor:route>
+      <nor:route entryRef="id55" exitRef="id51" id="id108" name="L03---69A"/>
+      <nor:route entryRef="id56" exitRef="id62" id="id109" name="B02---06" proceedSpeed="80" releaseSpeed="40">
+        <nor:switchAndPosition switchPosition="right" switchRef="sw18"/>
+        <nor:releaseGroup>
+          <nor:trackSectionRef ref="ar85"/>
+          <nor:trackSectionRef ref="ar156"/>
+          <nor:trackSectionRef ref="ar164"/>
+        </nor:releaseGroup>
+        <nor:releaseGroup>
+          <nor:trackSectionRef ref="ar80"/>
+        </nor:releaseGroup>
+      </nor:route>
+      <nor:route entryRef="id56" exitRef="id61" id="id110" name="B02---16" releaseSpeed="40">
+        <nor:switchAndPosition switchPosition="straight" switchRef="sw18"/>
+        <nor:releaseGroup>
+          <nor:trackSectionRef ref="ar85"/>
+          <nor:trackSectionRef ref="ar158"/>
+          <nor:trackSectionRef ref="ar164"/>
+        </nor:releaseGroup>
+        <nor:releaseGroup>
+          <nor:trackSectionRef ref="ar82"/>
+        </nor:releaseGroup>
+      </nor:route>
+      <nor:route entryRef="id57" exitRef="id55" id="id111" name="05---L03">
+        <nor:switchAndPosition switchPosition="right" switchRef="sw18"/>
+      </nor:route>
+      <nor:route entryRef="id58" exitRef="id57" id="id112" name="25---05"/>
+      <nor:route entryRef="id59" exitRef="id60" id="id113" name="35---15"/>
+      <nor:route entryRef="id60" exitRef="id55" id="id114" name="15---L03">
+        <nor:switchAndPosition switchPosition="straight" switchRef="sw18"/>
+      </nor:route>
+      <nor:route approachPointRef="id73" approachSpeed="130" conditional="ocpManned" entryRef="id51" exitRef="id115" id="id117" name="69A----71" overlapEndRef="id48" overlapValidityTime="PT30S" releaseSpeed="40" releaseTriggerHead="false" releaseTriggerRef="id90">
+        <nor:switchAndPosition switchPosition="straight" switchRef="sw25"/>
+        <nor:releaseGroup>
+          <nor:trackSectionRef ref="ar87"/>
+          <nor:trackSectionRef ref="ar89"/>
+        </nor:releaseGroup>
+        <nor:releaseGroup>
+          <nor:trackSectionRef ref="ar91"/>
+        </nor:releaseGroup>
+      </nor:route>
+      <nor:route approachPointRef="id73" approachSpeed="130" conditional="ocpManned" entryRef="id51" exitRef="id116" id="id118" name="69A----73" overlapEndRef="id49" overlapValidityTime="PT30S" proceedSpeed="80" releaseSpeed="40" releaseTriggerHead="false" releaseTriggerRef="id92">
+        <nor:switchAndPosition switchPosition="right" switchRef="sw25"/>
+        <nor:switchAndPosition switchPosition="left" switchRef="sw32"/>
+        <nor:releaseGroup>
+          <nor:trackSectionRef ref="ar87"/>
+          <nor:trackSectionRef ref="ar89"/>
+          <nor:trackSectionRef ref="ar132"/>
+        </nor:releaseGroup>
+        <nor:releaseGroup>
+          <nor:trackSectionRef ref="ar93"/>
+        </nor:releaseGroup>
+      </nor:route>
+    </nor:routes>
+    <nor:areas>
+      <nor:area id="ar80" name="01" type="trackSection">
+        <nor:isLimitedBy ref="id47"/>
+        <nor:isLimitedBy ref="id79"/>
+      </nor:area>
+      <nor:area id="ar82" name="02" type="trackSection">
+        <nor:isLimitedBy ref="id46"/>
+        <nor:isLimitedBy ref="id81"/>
+      </nor:area>
+      <nor:area id="ar85" name="B" type="trackSection">
+        <nor:isLimitedBy ref="id83"/>
+        <nor:isLimitedBy ref="id84"/>
+      </nor:area>
+      <nor:area id="ar87" name="A" type="trackSection">
+        <nor:isLimitedBy ref="id86"/>
+        <nor:isLimitedBy ref="id88"/>
+      </nor:area>
+      <nor:area id="ar89" name="3" type="trackSection">
+        <nor:isLimitedBy ref="id88"/>
+        <nor:isLimitedBy ref="id90"/>
+        <nor:isLimitedBy ref="id131"/>
+      </nor:area>
+      <nor:area id="ar91" name="02" type="trackSection">
+        <nor:isLimitedBy ref="id48"/>
+        <nor:isLimitedBy ref="id90"/>
+      </nor:area>
+      <nor:area id="ar93" name="01" type="trackSection">
+        <nor:isLimitedBy ref="id49"/>
+        <nor:isLimitedBy ref="id92"/>
+      </nor:area>
+      <nor:area id="ar95" name="03" type="trackSection">
+        <nor:isLimitedBy ref="oe28"/>
+        <nor:isLimitedBy ref="id94"/>
+      </nor:area>
+      <nor:area id="ar132" name="4" type="trackSection">
+        <nor:isLimitedBy ref="id92"/>
+        <nor:isLimitedBy ref="id94"/>
+        <nor:isLimitedBy ref="id131"/>
+        <nor:isLimitedBy ref="id148"/>
+      </nor:area>
+      <nor:area id="ar149" name="04" type="trackSection">
+        <nor:isLimitedBy ref="id147"/>
+        <nor:isLimitedBy ref="id148"/>
+      </nor:area>
+      <nor:area id="ar156" name="001" type="trackSection">
+        <nor:isLimitedBy ref="id79"/>
+        <nor:isLimitedBy ref="id155"/>
+      </nor:area>
+      <nor:area id="ar158" name="002" type="trackSection">
+        <nor:isLimitedBy ref="id81"/>
+        <nor:isLimitedBy ref="id157"/>
+      </nor:area>
+      <nor:area id="ar164" name="2" type="trackSection">
+        <nor:isLimitedBy ref="id83"/>
+        <nor:isLimitedBy ref="id155"/>
+        <nor:isLimitedBy ref="id157"/>
+      </nor:area>
+    </nor:areas>
+    <tracks>
+      <track id="tr1" mainDir="none" name="2" type="mainTrack">
+        <trackTopology>
+          <trackBegin absPos="0.0" id="id1" pos="0.0">
+            <bufferStop id="id46"/>
+          </trackBegin>
+          <trackEnd id="id16" pos="550.0">
+            <connection id="c16" ref="c18-16"/>
+          </trackEnd>
+          <crossSections>
+            <crossSection absPos="200.0" id="id39" ocpRef="id34" pos="200.0"/>
+          </crossSections>
+        </trackTopology>
+        <trackElements>
+          <speedChanges>
+            <speedChange absPos="0.0" dir="up" etcsTrainCategory="5" id="id98_spf_normal" pos="0.0" profileRef="spf_normal" vMax="40.0"/>
+          </speedChanges>
+          <gradientChanges>
+            <gradientChange absPos="0.0" id="id119" pos="0.0" slope="0.0"/>
+          </gradientChanges>
+          <trainProtectionChanges>
+            <trainProtectionChange absPos="0.0" dir="up" id="id121" nor:trainProtectionType="ETCS-L2" pos="0.0"/>
+          </trainProtectionChanges>
+          <electrificationChanges>
+            <electrificationChange absPos="0.0" id="id125" pos="0.0" type="overhead"/>
+          </electrificationChanges>
+          <platformEdges>
+            <platformEdge absPos="120.0" height="760.0" id="id42" length="250.0" ocpRef="id34" pos="120.0" side="right"/>
+          </platformEdges>
+        </trackElements>
+        <ocsElements>
+          <signals>
+            <signal absPos="0.0" code="SA-SIG-005441" controllerRef="id36" dir="down" function="other:end" id="id61" name="16" ocpStationRef="id34" pos="0.0" ruleCode="NOR:TJN:E35e" switchable="false" type="main" virtual="true">
+              <etcs level_2="true"/>
+            </signal>
+            <signal absPos="450.0" code="SA-SIG-005444" controllerRef="id36" dir="up" function="intermediate" id="id59" name="35" ocpStationRef="id34" pos="450.0" ruleCode="NOR:TJN:E35c" switchable="false" type="main">
+              <etcs level_2="true"/>
+            </signal>
+            <signal absPos="500.0" code="SA-SIG-005446" controllerRef="id36" dir="up" function="intermediate" id="id60" name="15" ocpStationRef="id34" pos="500.0" ruleCode="NOR:TJN:E35c" switchable="false" type="main">
+              <etcs level_2="true"/>
+            </signal>
+          </signals>
+          <trainDetectionElements>
+            <trainDetector absPos="450.0" id="id81" pos="450.0"/>
+            <trackCircuitBorder absPos="500.0" id="id157" pos="500.0"/>
+          </trainDetectionElements>
+          <stopPosts>
+            <stopPost absPos="140.0" code="KO-SKT-005447" dir="down" id="id65" ocpRef="id34" pos="140.0" trainLength="220.0">
+              <validForMovements kind="passengerTrains"/>
+            </stopPost>
+            <stopPost absPos="360.0" code="KO-SKT-005446" dir="up" id="id68" ocpRef="id34" pos="360.0" trainLength="220.0" trainRelation="headOfTrain">
+              <validForMovements kind="passengerTrains"/>
+            </stopPost>
+          </stopPosts>
+        </ocsElements>
+      </track>
+      <track id="tr5" mainDir="none" name="H" type="mainTrack">
+        <trackTopology>
+          <trackBegin id="id5" pos="0.0">
+            <connection id="c5" ref="c4"/>
+          </trackBegin>
+          <trackEnd id="id8" pos="3300.0">
+            <connection id="c8" ref="c9"/>
+          </trackEnd>
+          <mileageChanges>
+            <mileageChange absPos="2850.0" absPosIn="2800.0" id="id129" pos="1850.0" type="missing"/>
+          </mileageChanges>
+        </trackTopology>
+        <trackElements>
+          <speedChanges>
+            <speedChange absPos="1390.0" dir="up" id="id136_spf_temporary" pos="440.0" profileRef="spf_temporary" vMax="40.0">
+              <states>
+                <state disabled="false" nor:endDate="2019-04-01" nor:startDate="2019-01-01" status="planned"/>
+              </states>
+            </speedChange>
+            <speedChange absPos="1520.0" dir="up" id="id137_spf_temporary" pos="570.0" profileRef="spf_temporary" vMax="end">
+              <states>
+                <state disabled="false" nor:endDate="2019-04-01" nor:startDate="2019-01-01" status="planned"/>
+              </states>
+            </speedChange>
+            <speedChange absPos="2400.0" dir="up" etcsTrainCategory="13" id="id100_spf_krenge" pos="1450.0" profileRef="spf_krenge" vMax="end"/>
+            <speedChange absPos="2400.0" dir="up" etcsTrainCategory="5" id="id100_spf_normal" pos="1450.0" profileRef="spf_normal" vMax="20.0"/>
+            <speedChange absPos="2400.0" dir="up" etcsTrainCategory="6" id="id100_spf_pluss" pos="1450.0" profileRef="spf_pluss" vMax="end"/>
+            <speedChange absPos="2550.0" dir="up" etcsTrainCategory="5" id="id101_spf_normal" pos="1600.0" profileRef="spf_normal" vMax="80.0"/>
+            <speedChange absPos="3350.0" dir="down" id="id139_spf_avalanche" pos="2350.0" profileRef="spf_avalanche" signalised="false" vMax="end"/>
+            <speedChange absPos="3520.0" dir="down" id="id138_spf_avalanche" pos="2520.0" profileRef="spf_avalanche" signalised="false" vMax="50.0"/>
+            <speedChange absPos="3850.0" dir="up" id="id140_spf_conditional" pos="2850.0" profileRef="spf_conditional" signalised="false" vMax="60.0"/>
+            <speedChange absPos="4050.0" dir="up" id="id141_spf_conditional" pos="3050.0" profileRef="spf_conditional" signalised="false" vMax="end"/>
+          </speedChanges>
+          <gradientChanges>
+            <gradientChange absPos="3821.0" id="id165" pos="2821.0" slope="2.0"/>
+          </gradientChanges>
+          <tunnels>
+            <tunnel absPos="2850.0" id="id96" length="230.0" name="Testtunnelen" nor:resistanceFactorA="11.0" pos="1850.0"/>
+          </tunnels>
+          <bridges>
+            <brigde absPos="1420.0" id="id135" kind="under" length="100.0" name="Bruse" pos="470.0"/>
+          </bridges>
+          <levelCrossings>
+            <levelCrossing absPos="2500.0" id="id78" length="20.0" nor:roadEndPos="610.0" nor:roadStartPos="590.0" pos="1550.0" protection="Ba"/>
+          </levelCrossings>
+          <trainProtectionChanges>
+            <trainProtectionChange absPos="1900.0" dir="up" id="id123" nor:trainProtectionType="D-ATC" pos="950.0"/>
+          </trainProtectionChanges>
+        </trackElements>
+        <ocsElements>
+          <signals>
+            <signal absPos="950.0" code="SA-SIG-005448" controllerRef="id36" dir="up" function="exit" id="id55" name="L03" ocpStationRef="id34" pos="0.0" ruleCode="NOR:TJN:E35b" switchable="false" type="main">
+              <etcs level_2="true"/>
+            </signal>
+            <signal absPos="950.0" code="SA-SIG-005447" controllerRef="id36" dir="down" function="home" id="id56" name="B02" ocpStationRef="id34" pos="0.0" ruleCode="NOR:TJN:E35a" switchable="false" type="main">
+              <etcs level_2="true"/>
+            </signal>
+            <signal absPos="1050.0" code="KO-SKT-005444" controllerRef="id36" dir="down" id="id63" ocpStationRef="id34" pos="100.0" ruleCode="NOR:TJN:E37A" switchable="false"/>
+            <signal absPos="1900.0" code="KO-SKT-005443" dir="up" id="id64" pos="950.0" ruleCode="NOR:TJN:60G" switchable="false"/>
+            <signal absPos="2492.0" code="SA-SIG-005450" dir="up" id="id133" name="V1" nor:lamps="2" nor:mounted="pole" nor:side="right" pos="1542.0" ruleCode="NOR:TJN:§8-28" switchable="true" type="other:supervision">
+              <levelCrossing type="supervision"/>
+            </signal>
+            <signal absPos="2510.0" code="SA-SIG-005451" dir="down" id="id134" name="V2" nor:lamps="2" nor:mounted="pole" nor:side="left" pos="1560.0" ruleCode="NOR:TJN:§8-28" switchable="true" type="other:supervision">
+              <levelCrossing type="supervision"/>
+            </signal>
+            <signal absPos="3600.0" code="SA-SIG-005452" controllerRef="id37" dir="up" id="id73" name="69Va" ocpStationRef="id35" pos="2600.0" ruleCode="NOR:TJN:§8-14" switchable="true" type="distant"/>
+          </signals>
+          <trainDetectionElements>
+            <trainDetector absPos="950.0" id="id84" pos="0.0"/>
+          </trainDetectionElements>
+          <balises>
+            <balise absPos="3600.0" dir="up" id="id74-dummy" pos="2600.0"/>
+            <baliseGroup id="id74" type="signal">
+              <baliseRef ref="id74-dummy" sequence="1"/>
+            </baliseGroup>
+          </balises>
+        </ocsElements>
+      </track>
+      <track id="tr9" mainDir="none" name="2" type="mainTrack">
+        <trackTopology>
+          <trackBegin id="id9" pos="0.0">
+            <connection id="c9" ref="c8"/>
+          </trackBegin>
+          <trackEnd absPos="4500.0" id="id23" pos="200.0">
+            <connection id="c23" ref="c25-23"/>
+          </trackEnd>
+        </trackTopology>
+        <trackElements>
+          <speedChanges>
+            <speedChange absPos="4400.0" dir="down" etcsTrainCategory="5" id="id102_spf_normal" pos="100.0" profileRef="spf_normal" vMax="80.0"/>
+            <speedChange absPos="4400.0" dir="down" id="id102_spf_local" pos="100.0" profileRef="spf_local" signalised="false" vMax="end"/>
+          </speedChanges>
+        </trackElements>
+        <ocsElements>
+          <signals>
+            <signal absPos="4300.0" code="SA-SIG-005453" controllerRef="id37" dir="up" function="home" id="id51" name="69A" ocpStationRef="id35" pos="0.0" ruleCode="NOR:TJN:§8-10+14" switchable="true" type="combined"/>
+          </signals>
+          <trainDetectionElements>
+            <trackCircuitBorder absPos="4300.0" id="id86" pos="0.0"/>
+            <trackCircuitBorder absPos="4495.0" id="id88" pos="195.0"/>
+          </trainDetectionElements>
+          <balises>
+            <balise absPos="4300.0" dir="up" id="id75-A" name="A" pos="0.0"/>
+            <balise absPos="4300.0" dir="up" id="id75-B" name="B" pos="0.0"/>
+            <baliseGroup id="id75" type="signal">
+              <baliseRef ref="id75-A" sequence="1"/>
+              <baliseRef ref="id75-B" sequence="2"/>
+            </baliseGroup>
+          </balises>
+        </ocsElements>
+      </track>
+      <track id="tr14" mainDir="none" name="1" type="secondaryTrack">
+        <trackTopology>
+          <trackBegin absPos="0.0" id="id14" pos="0.0">
+            <bufferStop id="id47"/>
+          </trackBegin>
+          <trackEnd id="id13" pos="550.0">
+            <connection id="c13" ref="c18-13"/>
+          </trackEnd>
+          <crossSections>
+            <crossSection absPos="200.0" id="id38" ocpRef="id34" pos="200.0"/>
+          </crossSections>
+        </trackTopology>
+        <trackElements>
+          <speedChanges>
+            <speedChange absPos="0.0" dir="up" etcsTrainCategory="5" id="id97_spf_normal" pos="0.0" profileRef="spf_normal" vMax="40.0"/>
+          </speedChanges>
+          <gradientChanges>
+            <gradientChange absPos="0.0" id="id120" pos="0.0" slope="0.0"/>
+          </gradientChanges>
+          <trainProtectionChanges>
+            <trainProtectionChange absPos="0.0" dir="up" id="id122" nor:trainProtectionType="ETCS-L2" pos="0.0"/>
+          </trainProtectionChanges>
+          <electrificationChanges>
+            <electrificationChange absPos="0.0" id="id124" pos="0.0" type="overhead"/>
+          </electrificationChanges>
+          <geoMappings>
+            <geoMapping id="id126" pos="450.0"/>
+          </geoMappings>
+          <platformEdges>
+            <platformEdge absPos="150.0" height="760.0" id="id43" length="150.0" ocpRef="id34" pos="150.0" side="right"/>
+          </platformEdges>
+        </trackElements>
+        <ocsElements>
+          <signals>
+            <signal absPos="0.0" code="SA-SIG-005442" controllerRef="id36" dir="down" function="other:end" id="id62" name="06" ocpStationRef="id34" pos="0.0" ruleCode="NOR:TJN:E35e" switchable="false" type="main" virtual="true">
+              <etcs level_2="true"/>
+            </signal>
+            <signal absPos="450.0" code="SA-SIG-005443" controllerRef="id36" dir="up" function="intermediate" id="id58" name="25" ocpStationRef="id34" pos="450.0" ruleCode="NOR:TJN:E35c" switchable="false" type="main">
+              <etcs level_2="true"/>
+            </signal>
+            <signal absPos="500.0" code="SA-SIG-005445" controllerRef="id36" dir="up" function="intermediate" id="id57" name="05" ocpStationRef="id34" pos="500.0" ruleCode="NOR:TJN:E35c" switchable="false" type="main">
+              <etcs level_2="true"/>
+            </signal>
+          </signals>
+          <trainDetectionElements>
+            <trainDetector absPos="450.0" id="id79" pos="450.0"/>
+            <trainDetector absPos="500.0" id="id155" pos="500.0"/>
+          </trainDetectionElements>
+          <stopPosts>
+            <stopPost absPos="160.0" code="KO-SKT-005448" dir="down" id="id67" ocpRef="id34" pos="160.0" trainLength="110.0">
+              <validForMovements kind="passengerTrains"/>
+            </stopPost>
+            <stopPost absPos="290.0" code="KO-SKT-005445" description="this is a description/*Should be corrected to only valid for passenger trains[478.0,-500.0]*/" dir="up" id="id66" ocpRef="id34" pos="290.0" trainLength="110.0" trainRelation="headOfTrain">
+              <validForMovements kind="allTrains"/>
+            </stopPost>
+          </stopPosts>
+        </ocsElements>
+      </track>
+      <track id="tr17" mainDir="none" name="2" type="mainTrack">
+        <trackTopology>
+          <trackBegin id="id17" pos="0.0">
+            <connection id="c18-16" ref="c16"/>
+          </trackBegin>
+          <trackEnd absPos="950.0" id="id4" pos="400.0">
+            <connection id="c4" ref="c5"/>
+          </trackEnd>
+          <connections>
+            <switch controllerRef="id36" id="sw18" name="2" nor:clearance="45.0" nor:remoteIndicated="true" nor:remoteOperated="true" normalPosition="right" pos="0.0" trackContinueCourse="straight">
+              <connection course="right" id="c18-13" maxSpeed="40.0" orientation="incoming" passable="true" ref="c13"/>
+            </switch>
+          </connections>
+        </trackTopology>
+        <trackElements>
+          <speedChanges>
+            <speedChange absPos="800.0" dir="up" etcsTrainCategory="13" id="id99_spf_krenge" pos="250.0" profileRef="spf_krenge" vMax="100.0"/>
+            <speedChange absPos="800.0" dir="up" etcsTrainCategory="5" id="id99_spf_normal" pos="250.0" profileRef="spf_normal" vMax="80.0"/>
+            <speedChange absPos="800.0" dir="up" etcsTrainCategory="6" id="id99_spf_pluss" pos="250.0" profileRef="spf_pluss" vMax="90.0"/>
+          </speedChanges>
+        </trackElements>
+        <ocsElements>
+          <trainDetectionElements>
+            <trainDetector absPos="555.0" id="id83" pos="5.0"/>
+          </trainDetectionElements>
+        </ocsElements>
+      </track>
+      <track id="tr20" mainDir="none" name="1" type="secondaryTrack">
+        <trackTopology>
+          <trackBegin absPos="4500.0" id="id20" pos="0.0">
+            <connection id="c20" ref="c25-20"/>
+          </trackBegin>
+          <trackEnd absPos="4600.0" id="id30" pos="100.0">
+            <connection id="c30" ref="c32-30"/>
+          </trackEnd>
+        </trackTopology>
+        <ocsElements>
+          <trainDetectionElements>
+            <trackCircuitBorder absPos="4550.0" id="id131" pos="50.0"/>
+          </trainDetectionElements>
+        </ocsElements>
+      </track>
+      <track id="tr24" mainDir="none" name="2" type="mainTrack">
+        <trackTopology>
+          <trackBegin absPos="4500.0" id="id24" pos="0.0">
+            <connection id="c25-23" ref="c23"/>
+          </trackBegin>
+          <trackEnd id="id2" pos="700.0">
+            <bufferStop id="id48"/>
+          </trackEnd>
+          <connections>
+            <switch absPos="4500.0" id="sw25" name="3" nor:clearance="45.0" nor:remoteIndicated="true" nor:remoteOperated="true" normalPosition="straight" pos="0.0" trackContinueCourse="straight">
+              <connection course="right" id="c25-20" maxSpeed="40.0" orientation="outgoing" passable="true" ref="c20"/>
+            </switch>
+          </connections>
+          <crossSections>
+            <crossSection absPos="4850.0" id="id41" ocpRef="id35" pos="350.0"/>
+          </crossSections>
+        </trackTopology>
+        <trackElements>
+          <speedChanges>
+            <speedChange absPos="5200.0" dir="down" id="id103_spf_local" pos="700.0" profileRef="spf_local" signalised="false" vMax="40.0"/>
+          </speedChanges>
+          <trainProtectionChanges>
+            <trainProtectionChange absPos="5200.0" dir="down" id="id159" nor:trainProtectionType="D-ATC" pos="700.0"/>
+          </trainProtectionChanges>
+          <platformEdges>
+            <platformEdge absPos="4800.0" height="760.0" id="id44" length="250.0" ocpRef="id35" pos="300.0" side="left"/>
+          </platformEdges>
+        </trackElements>
+        <ocsElements>
+          <signals>
+            <signal absPos="4600.0" code="SA-SIG-005454" controllerRef="id37" dir="down" function="exit" id="id53" name="69P2" ocpStationRef="id35" pos="100.0" ruleCode="NOR:TJN:§8-11" switchable="true" type="main"/>
+            <signal absPos="5190.0" code="SA-SIG-005457" dir="up" function="other:end" id="id115" name="71" ocpStationRef="id35" pos="690.0" ruleCode="NOR:TJN:66" switchable="false" type="main" virtual="false"/>
+          </signals>
+          <trainDetectionElements>
+            <trackCircuitBorder absPos="4600.0" id="id90" pos="100.0"/>
+          </trainDetectionElements>
+          <balises>
+            <balise absPos="4600.0" dir="down" id="id76-A" name="A" pos="100.0"/>
+            <balise absPos="4600.0" dir="down" id="id76-B" name="B" pos="100.0"/>
+            <baliseGroup id="id76" type="signal">
+              <baliseRef ref="id76-A" sequence="1"/>
+              <baliseRef ref="id76-B" sequence="2"/>
+            </baliseGroup>
+          </balises>
+          <stopPosts>
+            <stopPost absPos="4810.0" code="KO-SKT-005441" dir="down" id="id69" ocpRef="id35" pos="310.0" trainLength="220.0">
+              <validForMovements kind="passengerTrains"/>
+            </stopPost>
+            <stopPost absPos="5040.0" dir="up" id="id72" ocpRef="id35" pos="540.0" trainLength="220.0">
+              <validForMovements kind="passengerTrains"/>
+            </stopPost>
+          </stopPosts>
+        </ocsElements>
+      </track>
+      <track id="tr28" mainDir="none" name="3" type="sidingTrack">
+        <trackTopology>
+          <trackBegin id="id28" pos="0.0">
+            <openEnd id="oe28"/>
+          </trackBegin>
+          <trackEnd absPos="4600.0" id="id27" pos="300.0">
+            <connection id="c27" ref="c32-27"/>
+          </trackEnd>
+        </trackTopology>
+        <trackElements>
+          <speedChanges>
+            <speedChange absPos="4300.0" dir="up" id="id105_spf_local" pos="0.0" profileRef="spf_local" signalised="false" vMax="40.0"/>
+          </speedChanges>
+          <gradientChanges>
+            <gradientChange absPos="4300.0" id="id152" pos="0.0" slope="2.0"/>
+          </gradientChanges>
+          <trainProtectionChanges>
+            <trainProtectionChange absPos="4300.0" dir="up" id="id162" nor:trainProtectionType="none" pos="0.0"/>
+            <trainProtectionChange absPos="4550.0" dir="up" id="id163" nor:trainProtectionType="D-ATC" pos="250.0"/>
+          </trainProtectionChanges>
+          <electrificationChanges>
+            <electrificationChange absPos="4300.0" id="id153" pos="0.0" type="none"/>
+            <electrificationChange absPos="4550.0" id="id154" pos="250.0" type="overhead"/>
+          </electrificationChanges>
+        </trackElements>
+        <ocsElements>
+          <signals>
+            <signal absPos="4300.0" code="unknown" controllerRef="id37" dir="up" function="home" id="id142" name="71C" nor:lamps="1" nor:mounted="pole" nor:side="right" ocpStationRef="id35" pos="0.0" ruleCode="NOR:TJN:§8-16" sigSystem="simplified" sight="200.0" switchable="true" type="main"/>
+            <signal absPos="4540.0" code="SA-SIG-005456" controllerRef="id37" dir="up" id="id52" ocpStationRef="id35" pos="240.0" ruleCode="NOR:TJN:§8-23" switchable="true" type="shunting"/>
+          </signals>
+          <trainDetectionElements>
+            <trackCircuitBorder absPos="4555.0" id="id94" pos="255.0"/>
+          </trainDetectionElements>
+          <derailers>
+            <derailer absPos="4550.0" derailSide="right" dir="up" id="id50" name="Sp.I" pos="250.0"/>
+          </derailers>
+        </ocsElements>
+      </track>
+      <track id="tr31" mainDir="none" name="1" type="secondaryTrack">
+        <trackTopology>
+          <trackBegin absPos="4600.0" id="id31" pos="0.0">
+            <connection id="c32-30" ref="c30"/>
+          </trackBegin>
+          <trackEnd id="id21" pos="600.0">
+            <bufferStop id="id49"/>
+          </trackEnd>
+          <connections>
+            <crossing absPos="4600.0" id="sw32" name="4" nor:clearance="45.0" nor:remoteIndicated="true" nor:remoteOperated="true" normalPosition="straight" pos="0.0" trackContinueCourse="left" type="doubleSwitchCrossing">
+              <connection course="right" id="c32-27" maxSpeed="40.0" orientation="incoming" passable="true" ref="c27"/>
+              <connection course="straight" id="c32-143" maxSpeed="40.0" orientation="outgoing" passable="true" ref="c143"/>
+            </crossing>
+          </connections>
+          <crossSections>
+            <crossSection absPos="4850.0" id="id40" ocpRef="id35" pos="250.0"/>
+          </crossSections>
+        </trackTopology>
+        <trackElements>
+          <speedChanges>
+            <speedChange absPos="5200.0" dir="down" etcsTrainCategory="5" id="id104_spf_normal" pos="600.0" profileRef="spf_normal" vMax="40.0"/>
+            <speedChange absPos="5200.0" dir="down" id="id104_spf_local" pos="600.0" profileRef="spf_local" signalised="false" vMax="40.0"/>
+          </speedChanges>
+          <trainProtectionChanges>
+            <trainProtectionChange absPos="5200.0" dir="down" id="id160" nor:trainProtectionType="D-ATC" pos="600.0"/>
+          </trainProtectionChanges>
+          <platformEdges>
+            <platformEdge absPos="4800.0" height="760.0" id="id45" length="250.0" ocpRef="id35" pos="200.0" side="right"/>
+          </platformEdges>
+        </trackElements>
+        <ocsElements>
+          <signals>
+            <signal absPos="4650.0" code="SA-SIG-005455" controllerRef="id37" dir="down" function="exit" id="id54" name="69P1" ocpStationRef="id35" pos="50.0" ruleCode="NOR:TJN:§8-11" switchable="true" type="main"/>
+            <signal absPos="5190.0" code="SA-SIG-005458" dir="up" function="other:end" id="id116" name="73" ocpStationRef="id35" pos="590.0" ruleCode="NOR:TJN:66" switchable="false" type="main" virtual="false"/>
+          </signals>
+          <trainDetectionElements>
+            <trackCircuitBorder absPos="4650.0" id="id92" pos="50.0"/>
+          </trainDetectionElements>
+          <balises>
+            <balise absPos="4650.0" dir="down" id="id77-A" name="A" pos="50.0"/>
+            <balise absPos="4650.0" dir="down" id="id77-B" name="B" pos="50.0"/>
+            <baliseGroup id="id77" type="signal">
+              <baliseRef ref="id77-A" sequence="1"/>
+              <baliseRef ref="id77-B" sequence="2"/>
+            </baliseGroup>
+          </balises>
+          <stopPosts>
+            <stopPost absPos="4810.0" code="KO-SKT-005442" dir="down" id="id70" ocpRef="id35" pos="210.0" trainLength="220.0">
+              <validForMovements kind="passengerTrains"/>
+            </stopPost>
+            <stopPost absPos="5040.0" dir="up" id="id71" ocpRef="id35" pos="440.0" trainLength="220.0">
+              <validForMovements kind="passengerTrains"/>
+            </stopPost>
+          </stopPosts>
+        </ocsElements>
+      </track>
+      <track id="tr143" name="4" type="sidingTrack">
+        <trackTopology>
+          <trackBegin absPos="4600.0" id="id143" pos="0.0">
+            <connection id="c143" ref="c32-143"/>
+          </trackBegin>
+          <trackEnd id="id144" pos="200.0">
+            <bufferStop id="id147"/>
+          </trackEnd>
+        </trackTopology>
+        <trackElements>
+          <speedChanges>
+            <speedChange absPos="4800.0" dir="down" etcsTrainCategory="5" id="id151_spf_normal" pos="200.0" profileRef="spf_normal" vMax="40.0"/>
+          </speedChanges>
+          <trainProtectionChanges>
+            <trainProtectionChange absPos="4800.0" dir="down" id="id161" nor:trainProtectionType="D-ATC" pos="200.0"/>
+          </trainProtectionChanges>
+          <geoMappings>
+            <geoMapping id="id146" pos="100.0"/>
+          </geoMappings>
+        </trackElements>
+        <ocsElements>
+          <trainDetectionElements>
+            <trackCircuitBorder absPos="4650.0" id="id148" pos="50.0"/>
+          </trainDetectionElements>
+        </ocsElements>
+      </track>
+    </tracks>
+    <trackGroups>
+      <line id="li0" name="Enkel eksempel linje">
+        <trackRef ref="tr1"/>
+        <trackRef ref="tr5"/>
+        <trackRef ref="tr9"/>
+        <trackRef ref="tr14"/>
+        <trackRef ref="tr17"/>
+        <trackRef ref="tr20"/>
+        <trackRef ref="tr24"/>
+        <trackRef ref="tr28"/>
+        <trackRef ref="tr31"/>
+        <trackRef ref="tr143"/>
+      </line>
+      <nor:lineSection id="ls0" name="ARN-CST">
+        <nor:trackRef ref="tr5"/>
+      </nor:lineSection>
+    </trackGroups>
+    <operationControlPoints>
+      <ocp id="id34" name="Arnau">
+        <nor:propOperationalAdditional simultaneousEntry="standard"/>
+        <propOperational operationalType="station" trafficType="passenger"/>
+        <propService airport="true" passenger="true"/>
+        <propEquipment>
+          <trackRef ref="tr1"/>
+          <trackRef ref="tr17"/>
+          <trackRef ref="tr14"/>
+        </propEquipment>
+        <geoCoord coord="60.0 10.0"/>
+        <designator entry="ARN" register="SJN"/>
+      </ocp>
+      <ocp id="id35" name="Cstadt">
+        <nor:propOperationalAdditional remoteControlled="false" simultaneousEntry="none"/>
+        <propOperational operationalType="station" trafficType="passenger"/>
+        <propEquipment>
+          <trackRef ref="tr31"/>
+          <trackRef ref="tr143"/>
+          <trackRef ref="tr20"/>
+          <trackRef ref="tr24"/>
+          <trackRef ref="tr9"/>
+          <trackRef ref="tr28"/>
+        </propEquipment>
+        <geoCoord coord="60.0 11.0"/>
+        <designator entry="CST" register="SJN"/>
+      </ocp>
+    </operationControlPoints>
+    <controllers>
+      <controller id="id36" model="Thales L90 5" name="Arnau" nor:routeSetTime="PT7S" nor:typicalThrowTime="PT6S" technologyType="electronic">
+        <ocpRef ref="id34"/>
+      </controller>
+      <controller id="id37" model="NSI-63" name="Cstadt" nor:routeSetTime="PT5S" nor:typicalThrowTime="PT5S" technologyType="electrical">
+        <ocpRef ref="id35"/>
+      </controller>
+    </controllers>
+    <speedProfiles>
+      <speedProfile id="spf_temporary" influence="decreasing" name="nor:temporary"/>
+      <speedProfile id="spf_pluss" influence="increasing" name="nor:pluss"/>
+      <speedProfile id="spf_conditional" influence="decreasing" name="nor:conditional" verbalConstraint="SJN defined condition"/>
+      <speedProfile id="spf_avalanche" influence="decreasing" name="nor:avalanche" verbalConstraint="SJN defined condition"/>
+      <speedProfile id="spf_normal" influence="increasing" name="basis"/>
+      <speedProfile id="spf_local" influence="decreasing" name="nor:local" verbalConstraint="SJN defined condition"/>
+      <speedProfile id="spf_krenge" influence="increasing" name="nor:krenge"/>
+    </speedProfiles>
+  </infrastructure>
+  <infrastructureVisualizations>
+    <visualization id="vis0" infrastructureRef="inf0" version="2.4">
+      <lineVis ref="li0">
+        <trackVis ref="tr1">
+          <trackElementVis ref="id1">
+            <position x="390.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id46">
+            <position x="390.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id61">
+            <position x="390.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id98_spf_normal">
+            <position x="390.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id119">
+            <position x="390.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id121">
+            <position x="390.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id125">
+            <position x="390.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id42">
+            <position x="414.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id65">
+            <position x="418.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id39">
+            <position x="430.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id68">
+            <position x="462.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id59">
+            <position x="480.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id81">
+            <position x="480.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id60">
+            <position x="490.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id157">
+            <position x="490.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id16">
+            <position x="500.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c16">
+            <position x="500.0" y="-450.0"/>
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="tr5">
+          <trackElementVis ref="id5">
+            <position x="580.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c5">
+            <position x="580.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id55">
+            <position x="580.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id56">
+            <position x="580.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id84">
+            <position x="580.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id63">
+            <position x="586.5" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id136_spf_temporary">
+            <position x="608.5" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id135">
+            <position x="610.5" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id137_spf_temporary">
+            <position x="617.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id64">
+            <position x="641.6" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id123">
+            <position x="641.6" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id100_spf_krenge">
+            <position x="674.1" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id100_spf_normal">
+            <position x="674.1" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id100_spf_pluss">
+            <position x="674.1" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id133">
+            <position x="680.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id78">
+            <position x="680.5" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id134">
+            <position x="681.2" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id101_spf_normal">
+            <position x="683.8" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id129">
+            <position x="700.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id96">
+            <position x="700.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id139_spf_avalanche">
+            <position x="727.6" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id138_spf_avalanche">
+            <position x="737.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id73">
+            <position x="741.4" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id74-dummy">
+            <position x="741.4" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id165">
+            <position x="753.6" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id140_spf_conditional">
+            <position x="755.2" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id141_spf_conditional">
+            <position x="766.2" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id8">
+            <position x="780.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c8">
+            <position x="780.0" y="-450.0"/>
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="tr9">
+          <trackElementVis ref="id9">
+            <position x="780.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c9">
+            <position x="780.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id51">
+            <position x="780.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id75-A">
+            <position x="780.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id75-B">
+            <position x="780.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id86">
+            <position x="780.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id102_spf_normal">
+            <position x="800.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id102_spf_local">
+            <position x="800.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id88">
+            <position x="819.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id23">
+            <position x="820.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c23">
+            <position x="820.0" y="-450.0"/>
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="tr14">
+          <trackElementVis ref="id14">
+            <position x="390.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id47">
+            <position x="390.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id62">
+            <position x="390.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id97_spf_normal">
+            <position x="390.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id120">
+            <position x="390.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id122">
+            <position x="390.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id124">
+            <position x="390.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id43">
+            <position x="420.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id67">
+            <position x="422.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id38">
+            <position x="430.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id66">
+            <position x="448.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id58">
+            <position x="480.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id79">
+            <position x="480.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id126">
+            <position x="480.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id57">
+            <position x="490.0" y="-460.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id155">
+            <position x="490.0" y="-460.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id13">
+            <position x="500.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c13">
+            <position x="500.0" y="-450.0"/>
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="tr17">
+          <trackElementVis ref="id17">
+            <position x="500.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c18-16">
+            <position x="500.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="sw18">
+            <position x="500.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c18-13">
+            <position x="500.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id83">
+            <position x="501.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id99_spf_krenge">
+            <position x="550.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id99_spf_normal">
+            <position x="550.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id99_spf_pluss">
+            <position x="550.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id4">
+            <position x="580.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c4">
+            <position x="580.0" y="-450.0"/>
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="tr20">
+          <trackElementVis ref="id20">
+            <position x="820.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c20">
+            <position x="820.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id131">
+            <position x="830.0" y="-460.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id30">
+            <position x="840.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c30">
+            <position x="840.0" y="-470.0"/>
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="tr24">
+          <trackElementVis ref="id24">
+            <position x="820.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c25-23">
+            <position x="820.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="sw25">
+            <position x="820.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c25-20">
+            <position x="820.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id53">
+            <position x="840.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id76-A">
+            <position x="840.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id76-B">
+            <position x="840.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id90">
+            <position x="840.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id44">
+            <position x="880.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id69">
+            <position x="882.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id41">
+            <position x="890.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id72">
+            <position x="928.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id115">
+            <position x="958.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id103_spf_local">
+            <position x="960.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id159">
+            <position x="960.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id2">
+            <position x="960.0" y="-450.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id48">
+            <position x="960.0" y="-450.0"/>
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="tr28">
+          <trackElementVis ref="id28">
+            <position x="780.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="oe28">
+            <position x="780.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id105_spf_local">
+            <position x="780.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id142">
+            <position x="780.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id152">
+            <position x="780.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id153">
+            <position x="780.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id162">
+            <position x="780.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id52">
+            <position x="828.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id50">
+            <position x="830.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id154">
+            <position x="830.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id163">
+            <position x="830.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id94">
+            <position x="831.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id27">
+            <position x="840.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c27">
+            <position x="840.0" y="-470.0"/>
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="tr31">
+          <trackElementVis ref="id31">
+            <position x="840.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c32-30">
+            <position x="840.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="sw32">
+            <position x="840.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c32-27">
+            <position x="840.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c32-143">
+            <position x="840.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id54">
+            <position x="850.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id77-A">
+            <position x="850.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id77-B">
+            <position x="850.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id92">
+            <position x="850.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id45">
+            <position x="880.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id70">
+            <position x="882.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id40">
+            <position x="890.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id71">
+            <position x="928.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id116">
+            <position x="958.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id104_spf_normal">
+            <position x="960.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id104_spf_local">
+            <position x="960.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id160">
+            <position x="960.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id21">
+            <position x="960.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id49">
+            <position x="960.0" y="-470.0"/>
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="tr143">
+          <trackElementVis ref="id143">
+            <position x="840.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c143">
+            <position x="840.0" y="-470.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id148">
+            <position x="850.0" y="-480.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id146">
+            <position x="860.0" y="-490.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id151_spf_normal">
+            <position x="880.0" y="-490.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id161">
+            <position x="880.0" y="-490.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id144">
+            <position x="880.0" y="-490.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id147">
+            <position x="880.0" y="-490.0"/>
+          </trackElementVis>
+        </trackVis>
+      </lineVis>
+      <ocpVis ref="id34">
+        <position x="430.0" y="-490.0"/>
+      </ocpVis>
+      <ocpVis ref="id35">
+        <position x="890.0" y="-490.0"/>
+      </ocpVis>
+      <ocpVis ref="id36">
+        <position x="450.0" y="-490.0"/>
+      </ocpVis>
+      <ocpVis ref="id37">
+        <position x="910.0" y="-490.0"/>
+      </ocpVis>
+    </visualization>
+  </infrastructureVisualizations>
+</railml>

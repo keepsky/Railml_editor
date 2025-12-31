@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="clr-namespace:RailmlEditor.ViewModels"
     xmlns:local="clr-namespace:RailmlEditor" mc:Ignorable="d" Title="MainWindow" Height="900" Width="1300" KeyDown="Window_KeyDown">
     <Window.InputBindings>
         <KeyBinding Key="Delete" Command="{Binding DeleteCommand}"/>
@@ -837,21 +838,59 @@
                 <Border Grid.Row="0" BorderBrush="Gray" BorderThickness="0,0,1,1" Margin="0,0,0,5">
                     <DockPanel>
                         <TextBlock Text="Explorer" DockPanel.Dock="Top" FontWeight="Bold" Margin="5"/>
-                        <TreeView ItemsSource="{Binding TreeCategories}" BorderThickness="0" Background="Transparent" Name="ElementTree">
-                            <TreeView.ItemTemplate>
-                                <HierarchicalDataTemplate ItemsSource="{Binding Items}">
-                                    <TextBlock Text="{Binding Title}" FontWeight="Bold"/>
-                                    <HierarchicalDataTemplate.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding Id}"/>
-                                                <TextBlock Text=" - " Foreground="Gray"/>
-                                                <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </HierarchicalDataTemplate.ItemTemplate>
+                        <TreeView ItemsSource="{Binding TreeRoots}" BorderThickness="0" Background="Transparent" Name="ElementTree" SelectedItemChanged="ElementTree_SelectedItemChanged">
+                            <TreeView.Resources>
+                                <!-- Level 1: Infrastructure -->
+                                <HierarchicalDataTemplate DataType="{x:Type viewmodels:InfrastructureViewModel}" ItemsSource="{Binding Categories}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Id}" FontWeight="Bold"/>
+                                        <TextBlock Text=" - " Foreground="Gray"/>
+                                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
+                                    </StackPanel>
                                 </HierarchicalDataTemplate>
-                            </TreeView.ItemTemplate>
+
+                                <!-- Level 2: Category -->
+                                <HierarchicalDataTemplate DataType="{x:Type viewmodels:CategoryViewModel}" ItemsSource="{Binding Items}">
+                                    <TextBlock Text="{Binding Title}" FontWeight="Bold"/>
+                                </HierarchicalDataTemplate>
+
+                                <!-- Level 3: Elements (restoring text-only display) -->
+                                <DataTemplate DataType="{x:Type viewmodels:TrackViewModel}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Id}"/>
+                                        <TextBlock Text=" - " Foreground="Gray"/>
+                                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type viewmodels:CurvedTrackViewModel}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Id}"/>
+                                        <TextBlock Text=" - " Foreground="Gray"/>
+                                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type viewmodels:SignalViewModel}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Id}"/>
+                                        <TextBlock Text=" - " Foreground="Gray"/>
+                                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type viewmodels:SwitchViewModel}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Id}"/>
+                                        <TextBlock Text=" - " Foreground="Gray"/>
+                                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type viewmodels:RouteViewModel}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Id}"/>
+                                        <TextBlock Text=" - " Foreground="Gray"/>
+                                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </TreeView.Resources>
                             <TreeView.ItemContainerStyle>
                                 <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource RailmlTreeViewItemStyle}"/>
                             </TreeView.ItemContainerStyle>
@@ -1350,6 +1389,26 @@
                                                 </ItemsControl>
                                             </StackPanel>
                                         </StackPanel>
+                                    </DataTemplate>
+
+                                    <!-- Infrastructure Properties -->
+                                    <DataTemplate DataType="{x:Type viewmodels:InfrastructureViewModel}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Id}" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                        </Grid>
                                     </DataTemplate>
 
                                 </ContentControl.Resources>

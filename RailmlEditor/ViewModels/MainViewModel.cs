@@ -453,6 +453,15 @@ namespace RailmlEditor.ViewModels
         public List<bool> AvailableProtections { get; } = new() { true, false };
     }
 
+    public class InfrastructureViewModel : BaseElementViewModel
+    {
+        public override string TypeName => "Infrastructure";
+        public ObservableCollection<CategoryViewModel> Categories { get; } = new();
+
+        public override double X { get => 0; set { } }
+        public override double Y { get => 0; set { } }
+    }
+
     public class CategoryViewModel : ObservableObject
     {
         public string Title { get; set; }
@@ -464,7 +473,14 @@ namespace RailmlEditor.ViewModels
         public ObservableCollection<BaseElementViewModel> Elements { get; } = new ObservableCollection<BaseElementViewModel>();
         public ObservableCollection<BaseElementViewModel> SelectedElements { get; } = new ObservableCollection<BaseElementViewModel>();
 
-        public ObservableCollection<CategoryViewModel> TreeCategories { get; } = new ObservableCollection<CategoryViewModel>();
+        public ObservableCollection<InfrastructureViewModel> TreeRoots { get; } = new ObservableCollection<InfrastructureViewModel>();
+        
+        private InfrastructureViewModel _activeInfrastructure;
+        public InfrastructureViewModel ActiveInfrastructure
+        {
+            get => _activeInfrastructure;
+            set => SetProperty(ref _activeInfrastructure, value);
+        }
 
         private BaseElementViewModel? _selectedElement;
         public BaseElementViewModel? SelectedElement
@@ -495,7 +511,7 @@ namespace RailmlEditor.ViewModels
 
         public MainViewModel()
         {
-            InitializeTreeCategories();
+            InitializeInfrastructure();
             Elements.CollectionChanged += Elements_CollectionChanged;
             History.StateChanged += (s, e) => { 
                 (UndoCommand as RelayCommand)?.RaiseCanExecuteChanged();
@@ -846,7 +862,7 @@ namespace RailmlEditor.ViewModels
 
             Elements.CollectionChanged -= Elements_CollectionChanged;
             Elements.Clear();
-            foreach (var cat in TreeCategories) cat.Items.Clear();
+            foreach (var cat in ActiveInfrastructure.Categories) cat.Items.Clear();
             SelectedElements.Clear();
 
             foreach (var el in state)
@@ -863,19 +879,26 @@ namespace RailmlEditor.ViewModels
             UpdateSelectionState();
         }
 
-        private void InitializeTreeCategories()
+        private void InitializeInfrastructure()
         {
-            TreeCategories.Add(new CategoryViewModel { Title = "Track" });
-            TreeCategories.Add(new CategoryViewModel { Title = "Signal" });
-            TreeCategories.Add(new CategoryViewModel { Title = "Point" });
-            TreeCategories.Add(new CategoryViewModel { Title = "Route" });
+            ActiveInfrastructure = new InfrastructureViewModel
+            {
+                Id = "inf001",
+                Name = "Default Infrastructure"
+            };
+            ActiveInfrastructure.Categories.Add(new CategoryViewModel { Title = "Track" });
+            ActiveInfrastructure.Categories.Add(new CategoryViewModel { Title = "Signal" });
+            ActiveInfrastructure.Categories.Add(new CategoryViewModel { Title = "Point" });
+            ActiveInfrastructure.Categories.Add(new CategoryViewModel { Title = "Route" });
+            
+            TreeRoots.Add(ActiveInfrastructure);
         }
 
         private void Elements_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
              if (e.Action == NotifyCollectionChangedAction.Reset)
              {
-                 foreach(var cat in TreeCategories) cat.Items.Clear();
+                 foreach(var cat in ActiveInfrastructure.Categories) cat.Items.Clear();
              }
              
              if (e.NewItems != null)
@@ -902,7 +925,7 @@ namespace RailmlEditor.ViewModels
              else if (item is SwitchViewModel) catTitle = "Point";
              else if (item is RouteViewModel) catTitle = "Route";
              
-             var cat = TreeCategories.FirstOrDefault(c => c.Title == catTitle);
+             var cat = ActiveInfrastructure.Categories.FirstOrDefault(c => c.Title == catTitle);
              cat?.Items.Add(item);
              
              item.PropertyChanged += Element_PropertyChanged;
@@ -917,7 +940,7 @@ namespace RailmlEditor.ViewModels
                  UpdateSelectionState();
              }
 
-             foreach(var cat in TreeCategories)
+             foreach(var cat in ActiveInfrastructure.Categories)
              {
                  if (cat.Items.Contains(item))
                  {

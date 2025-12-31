@@ -1,0 +1,792 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<railml xmlns="https://www.railml.org/schemas/2018"
+  xmlns:nor="http://www.jernbanedirektoratet.no/railml"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.4" xsi:schemaLocation="https://www.railml.org/schemas/2018 https://schemas.railml.org/2018/railML-2.4/schema/railML.xsd http://www.jernbanedirektoratet.no/railml https://www.jernbanedirektoratet.no/globalassets/documenter/railml/norExtension.xsd">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:date>2025-12-31T07:25:22.848950261Z</dc:date>
+    <dc:source>railOscope https://railoscope.com</dc:source>
+    <dc:source>Simplest Example rev547</dc:source>
+    <dc:source>infrastructureVisualization: For id="vis0" used coordinate system ortho: y-axis vertical from bottom to top, x-axis horizontal from left to right</dc:source>
+    <dc:language>no-NO</dc:language>
+    <dc:relation>norExtension.xsd_5.4</dc:relation>
+    <dc:source>https://railoscope.com/workspace/5c0e3000dc7adc0696c960e2?modelId=5c815c32137e0f14761f0ba8&amp;revision=547</dc:source>
+    <!--Browsable url: https://railoscope.com/workspace/5c0e3000dc7adc0696c960e2?modelId=5c815c32137e0f14761f0ba8&revision=547 -->
+    <dc:subject>Examples</dc:subject>
+    <dc:subject>Trunk</dc:subject>
+    <dc:creator>Vivian Augele, Torben Brand, Thomas Nygreen, Janne Moller</dc:creator>
+    <organizationalUnits>
+      <infrastructureManager code="BN" id="id71" name="Bane NOR"/>
+    </organizationalUnits>
+  </metadata>
+  <infrastructure description="/*This is Jernbanedirektoratet &quot;Simplest example&quot; (for railML2.4nor).&#10;© 2024, Norwegian Railway Directorate. This work is licensed under a CC BY 4.0 license (https://creativecommons.org/licenses/by/4.0/). [391.0,-663.0]*/" id="inf0" name="Simplest Example">
+    <nor:projects>
+      <nor:project id="pr6921e524-bf24-145f-f9b3-8428457225c9" name="&quot;Bruse&quot; brigde">
+        <nor:alternative description="Axcle load increase according to concept A2" id="pra8b26d91f-791b-16f0-b980-da5ff7ee80e8" name="Brigde improvement"/>
+        <nor:phase id="prp6473936e-7fc0-996f-e56e-0db99c3020ca" name="As built" regulationPhase="built" startDate="2020-10-01"/>
+      </nor:project>
+    </nor:projects>
+    <nor:routes>
+      <nor:route approachPointRef="id12" approachSpeed="100" code="[BD code?]" conditional="ocpManned" description="naming rule:[entry signal name]&quot;-&quot;[exit signal name]" entryRef="id10" exitRef="id39" id="id54" name="OSL A101---OSL L201" nor:change="new" overlapEndRef="sw26" overlapValidityTime="PT40S" proceedSpeed="60" releaseSpeed="20" releaseTriggerHead="false" releaseTriggerRef="id15">
+        <nor:switchAndPosition switchPosition="straight" switchRef="sw35"/>
+        <nor:releaseGroup>
+          <nor:trackSectionRef ref="ar57"/>
+        </nor:releaseGroup>
+        <nor:releaseGroup>
+          <nor:trackSectionRef ref="ar61"/>
+        </nor:releaseGroup>
+        <nor:states>
+          <state disabled="false" status="conceptual"/>
+        </nor:states>
+      </nor:route>
+      <nor:route entryRef="id72" exitRef="id39" id="id73" name="R21---OSL L201">
+        <nor:states>
+          <state disabled="false" status="operational"/>
+        </nor:states>
+      </nor:route>
+    </nor:routes>
+    <nor:areas>
+      <nor:area id="ar57" name="1" type="trackSection">
+        <nor:isLimitedBy ref="id14"/>
+        <nor:isLimitedBy ref="id15"/>
+        <nor:isLimitedBy ref="id51"/>
+        <nor:states>
+          <state disabled="false" status="operational"/>
+        </nor:states>
+      </nor:area>
+      <nor:area id="ar61" name="01" nor:controllerRef="id5" type="trackSection">
+        <nor:isLimitedBy ref="id15"/>
+        <nor:isLimitedBy ref="id60"/>
+        <nor:states>
+          <state disabled="false" status="operational"/>
+        </nor:states>
+      </nor:area>
+      <nor:area description="Description: According to KVB-15-C-10000_00B. " type="project">
+        <nor:isLimitedBy ref="id68"/>
+        <nor:isLimitedBy ref="id69"/>
+        <nor:states>
+          <state disabled="false" nor:projectRef="pr6921e524-bf24-145f-f9b3-8428457225c9" remarks="Remark: According to KVB-15-C-10000_00B.&#10;Elements marked with the status &quot;conceptual&quot; in the project area are based on a template for a 2-track station on a single-track line with ETCS (doc. no.: 202100192-11), adjusted to 740m effective train length for the Kongsvinger line according to effect package 14. (added by Torben Brand, 24.8.2023)" status="conceptual"/>
+        </nor:states>
+      </nor:area>
+    </nor:areas>
+    <tracks>
+      <track code="KO-SPO-800681" description="naming rule: [arabic numbers]" id="tr1" mainDir="none" name="01" type="mainTrack">
+        <states>
+          <state disabled="false" status="operational"/>
+        </states>
+        <trackTopology>
+          <trackBegin absPos="2000.0" id="id1" pos="0.0">
+            <openEnd id="oe1"/>
+          </trackBegin>
+          <trackEnd absPos="2100.0" id="id47" pos="100.0">
+            <connection id="c47" ref="c48"/>
+          </trackEnd>
+        </trackTopology>
+        <trackElements>
+          <speedChanges>
+            <speedChange absPos="2000.0" dir="up" etcsTrainCategory="5" id="id40_spf_normal" pos="0.0" profileRef="spf_normal" vMax="60.0">
+              <states>
+                <state disabled="false" status="conceptual"/>
+              </states>
+            </speedChange>
+          </speedChanges>
+          <gradientChanges>
+            <gradientChange absPos="2000.0" id="id42" pos="0.0" slope="0.0">
+              <states>
+                <state disabled="false" status="conceptual"/>
+              </states>
+            </gradientChange>
+          </gradientChanges>
+          <trainProtectionChanges>
+            <trainProtectionChange absPos="2000.0" dir="up" id="id56" nor:trainProtectionType="ETCS-L2" pos="0.0">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </trainProtectionChange>
+          </trainProtectionChanges>
+          <electrificationChanges>
+            <electrificationChange absPos="2000.0" id="id55" pos="0.0" type="none">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </electrificationChange>
+          </electrificationChanges>
+        </trackElements>
+        <ocsElements>
+          <signals>
+            <signal absPos="2100.0" code="SA-SIG-804897" controllerRef="id5" description="naming rule: [signal letter]+[signal number]" dir="up" function="home" id="id10" name="A101" nor:change="new" nor:lamps="3" nor:mounted="pole" nor:side="right" ocpStationRef="id4" pos="100.0" ruleCode="NOR:TJN:§8-10" sight="50.0" switchable="true" type="main" virtual="false">
+              <states>
+                <state disabled="false" status="planned"/>
+              </states>
+            </signal>
+          </signals>
+          <trainDetectionElements>
+            <trainDetector absPos="2100.0" code="SA-TEL-823091" controllerRef="id5" id="id14" name="Tp(376/378)" nor:change="modified" pos="100.0">
+              <states>
+                <state disabled="true" status="closed"/>
+              </states>
+            </trainDetector>
+          </trainDetectionElements>
+          <balises>
+            <balise absPos="2020.0" dir="up" id="id12-P" name="P" pos="20.0">
+              <states>
+                <state disabled="true" status="operational"/>
+              </states>
+            </balise>
+            <balise absPos="2020.0" dir="up" id="id12-A" name="A" pos="20.0">
+              <states>
+                <state disabled="true" status="operational"/>
+              </states>
+            </balise>
+            <balise absPos="2020.0" dir="up" id="id12-B" name="B" pos="20.0">
+              <states>
+                <state disabled="true" status="operational"/>
+              </states>
+            </balise>
+            <balise absPos="2020.0" dir="up" id="id12-C" name="C" pos="20.0">
+              <states>
+                <state disabled="true" status="operational"/>
+              </states>
+            </balise>
+            <baliseGroup code="SA-ATC-845613" description="Naming rule: [signal name]" id="id12" name="A101" nor:change="removed" nor:switchable="true" type="other:norFF">
+              <baliseRef ref="id12-P" sequence="1"/>
+              <baliseRef ref="id12-A" sequence="2"/>
+              <baliseRef ref="id12-B" sequence="3"/>
+              <baliseRef ref="id12-C" sequence="4"/>
+            </baliseGroup>
+          </balises>
+        </ocsElements>
+      </track>
+      <track code="KO-SPO-800683" description="naming rule: [arabic numbers]" id="tr25" mainDir="none" name="1" type="mainTrack">
+        <states>
+          <state disabled="false" status="operational"/>
+        </states>
+        <trackTopology>
+          <trackBegin absPos="2800.0" id="id25" pos="0.0">
+            <connection id="c26-24" ref="c24"/>
+          </trackBegin>
+          <trackEnd absPos="3000.0" id="id2" pos="180.0">
+            <openEnd id="oe2"/>
+          </trackEnd>
+          <mileageChanges>
+            <mileageChange absPos="2970.0" absPosIn="2950.0" code="KO-KJE-800025" id="id45" pos="150.0" type="missing"/>
+          </mileageChanges>
+          <connections>
+            <crossing absPos="2800.0" code="KO-SPV-803681" controllerRef="id5" description="Naming rule: [number/number]" id="sw26" length="27.0" name="50/52" nor:change="new" nor:clearance="50.0" nor:remoteIndicated="true" nor:remoteOperated="true" normalPosition="straight" pos="0.0" trackContinueCourse="straight" type="simpleSwitchCrossing">
+              <states>
+                <state disabled="false" status="planned"/>
+              </states>
+              <connection course="left" id="c26-28" maxSpeed="30.0" orientation="outgoing" passable="false" ref="c28"/>
+              <connection course="right" id="c26-31" maxSpeed="30.0" orientation="incoming" passable="true" ref="c31"/>
+            </crossing>
+          </connections>
+        </trackTopology>
+        <trackElements>
+          <speedChanges>
+            <speedChange absPos="2830.0" code="KO-HAS-800373" description="desc" dir="up" etcsTrainCategory="13" id="id22_spf_krenge" pos="30.0" profileRef="spf_krenge" vMax="end">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </speedChange>
+            <speedChange absPos="2830.0" code="KO-HAS-800373" description="desc" dir="up" etcsTrainCategory="6" id="id22_spf_pluss" pos="30.0" profileRef="spf_pluss" vMax="end">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </speedChange>
+            <speedChange absPos="3000.0" dir="down" etcsTrainCategory="5" id="id41_spf_normal" pos="180.0" profileRef="spf_normal" vMax="100.0">
+              <states>
+                <state disabled="false" status="conceptual"/>
+              </states>
+            </speedChange>
+          </speedChanges>
+          <gradientChanges>
+            <gradientChange absPos="2850.0" description="desc" id="id19" pos="50.0" slope="15.0">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </gradientChange>
+          </gradientChanges>
+          <tunnels>
+            <tunnel absPos="2850.0" code="KU-TUN-873405" crossSection="45.0" description="desc" id="id16" length="100.0" name="Oslotunnelen" nor:change="modified" nor:resistanceFactorA="15.0" pos="50.0">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </tunnel>
+          </tunnels>
+          <trainProtectionChanges>
+            <trainProtectionChange absPos="2900.0" description="desc" dir="up" id="id20" nor:trainProtectionType="F-ATC" pos="100.0">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </trainProtectionChange>
+            <trainProtectionChange absPos="2900.0" description="desc" dir="down" id="id74" nor:trainProtectionType="ETCS-L2" pos="100.0">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </trainProtectionChange>
+            <trainProtectionChange absPos="3000.0" dir="down" id="id64" nor:trainProtectionType="F-ATC" pos="180.0">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </trainProtectionChange>
+          </trainProtectionChanges>
+        </trackElements>
+        <ocsElements>
+          <signals>
+            <signal absPos="2900.0" code="KO-SKT-800934" description="Naming rule: [just value where applicable, no name]" dir="up" id="id13" nor:mounted="pole" pos="100.0" ruleCode="NOR:TJN:60F" switchable="false">
+              <states>
+                <state disabled="true" status="disabled"/>
+              </states>
+            </signal>
+          </signals>
+        </ocsElements>
+      </track>
+      <track code="KO-SPO-800685" description="naming rule: [arabic numbers]" id="tr28" mainDir="none" name="3" type="sidingTrack">
+        <states>
+          <state disabled="false" status="planned"/>
+        </states>
+        <trackTopology>
+          <trackBegin absPos="2800.0" id="id28" pos="0.0">
+            <connection id="c28" ref="c26-28"/>
+          </trackBegin>
+          <trackEnd absPos="2850.0" id="id29" pos="50.0">
+            <bufferStop code="KO-SST-800256" description="Naming rule: [track name]" id="id52" name="1"/>
+          </trackEnd>
+        </trackTopology>
+        <trackElements>
+          <speedChanges>
+            <speedChange absPos="2850.0" dir="down" etcsTrainCategory="5" id="id53_spf_normal" pos="50.0" profileRef="spf_normal" vMax="40.0">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </speedChange>
+          </speedChanges>
+          <radiusChanges>
+            <radiusChange absPos="2835.0" code="KO-HOT-874132" description="rad1" id="id32" pos="35.0" radius="1200.0">
+              <states>
+                <state disabled="false" status="planned"/>
+              </states>
+            </radiusChange>
+          </radiusChanges>
+          <trainProtectionChanges>
+            <trainProtectionChange absPos="2810.0" dir="down" id="id75" nor:trainProtectionType="ETCS-L2" pos="10.0">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </trainProtectionChange>
+            <trainProtectionChange absPos="2850.0" dir="down" id="id65" nor:trainProtectionType="none" pos="50.0">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </trainProtectionChange>
+          </trainProtectionChanges>
+        </trackElements>
+      </track>
+      <track code="KO-SPO-800683" description="naming rule: [arabic numbers]" id="tr34" mainDir="none" name="1" type="mainTrack">
+        <states>
+          <state disabled="false" status="operational"/>
+        </states>
+        <trackTopology>
+          <trackBegin absPos="2200.0" id="id34" pos="0.0">
+            <connection id="c35-33" ref="c33"/>
+          </trackBegin>
+          <trackEnd absPos="2800.0" id="id24" pos="600.0">
+            <connection id="c24" ref="c26-24"/>
+          </trackEnd>
+          <connections>
+            <switch absPos="2200.0" code="KO-SPV-803680" controllerRef="id5" description="Naming rule: [Arabic number]" id="sw35" length="43.0" name="1" nor:change="new" nor:clearance="50.0" nor:lockRef="id9" nor:remoteIndicated="true" nor:remoteOperated="true" normalPosition="straight" pos="0.0" trackContinueCourse="straight">
+              <geoCoord coord="59.12 10.12" epsgCode="WGS89"/>
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+              <connection course="right" id="c35-37" maxSpeed="50.0" orientation="outgoing" passable="true" ref="c37"/>
+            </switch>
+          </connections>
+          <crossSections>
+            <crossSection absPos="2500.0" code="8750-85435" description="Naming rule: [track name]" id="id6" ocpRef="id4" pos="300.0">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </crossSection>
+          </crossSections>
+        </trackTopology>
+        <trackElements>
+          <speedChanges>
+            <speedChange absPos="2650.0" code="KO-HAS-800372" description="desc" dir="up" etcsTrainCategory="13" id="id18_spf_krenge" pos="450.0" profileRef="spf_krenge" vMax="110.0">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </speedChange>
+            <speedChange absPos="2650.0" code="KO-HAS-800372" description="desc" dir="up" etcsTrainCategory="5" id="id18_spf_normal" pos="450.0" profileRef="spf_normal" vMax="100.0">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </speedChange>
+            <speedChange absPos="2650.0" code="KO-HAS-800372" description="desc" dir="up" etcsTrainCategory="6" id="id18_spf_pluss" pos="450.0" profileRef="spf_pluss" vMax="105.0">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </speedChange>
+          </speedChanges>
+          <levelCrossings>
+            <levelCrossing absPos="2750.0" code="KO-PLO-809435" controllerRef="id5" description="naming rule: location name" id="id17" length="20.0" name="Rakkestad" nor:roadEndPos="360.0" nor:roadStartPos="340.0" pos="550.0" protection="Ba">
+              <states>
+                <state disabled="true" nor:startDate="2022-12-10" status="closed"/>
+              </states>
+            </levelCrossing>
+          </levelCrossings>
+          <platformEdges>
+            <platformEdge absPos="2450.0" code="KO-PLF-807354" description="desc" height="760.0" id="id7" length="200.0" name="Test" nor:change="modified" ocpRef="id4" pos="250.0" side="left">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </platformEdge>
+          </platformEdges>
+        </trackElements>
+        <ocsElements>
+          <signals>
+            <signal absPos="2678.0" code="unknown" description="shunting signal to model shunting route" dir="up" id="id72" name="R21" nor:side="right" pos="478.0" ruleCode="NOR:TJN:§8-23" switchable="true" type="shunting">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </signal>
+            <signal absPos="2720.0" code="SA-SIG-804898" controllerRef="id5" description="naming rule: [signal letter]+[signal number]" dir="up" function="exit" id="id39" name="L201" nor:change="modified" ocpStationRef="id4" pos="520.0" ruleCode="NOR:TJN:E35b" switchable="false" type="main" virtual="true">
+              <states>
+                <state disabled="false" status="planned"/>
+              </states>
+              <etcs level_2="true"/>
+            </signal>
+          </signals>
+          <trainDetectionElements>
+            <trackCircuitBorder absPos="2250.0" code="SA-ATB-856701" controllerRef="id5" description="desc" id="id15" nor:change="new" pos="50.0">
+              <states>
+                <state disabled="false" status="planned"/>
+              </states>
+            </trackCircuitBorder>
+            <trackCircuitBorder absPos="2720.0" id="id60" pos="520.0">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </trackCircuitBorder>
+          </trainDetectionElements>
+          <balises>
+            <balise absPos="2350.0" dir="up" id="id23-dummy" pos="150.0">
+              <states>
+                <state disabled="true" nor:endDate="2023-08-10" nor:startDate="2023-07-10" status="disabled"/>
+              </states>
+            </balise>
+            <baliseGroup code="SA-ATC-845612" description="Naming Rule: [signal name]" id="id23" name="A101" type="infill">
+              <baliseRef ref="id23-dummy" sequence="1"/>
+            </baliseGroup>
+          </balises>
+          <stopPosts>
+            <stopPost absPos="2630.0" code="KO-SKT-896301" description="Naming rule: [no name]" dir="up" id="id11" nor:change="removed" ocpRef="id4" pos="430.0" trainLength="220.0" trainRelation="headOfTrain">
+              <states>
+                <state disabled="true" status="planned"/>
+              </states>
+              <validForMovements kind="passengerTrains"/>
+            </stopPost>
+            <stopPost absPos="2720.0" dir="up" id="id67" ocpRef="id4" pos="520.0" trainLength="470.0" trainRelation="headOfTrain" virtual="true">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+              <validForMovements kind="allTrains"/>
+            </stopPost>
+          </stopPosts>
+          <derailers>
+            <derailer absPos="2220.0" code="SA-SSP-871032" derailSide="left" description="Naming rule: [roman numbers]" dir="up" id="id8" name="I" nor:change="new" nor:lockRef="id9" pos="20.0">
+              <states>
+                <state disabled="false" status="planned"/>
+              </states>
+            </derailer>
+          </derailers>
+          <locks>
+            <lock absPos="2220.0" code="KO-SPV-803680" description="Naming rule: [roman numbers]" id="id9" name="II " nor:controllerRef="id5" nor:keyAtRef="id4" nor:lockSide="left" nor:lockType="trvA-las" pos="20.0">
+              <states>
+                <state disabled="false" status="other:norUnknown"/>
+              </states>
+            </lock>
+          </locks>
+        </ocsElements>
+      </track>
+      <track code="KO-SPO-800684" description="naming rule: [arabic numbers]" id="tr37" mainDir="none" name="2" type="secondaryTrack">
+        <states>
+          <state disabled="false" status="operational"/>
+        </states>
+        <trackTopology>
+          <trackBegin absPos="2200.0" id="id37" pos="0.0">
+            <connection id="c37" ref="c35-37"/>
+          </trackBegin>
+          <trackEnd absPos="2800.0" id="id31" pos="600.0">
+            <connection id="c31" ref="c26-31"/>
+          </trackEnd>
+          <borders>
+            <border absPos="2369.0" id="id68" pos="169.0" type="area">
+              <states>
+                <state disabled="false" status="conceptual"/>
+              </states>
+            </border>
+            <border absPos="2621.0" id="id69" pos="421.0" type="area">
+              <states>
+                <state disabled="false" status="conceptual"/>
+              </states>
+            </border>
+          </borders>
+        </trackTopology>
+        <trackElements>
+          <bridges>
+            <brigde absPos="2450.0" id="id58" kind="under" length="50.0" name="Bruse" pos="250.0">
+              <states>
+                <state disabled="false" nor:startDate="2023-01-24" startTime="15:06:00" status="conceptual"/>
+              </states>
+            </brigde>
+          </bridges>
+          <geoMappings>
+            <geoMapping id="id62" pos="100.0"/>
+            <geoMapping id="id63" pos="500.0"/>
+          </geoMappings>
+        </trackElements>
+        <ocsElements>
+          <trainDetectionElements>
+            <trackCircuitBorder absPos="2250.0" code="SA-ATB-856702" id="id51" pos="50.0">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </trackCircuitBorder>
+          </trainDetectionElements>
+          <derailers>
+            <derailer absPos="2275.0" derailSide="left" description="NO:&quot;avledende sporveksel&quot;" dir="down" id="id76" kind="doubleCatchPoints" pos="75.0">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </derailer>
+          </derailers>
+        </ocsElements>
+      </track>
+      <track code="KO-SPO-800683" description="naming rule: [arabic numbers]" id="tr48" mainDir="none" name="1" type="mainTrack">
+        <states>
+          <state disabled="false" status="operational"/>
+        </states>
+        <trackTopology>
+          <trackBegin absPos="2100.0" id="id48" pos="0.0">
+            <connection id="c48" ref="c47"/>
+          </trackBegin>
+          <trackEnd absPos="2200.0" id="id33" pos="100.0">
+            <connection id="c33" ref="c35-33"/>
+          </trackEnd>
+        </trackTopology>
+        <trackElements>
+          <electrificationChanges>
+            <electrificationChange absPos="2120.0" code="[code from BD]" description="[no name]" id="id21" pos="20.0" type="overhead">
+              <states>
+                <state disabled="false" status="operational"/>
+              </states>
+            </electrificationChange>
+          </electrificationChanges>
+        </trackElements>
+      </track>
+    </tracks>
+    <trackGroups>
+      <line id="li0" infrastructureManagerRef="id71" name="Bergensbanen">
+        <trackRef ref="tr1"/>
+        <trackRef ref="tr25"/>
+        <trackRef ref="tr28"/>
+        <trackRef ref="tr34"/>
+        <trackRef ref="tr37"/>
+        <trackRef ref="tr48"/>
+      </line>
+      <nor:lineSection id="ls0" name="-OSL">
+        <nor:trackRef ref="tr1"/>
+      </nor:lineSection>
+    </trackGroups>
+    <operationControlPoints>
+      <ocp code="8750-85435" description="desc" id="id4" name="Oslo S" nor:change="modified">
+        <nor:propOperationalAdditional remoteControlled="true" simultaneousEntry="partial"/>
+        <propOperational operationalType="station" trafficType="passenger"/>
+        <propService bus="true" passenger="true"/>
+        <propEquipment>
+          <trackRef ref="tr48"/>
+          <trackRef ref="tr34"/>
+          <trackRef ref="tr37"/>
+          <trackRef ref="tr25"/>
+          <trackRef ref="tr28"/>
+        </propEquipment>
+        <propOther>
+          <states>
+            <state disabled="false" status="operational"/>
+          </states>
+        </propOther>
+        <geoCoord coord="59.91 10.75"/>
+        <designator entry="OSL" register="SJN"/>
+      </ocp>
+    </operationControlPoints>
+    <controllers>
+      <controller code="SA-SIK-800400" description="desc" id="id5" model="NSB-77" name="OSL" nor:routeSetTime="PT5S" nor:typicalThrowTime="PT10S" technologyType="electrical">
+        <states>
+          <state disabled="false" status="planned"/>
+        </states>
+        <ocpRef ref="id4"/>
+      </controller>
+    </controllers>
+    <speedProfiles>
+      <speedProfile id="spf_temporary" influence="decreasing" name="nor:temporary"/>
+      <speedProfile id="spf_pluss" influence="increasing" name="nor:pluss"/>
+      <speedProfile id="spf_conditional" influence="decreasing" name="nor:conditional" verbalConstraint="SJN defined condition"/>
+      <speedProfile id="spf_avalanche" influence="decreasing" name="nor:avalanche" verbalConstraint="SJN defined condition"/>
+      <speedProfile id="spf_normal" influence="increasing" name="basis"/>
+      <speedProfile id="spf_local" influence="decreasing" name="nor:local" verbalConstraint="SJN defined condition"/>
+      <speedProfile id="spf_krenge" influence="increasing" name="nor:krenge"/>
+    </speedProfiles>
+  </infrastructure>
+  <infrastructureVisualizations>
+    <visualization id="vis0" infrastructureRef="inf0" version="2.4">
+      <lineVis ref="li0">
+        <trackVis ref="tr1">
+          <trackElementVis ref="id1">
+            <position x="370.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="oe1">
+            <position x="370.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id40_spf_normal">
+            <position x="370.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id42">
+            <position x="370.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id55">
+            <position x="370.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id56">
+            <position x="370.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id12-P">
+            <position x="374.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id12-A">
+            <position x="374.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id12-B">
+            <position x="374.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id12-C">
+            <position x="374.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id10">
+            <position x="390.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id14">
+            <position x="390.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id47">
+            <position x="390.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c47">
+            <position x="390.0" y="-620.0"/>
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="tr25">
+          <trackElementVis ref="id25">
+            <position x="530.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c26-24">
+            <position x="530.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="sw26">
+            <position x="530.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c26-28">
+            <position x="530.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c26-31">
+            <position x="530.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id22_spf_krenge">
+            <position x="536.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id22_spf_pluss">
+            <position x="536.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id16">
+            <position x="540.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id19">
+            <position x="540.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id13">
+            <position x="550.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id20">
+            <position x="550.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id74">
+            <position x="550.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id45">
+            <position x="560.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id41_spf_normal">
+            <position x="570.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id64">
+            <position x="570.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id2">
+            <position x="570.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="oe2">
+            <position x="570.0" y="-620.0"/>
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="tr28">
+          <trackElementVis ref="id28">
+            <position x="530.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c28">
+            <position x="530.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id75">
+            <position x="534.0" y="-616.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id32">
+            <position x="544.0" y="-606.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id53_spf_normal">
+            <position x="550.0" y="-600.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id65">
+            <position x="550.0" y="-600.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id29">
+            <position x="550.0" y="-600.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id52">
+            <position x="550.0" y="-600.0"/>
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="tr34">
+          <trackElementVis ref="id34">
+            <position x="410.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c35-33">
+            <position x="410.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="sw35">
+            <position x="410.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c35-37">
+            <position x="410.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id8">
+            <position x="414.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id9">
+            <position x="414.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id15">
+            <position x="420.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id23-dummy">
+            <position x="440.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id7">
+            <position x="460.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id6">
+            <position x="470.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id11">
+            <position x="496.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id18_spf_krenge">
+            <position x="500.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id18_spf_normal">
+            <position x="500.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id18_spf_pluss">
+            <position x="500.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id72">
+            <position x="505.6" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id39">
+            <position x="514.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id60">
+            <position x="514.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id67">
+            <position x="514.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id17">
+            <position x="520.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id24">
+            <position x="530.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c24">
+            <position x="530.0" y="-620.0"/>
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="tr37">
+          <trackElementVis ref="id37">
+            <position x="410.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c37">
+            <position x="410.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id51">
+            <position x="420.0" y="-630.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id76">
+            <position x="425.0" y="-635.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id62">
+            <position x="430.0" y="-640.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id68">
+            <position x="443.8" y="-640.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id58">
+            <position x="460.0" y="-640.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id69">
+            <position x="494.2" y="-640.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id63">
+            <position x="510.0" y="-640.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id31">
+            <position x="530.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c31">
+            <position x="530.0" y="-620.0"/>
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="tr48">
+          <trackElementVis ref="id48">
+            <position x="390.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c48">
+            <position x="390.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id21">
+            <position x="394.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="id33">
+            <position x="410.0" y="-620.0"/>
+          </trackElementVis>
+          <trackElementVis ref="c33">
+            <position x="410.0" y="-620.0"/>
+          </trackElementVis>
+        </trackVis>
+      </lineVis>
+      <ocpVis ref="id4">
+        <position x="470.0" y="-590.0"/>
+      </ocpVis>
+      <ocpVis ref="id5">
+        <position x="490.0" y="-590.0"/>
+      </ocpVis>
+    </visualization>
+  </infrastructureVisualizations>
+</railml>

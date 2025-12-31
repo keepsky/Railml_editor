@@ -227,6 +227,14 @@ namespace RailmlEditor
             return _viewModel.GetNextId(prefix);
         }
 
+        private void ElementTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (e.NewValue is BaseElementViewModel vm)
+            {
+                _viewModel.SelectedElement = vm;
+            }
+        }
+
 
         // Selection & Panning State
         private bool _isSelecting = false;
@@ -943,8 +951,6 @@ namespace RailmlEditor
                 // Ensure visual focus/highlight
                 item.IsSelected = true; 
                 item.Focus();
-                
-                e.Handled = true; 
             }
         }
 
