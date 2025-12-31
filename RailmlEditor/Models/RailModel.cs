@@ -15,6 +15,9 @@ namespace RailmlEditor.Models
         [XmlElement(ElementName = "infrastructure")]
         public Infrastructure Infrastructure { get; set; }
 
+        [XmlElement(ElementName = "infrastructureVisualizations")]
+        public InfrastructureVisualizations InfrastructureVisualizations { get; set; }
+
         [XmlNamespaceDeclarations]
         public XmlSerializerNamespaces Namespaces { get; set; } = new XmlSerializerNamespaces();
     }
@@ -110,8 +113,10 @@ namespace RailmlEditor.Models
         public double Y { get; set; }
         public bool ShouldSerializeY() => false;
 
+        // Legacy ScreenPos (Hide from Save)
         [XmlElement(ElementName = "screenPos", Namespace = "http://www.sehwa.co.kr/railml")]
         public ScreenPos ScreenPos { get; set; }
+        public bool ShouldSerializeScreenPos() => false;
     }
 
     public class AdditionalName
@@ -131,8 +136,10 @@ namespace RailmlEditor.Models
         [XmlElement(ElementName = "connections")]
         public Connections Connections { get; set; }
 
+        // Legacy CornerPos (Hide from Save)
         [XmlElement(ElementName = "cornerPos", Namespace = "http://www.sehwa.co.kr/railml")]
         public CornerPos CornerPos { get; set; }
+        public bool ShouldSerializeCornerPos() => false;
     }
 
     public class CornerPos
@@ -155,8 +162,10 @@ namespace RailmlEditor.Models
         [XmlElement(ElementName = "connection")]
         public List<Connection> ConnectionList { get; set; } = new List<Connection>();
 
+        // Legacy ScreenPos (Hide from Save)
         [XmlElement(ElementName = "screenPos", Namespace = "http://www.sehwa.co.kr/railml")]
         public ScreenPos ScreenPos { get; set; }
+        public bool ShouldSerializeScreenPos() => false;
     }
 
     public class Connection
@@ -199,6 +208,7 @@ namespace RailmlEditor.Models
 
         [XmlElement(ElementName = "screenPos", Namespace = "http://www.sehwa.co.kr/railml")]
         public ScreenPos ScreenPos { get; set; }
+        public bool ShouldSerializeScreenPos() => false;
 
         [XmlElement(ElementName = "additionalName")]
         public AdditionalName AdditionalName { get; set; }
@@ -312,6 +322,60 @@ namespace RailmlEditor.Models
 
         [XmlIgnore]
         public bool YSpecified { get; set; }
+    }
+
+
+    // --- New Visualization Structure ---
+
+    public class InfrastructureVisualizations
+    {
+        [XmlElement(ElementName = "visualization")]
+        public List<Visualization> VisualizationList { get; set; } = new List<Visualization>();
+    }
+
+    public class Visualization
+    {
+        [XmlAttribute(AttributeName = "id")]
+        public string Id { get; set; }
+
+        [XmlAttribute(AttributeName = "infrastructureRef")]
+        public string InfrastructureRef { get; set; }
+
+        [XmlElement(ElementName = "lineVis")]
+        public List<LineVis> LineVisList { get; set; } = new List<LineVis>();
+    }
+
+    public class LineVis
+    {
+        [XmlElement(ElementName = "trackVis")]
+        public List<TrackVis> TrackVisList { get; set; } = new List<TrackVis>();
+    }
+
+    public class TrackVis
+    {
+        [XmlAttribute(AttributeName = "ref")]
+        public string Ref { get; set; }
+
+        [XmlElement(ElementName = "trackElementVis")]
+        public List<TrackElementVis> TrackElementVisList { get; set; } = new List<TrackElementVis>();
+    }
+
+    public class TrackElementVis
+    {
+        [XmlAttribute(AttributeName = "ref")]
+        public string Ref { get; set; }
+
+        [XmlElement(ElementName = "position")]
+        public VisualizationPosition Position { get; set; }
+    }
+
+    public class VisualizationPosition
+    {
+        [XmlAttribute(AttributeName = "x")]
+        public double X { get; set; }
+
+        [XmlAttribute(AttributeName = "y")]
+        public double Y { get; set; }
     }
 }
 

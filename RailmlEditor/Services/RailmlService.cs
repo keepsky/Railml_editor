@@ -22,6 +22,19 @@ namespace RailmlEditor.Services
             };
             railml.Namespaces.Add("sehwa", "http://www.sehwa.co.kr/railml");
 
+            // Visualization setup
+            var visualizations = new InfrastructureVisualizations();
+            var mainVis = new Visualization 
+            { 
+                Id = "vis1", 
+                InfrastructureRef = railml.Infrastructure.Id 
+            };
+            visualizations.VisualizationList.Add(mainVis);
+            railml.InfrastructureVisualizations = visualizations;
+
+            var lineVis = new LineVis();
+            mainVis.LineVisList.Add(lineVis);
+
             // 1. Create Tracks
             var trackMap = new System.Collections.Generic.Dictionary<string, Track>();
             foreach (var element in viewModel.Elements.OfType<TrackViewModel>())
@@ -30,9 +43,10 @@ namespace RailmlEditor.Services
                 bool isCurved = element is CurvedTrackViewModel;
                 CurvedTrackViewModel ctv = isCurved ? (CurvedTrackViewModel)element : null;
 
+                var trackId = GetRailmlId(element.Id);
                 var track = new Track
                 {
-                    Id = GetRailmlId(element.Id),
+                    Id = trackId,
                     Name = element.Name,
                     Description = element.Description,
                     Type = element.Type,
@@ -42,32 +56,46 @@ namespace RailmlEditor.Services
                     {
                         TrackBegin = new TrackNode 
                         { 
-                            Id = $"{GetRailmlId(element.Id)}_begin",
+                            Id = $"{trackId}_begin",
                             Pos = 0,
-                            ScreenPos = new ScreenPos
-                            {
-                                X = element.X,
-                                XSpecified = true,
-                                Y = element.Y,
-                                YSpecified = true
-                            }
+                            ScreenPos = new ScreenPos { X = element.X, Y = element.Y }
                         },
                         TrackEnd = new TrackNode 
                         { 
-                            Id = $"{GetRailmlId(element.Id)}_end", 
+                            Id = $"{trackId}_end", 
                             Pos = (int)element.Length,
-                            ScreenPos = new ScreenPos
-                            {
-                                X = element.X2,
-                                XSpecified = true,
-                                Y = element.Y2,
-                                YSpecified = true
-                            }
-                        },
-                        CornerPos = isCurved ? new CornerPos { X = ctv.MX, Y = ctv.MY } : null
+                            ScreenPos = new ScreenPos { X = element.X2, Y = element.Y2 }
+                        }
                     },
-                     // OcsElements initialized conditionally below
                 };
+
+                // Visualization for Track
+                var trackVis = new TrackVis { Ref = trackId };
+                lineVis.TrackVisList.Add(trackVis);
+
+                // Track Begin Vis
+                trackVis.TrackElementVisList.Add(new TrackElementVis
+                {
+                    Ref = track.TrackTopology.TrackBegin.Id,
+                    Position = new VisualizationPosition { X = element.X, Y = element.Y }
+                });
+
+                // Track End Vis
+                trackVis.TrackElementVisList.Add(new TrackElementVis
+                {
+                    Ref = track.TrackTopology.TrackEnd.Id,
+                    Position = new VisualizationPosition { X = element.X2, Y = element.Y2 }
+                });
+
+                // Curved Midpoint Vis
+                if (isCurved)
+                {
+                    trackVis.TrackElementVisList.Add(new TrackElementVis
+                    {
+                        Ref = $"{trackId}_mid", // Midpoint/Corner coordinate
+                        Position = new VisualizationPosition { X = ctv.MX, Y = ctv.MY }
+                    });
+                }
 
                 // Add Signals bound to this track
                 var boundSignals = viewModel.Elements.OfType<SignalViewModel>().Where(s => s.RelatedTrackId == element.Id).ToList();
@@ -88,10 +116,17 @@ namespace RailmlEditor.Services
                             Type = sigVm.Type,
                             Function = sigVm.Function,
                             AdditionalName = new AdditionalName { Name = sigVm.Name },
-                            Pos = (int)dist, 
-                            ScreenPos = new ScreenPos { X = sigVm.X, XSpecified = true, Y = sigVm.Y, YSpecified = true }
+                            Pos = (int)dist,
+                            ScreenPos = new ScreenPos { X = sigVm.X, Y = sigVm.Y }
                         };
                         track.OcsElements.Signals.SignalList.Add(signal);
+
+                        // Signal Vis
+                        trackVis.TrackElementVisList.Add(new TrackElementVis
+                        {
+                            Ref = signal.Id,
+                            Position = new VisualizationPosition { X = sigVm.X, Y = sigVm.Y }
+                        });
                     }
                 }
 
@@ -99,11 +134,10 @@ namespace RailmlEditor.Services
                 trackMap[element.Id] = track;
             }
 
-            // 2. Add Signals & TCBs (REMOVED global signals additions)
-            // Just kept loop structure for clarity or removal
-            // Signals are now handled inside Track loop.
-
-            // 3. Auto-Generate Connections & Switches
+            // 2. Add Switches (they are nested in Tracks/TrackTopology/Connections)
+            // Need to handle switch visualizations after they are created in the next loop or integrated
+            // Actually, existing code generates connections/switches by analyzing overlaps.
+            // Let's keep that logic but extract visualization data.
             // 3. Auto-Generate Connections & Switches
             var allNodes = new System.Collections.Generic.List<TrackNode>();
             var nodeToTrack = new System.Collections.Generic.Dictionary<TrackNode, Track>(); // Map Node -> Track
@@ -206,6 +240,17 @@ namespace RailmlEditor.Services
                                              ? new ScreenPos { X = swVm.MX.Value, XSpecified = true, Y = swVm.MY.Value, YSpecified = true }
                                              : null
                                      };
+
+                                     // Switch Vis
+                                     var parentTrackVis = lineVis.TrackVisList.FirstOrDefault(tv => tv.Ref == parentTrack.Id);
+                                     if (parentTrackVis != null)
+                                     {
+                                         parentTrackVis.TrackElementVisList.Add(new TrackElementVis
+                                         {
+                                             Ref = swVm.Id,
+                                             Position = new VisualizationPosition { X = swVm.X, Y = swVm.Y }
+                                         });
+                                     }
 
                                      // (1-f) & (2-f) adding diverging connections
                                      foreach (var divId in swVm.DivergingTrackIds)
@@ -511,6 +556,28 @@ namespace RailmlEditor.Services
                     viewModel.ActiveInfrastructure.Name = railml.Infrastructure.Name ?? "Default Infrastructure";
                 }
                 
+                // Build Coordinate Map from Visualizations
+                var coordMap = new System.Collections.Generic.Dictionary<string, VisualizationPosition>();
+                if (railml?.InfrastructureVisualizations?.VisualizationList != null)
+                {
+                    foreach (var vis in railml.InfrastructureVisualizations.VisualizationList)
+                    {
+                        foreach (var lVis in vis.LineVisList)
+                        {
+                            foreach (var tVis in lVis.TrackVisList)
+                            {
+                                foreach (var eVis in tVis.TrackElementVisList)
+                                {
+                                    if (eVis.Ref != null && eVis.Position != null)
+                                    {
+                                        coordMap[eVis.Ref] = eVis.Position;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 viewModel.Elements.Clear();
 
                 if (railml?.Infrastructure?.Tracks?.TrackList != null)
@@ -519,14 +586,26 @@ namespace RailmlEditor.Services
                     {
                         TrackViewModel trackVm;
                         
-                        if (track.Code == "corner" && track.TrackTopology?.CornerPos != null)
+                        // Try to get coordinates from Visualization Map first
+                        VisualizationPosition? startPos = null;
+                        VisualizationPosition? endPos = null;
+                        VisualizationPosition? midPos = null;
+
+                        coordMap.TryGetValue($"{track.Id}_begin", out startPos);
+                        coordMap.TryGetValue($"{track.Id}_end", out endPos);
+                        coordMap.TryGetValue($"{track.Id}_mid", out midPos);
+
+                        if (track.Code == "corner" && midPos != null)
                         {
-                            var ctv = new CurvedTrackViewModel
+                            trackVm = new CurvedTrackViewModel { MX = midPos.X, MY = midPos.Y };
+                        }
+                        else if (track.Code == "corner" && track.TrackTopology?.CornerPos != null)
+                        {
+                            trackVm = new CurvedTrackViewModel
                             {
                                 MX = track.TrackTopology.CornerPos.X,
                                 MY = track.TrackTopology.CornerPos.Y
                             };
-                            trackVm = ctv;
                         }
                         else if (track.TrackTopology?.TrackBegin?.ScreenPos != null && track.TrackTopology.TrackBegin.ScreenPos.MXSpecified)
                         {
@@ -549,11 +628,26 @@ namespace RailmlEditor.Services
                         trackVm.Type = track.Type;
                         trackVm.MainDir = track.MainDir;
                         trackVm.Code = track.Code;
-                        trackVm.X = track.TrackTopology?.TrackBegin?.ScreenPos?.X ?? 0;
-                        trackVm.Y = track.TrackTopology?.TrackBegin?.ScreenPos?.Y ?? 0;
+
+                        // Set X, Y
+                        if (startPos != null)
+                        {
+                            trackVm.X = startPos.X;
+                            trackVm.Y = startPos.Y;
+                        }
+                        else
+                        {
+                            trackVm.X = track.TrackTopology?.TrackBegin?.ScreenPos?.X ?? 0;
+                            trackVm.Y = track.TrackTopology?.TrackBegin?.ScreenPos?.Y ?? 0;
+                        }
                         
-                        // Set X2, Y2 from TrackEnd
-                        if (track.TrackTopology?.TrackEnd != null)
+                        // Set X2, Y2
+                        if (endPos != null)
+                        {
+                            trackVm.X2 = endPos.X;
+                            trackVm.Y2 = endPos.Y;
+                        }
+                        else if (track.TrackTopology?.TrackEnd != null)
                         {
                             trackVm.X2 = track.TrackTopology.TrackEnd.ScreenPos?.X ?? 0;
                             trackVm.Y2 = track.TrackTopology.TrackEnd.ScreenPos?.Y ?? 0;
@@ -573,35 +667,53 @@ namespace RailmlEditor.Services
                             foreach (var sw in track.TrackTopology.Connections.Switches)
                             {
                                 var switchVm = viewModel.Elements.OfType<SwitchViewModel>().FirstOrDefault(e => e.Id == sw.Id);
-                                if (switchVm == null)
-                                {
-                                    // Calculate Position
-                                    double pos = sw.Pos;
-                                    double startX = trackVm.X;
-                                    double startY = trackVm.Y;
-                                    double endX = trackVm.X2;
-                                    double endY = trackVm.Y2;
-                                    double length = Math.Sqrt(Math.Pow(endX - startX, 2) + Math.Pow(endY - startY, 2));
-                                    if (length < 0.1) length = 1;
-                                    double ratio = pos / length;
-                                    double swX = startX + ratio * (endX - startX);
-                                    double swY = startY + ratio * (endY - startY);
+                                    // Try to get coordinates from Visualization Map first
+                                    VisualizationPosition? swPos = null;
+                                    coordMap.TryGetValue(sw.Id, out swPos);
 
-                                    switchVm = new SwitchViewModel
+                                    if (swPos != null)
                                     {
-                                        Id = sw.Id,
-                                        Name = sw.AdditionalName?.Name,
-                                        X = swX,
-                                        Y = swY,
-                                        MX = (sw.ScreenPos != null && sw.ScreenPos.XSpecified) ? sw.ScreenPos.X : (double?)null,
-                                        MY = (sw.ScreenPos != null && sw.ScreenPos.YSpecified) ? sw.ScreenPos.Y : (double?)null,
-                                        TrackContinueCourse = sw.TrackContinueCourse ?? "straight",
-                                        NormalPosition = sw.NormalPosition ?? "straight"
-                                    };
-                                    viewModel.Elements.Add(switchVm);
-                                }
+                                        switchVm = new SwitchViewModel
+                                        {
+                                            Id = sw.Id,
+                                            Name = sw.AdditionalName?.Name,
+                                            X = swPos.X,
+                                            Y = swPos.Y,
+                                            MX = (sw.ScreenPos != null && sw.ScreenPos.XSpecified) ? sw.ScreenPos.X : (double?)null,
+                                            MY = (sw.ScreenPos != null && sw.ScreenPos.YSpecified) ? sw.ScreenPos.Y : (double?)null,
+                                            TrackContinueCourse = sw.TrackContinueCourse ?? "straight",
+                                            NormalPosition = sw.NormalPosition ?? "straight"
+                                        };
+                                    }
+                                    else
+                                    {
+                                        // Calculate Position (Legacy fallback)
+                                        double pos = sw.Pos;
+                                        double startX = trackVm.X;
+                                        double startY = trackVm.Y;
+                                        double endX = trackVm.X2;
+                                        double endY = trackVm.Y2;
+                                        double length = Math.Sqrt(Math.Pow(endX - startX, 2) + Math.Pow(endY - startY, 2));
+                                        if (length < 0.1) length = 1;
+                                        double ratio = pos / length;
+                                        double calcX = startX + ratio * (endX - startX);
+                                        double calcY = startY + ratio * (endY - startY);
 
-                                // Topological reconstruction
+                                        switchVm = new SwitchViewModel
+                                        {
+                                            Id = sw.Id,
+                                            Name = sw.AdditionalName?.Name,
+                                            X = calcX,
+                                            Y = calcY,
+                                            MX = (sw.ScreenPos != null && sw.ScreenPos.XSpecified) ? sw.ScreenPos.X : (double?)null,
+                                            MY = (sw.ScreenPos != null && sw.ScreenPos.YSpecified) ? sw.ScreenPos.Y : (double?)null,
+                                            TrackContinueCourse = sw.TrackContinueCourse ?? "straight",
+                                            NormalPosition = sw.NormalPosition ?? "straight"
+                                        };
+                                    }
+                                    viewModel.Elements.Add(switchVm);
+
+                                    // Topological reconstruction
                                 var firstConn = sw.ConnectionList.FirstOrDefault();
                                 if (firstConn != null)
                                 {
@@ -655,6 +767,10 @@ namespace RailmlEditor.Services
                         {
                             foreach (var signal in track.OcsElements.Signals.SignalList)
                             {
+                                // Try to get coordinates from Visualization Map first
+                                VisualizationPosition? sigPos = null;
+                                coordMap.TryGetValue(signal.Id, out sigPos);
+
                                 var signalVm = new SignalViewModel
                                 {
                                     Id = signal.Id,
@@ -662,8 +778,8 @@ namespace RailmlEditor.Services
                                     Type = signal.Type,
                                     Function = signal.Function,
                                     Name = signal.AdditionalName?.Name,
-                                    X = signal.ScreenPos?.X ?? signal.X,
-                                    Y = signal.ScreenPos?.Y ?? signal.Y,
+                                    X = sigPos?.X ?? signal.ScreenPos?.X ?? signal.X,
+                                    Y = sigPos?.Y ?? signal.ScreenPos?.Y ?? signal.Y,
                                     RelatedTrackId = track.Id
                                 };
 
