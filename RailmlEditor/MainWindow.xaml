@@ -268,6 +268,19 @@
             </Viewbox>
         </ControlTemplate>
 
+        <ControlTemplate x:Key="BorderIcon">
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="200" Height="160">
+                    <Rectangle Canvas.Left="40" Canvas.Top="0" Width="40" Height="160" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <Rectangle Canvas.Left="0" Canvas.Top="0" Width="80" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <Rectangle Canvas.Left="0" Canvas.Top="120" Width="80" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <Rectangle Canvas.Left="120" Canvas.Top="0" Width="80" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <Rectangle Canvas.Left="120" Canvas.Top="0" Width="40" Height="160" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <Rectangle Canvas.Left="120" Canvas.Top="120" Width="80" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                </Canvas>
+            </Viewbox>
+        </ControlTemplate>
+
         <!-- Route Icon Template -->
         <ControlTemplate x:Key="RouteIcon">
             <Viewbox Stretch="Uniform">
@@ -792,6 +805,10 @@
                 <Button Click="Toolbox_Click" ToolTip="Cross" Style="{StaticResource ToolBarButtonStyle}">
                     <Control Template="{StaticResource CrossIcon}" Width="28" Height="16"/>
                     <Button.Tag>Cross</Button.Tag>
+                </Button>
+                <Button Click="Toolbox_Click" ToolTip="Border" Style="{StaticResource ToolBarButtonStyle}">
+                    <Control Template="{StaticResource BorderIcon}" Width="28" Height="16"/>
+                    <Button.Tag>Border</Button.Tag>
                 </Button>
             </ToolBar>
         </ToolBarTray>
