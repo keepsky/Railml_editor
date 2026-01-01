@@ -448,6 +448,10 @@ namespace RailmlEditor
                     {
                         foreach (var element in _viewModel.Elements)
                         {
+                            // Skip bound elements as they will vary with Track
+                            if (element is SignalViewModel s && !string.IsNullOrEmpty(s.RelatedTrackId)) continue;
+                            if (element is TrackCircuitBorderViewModel b && !string.IsNullOrEmpty(b.RelatedTrackId)) continue;
+
                             element.X += snapX;
                             element.Y += snapY;
 

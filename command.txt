@@ -1,4 +1,44 @@
+======================
+======================
+======================
+======================
 
+======================
+좌측 탐색창의 track 하위 요소인 border 처럼 해당 track의 하위 태그인 trackBegin, trackEnd, signal도 하위 요소로 표시하고 선택하면 속성창에 관련 속성을 표시하고 변경할수 있게 수정해주고 signal의 경우는 현재 구현처럼 Signal 하위 메뉴에도 동일하게 유지 해줘
+======================
+openEnd와 bufferStop의 id 명명 규칙을 아래 (1)과 같이 적용
+(1) openEnd 는 oe, bufferStop은 bs를 prefix로하고 뒤의 숫자는 연관된 track의 숫자를 그대로 사용하도록 수정
+그리고 속성창에서 Begin, End type을 선택하면 즉시 id 값이 변경되도록 수정해줘
+======================
+<trackBegin>와 <trackEnd>의 하위에 <bufferStop>, <openEnd> 태그를 아래와 같이 추가
+(1) track에 대해서 좌측 속성창에 begin, end 속성을 각각 추가하고 bufferStop, openEnd 중에 하나를 선택할수 있도록 추가
+(2) 해당 track의 trackBegin하위에 connection 태그가 있다면 해당 속성은 disable 처리하고 connection 태그가 없다면 trackBegin 하위에 (1)에서 선택한 bufferStop 또는 openEnd 태그를 만들고 (4)에서 지시하는 방식으로 속성을 추가
+(3) 해당 track의 trackEnd하위에 connection 태그가 있다면 해당 속성은 disable 처리하고 connection 태그가 없다면 trackEnd 하위에 (1)에서 선택한 bufferStop 또는 openEnd 태그를 만들고 (4)에서 지시하는 방식으로 속성을 추가
+(4) begin, end 속성 필드 아래에 id, code, name, description 을 추가하고 id는 bufferStop인 경우 bs1, bs2, bs3 형식으로 자동 생성하고, openEnd인 경우 oe1, oe2, oe3 형식으로 자동 생성하고, code, name, description은 default는 비어 있고 사용자가 입력할수 있도록 수정
+======================
+툴바의 border 버튼으로 생성되는 border 아이콘의 이미지에 "border" 라는 텍스트가 있는데 삭제해줘
+border 아이콘을 이동하다가 마우스 왼쪽 버튼 클릭으로 track 위에 위치 시켰다가 다시 마우스 윈쪽 버튼으로 선택하면 이미지가 마우스 이동에 따라 다시 이동할수 있도록 수정해줘
+border 이미지를 track 위에 위치시켜도 탐색창에서 바인딩된 track 하위에 정보가 보이지 않는 문제 수정해줘
+======================
+툴바의 border 메뉴를 누르면 border.svg 이미지를 이용해서 아래와 같은 기능을 구현
+(1) border 아이콘의 크기는 높이를 10px로 track의 높이와 동일하게 구현
+(2) 툴바의 border 메뉴를 선택하면 마우스에 border 아이콘이 붙어 있는 상태로 이동하다가 임의의 track위에(y 좌표가 동일) 마우스 왼쪽 버튼을 클릭하면 해당 track에 아래와 같이 바인딩 수행
+  (2-1) 좌측 탐색창에 바인딩된 track의 하위 요소로 해당 border 정보를 추가 (id, name)
+  (2-2) 해당 track에 track -> ocsElements -> trainDetectionElements -> trackCircuitBorder 태그를 추가하고 <trackCircuitBorder> 내에 속성으로 pos, id, name, code, description을 아래의 내용으로 추가
+  (2-3) pos는 trackbegin과 trackEnd 사이 상대적인 위치의 값이고 실제 좌표 위치는 trackElementVis->position 태그의 x,y 속성으로 저장하고, id는 td001, td002 형식의 자동 부여되는 값이고, name, code, description은 사용자가 입력할수 있는 값으로 구현
+======================
+현재 <sehwa:screenPos> 태그를 이용하여 좌표 정보를 저장하는 태그를 아래와 같이 변경하여 <infrastructure> 태그 내에는 sehwa:screenPos를 모두 제거하고 <infrastructureVisualizations> 태그에 필요한 정보를 저장
+(1) railml -> infrastructureVisualizations -> visualization -> lineVis -> trackVis -> trackElementVis -> position 태그에 x, y 속성으로 저장
+(2) infrastructureVisualizations은 속성 없음
+(3) visualization 태그에 id, infrastructureRef 속성을 추가하고, id는 vis1, vis2 형식의 자동 부여되는 값이고 infrastructureRef는 현재 연결된 infrastructure의 id를 링크 (예 <visualization id="vis1" infrastructureRef="inf1">)
+(4) lineVis은 현재 별도 정의되는 속성 없음
+(5) trackVis 태그는 ref 속성을 추가하고, ref는 추가하려는 x,y 좌표가 속한 track의 id와 링크 (예 <trackVis ref="T001">)
+(6) trackElementVis 태그는 ref 속성을 추가하고, ref는 추가하려는 x,y 좌표가 속한 track의 하위 요소(trackBegin, trackEnd, switch, signal)의 id와 링크 (예 <trackElementVis ref="T003_begin">)
+======================
+현재 infrastructure 태그에 id, name 속성을 추가하고 id는 inf1, inf2, inf3 형식의 자동 부여되는 값이고, name은 사용자가 입력할수 있는 값으로 구현
+좌측 탐색 윈도우에 infrastructure가 최상위 요소로 오도록 수정하고 infrastructure 하위에 track, signal, point, route가 배치 되도록 수정
+======================
+svg/border.svg 파일을 이용해서 툴바에 border 메뉴를 추가
 ======================
 속성창에 표시하는 요소별 속성정보를 아래와 같이 수정해줘
 (1) plain track

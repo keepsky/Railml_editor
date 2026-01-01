@@ -167,9 +167,26 @@ namespace RailmlEditor.ViewModels
             {
                 if (base.X != value)
                 {
+                    double delta = value - base.X;
                     base.X = value;
                     OnPropertyChanged(nameof(X));
                     OnPropertyChanged(nameof(Length));
+
+                    // Move Child Signals and Borders
+                    if (Children != null)
+                    {
+                        foreach (var child in Children)
+                        {
+                            if (child is SignalViewModel signal)
+                            {
+                                signal.X += delta;
+                            }
+                            else if (child is TrackCircuitBorderViewModel border)
+                            {
+                                border.X += delta;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -181,9 +198,26 @@ namespace RailmlEditor.ViewModels
             {
                 if (base.Y != value)
                 {
+                    double delta = value - base.Y;
                     base.Y = value;
                     OnPropertyChanged(nameof(Y));
                     OnPropertyChanged(nameof(Length));
+
+                    // Move Child Signals and Borders
+                    if (Children != null)
+                    {
+                        foreach (var child in Children)
+                        {
+                            if (child is SignalViewModel signal)
+                            {
+                                signal.Y += delta;
+                            }
+                            else if (child is TrackCircuitBorderViewModel border)
+                            {
+                                border.Y += delta;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1093,6 +1127,8 @@ namespace RailmlEditor.ViewModels
                  foreach(BaseElementViewModel item in e.NewItems)
                  {
                      AddToCategory(item);
+                     item.PropertyChanged += OnElementPropertyChanged;
+                     UpdateTrackChildrenBinding(item);
                  }
              }
              if (e.OldItems != null)
@@ -1100,8 +1136,56 @@ namespace RailmlEditor.ViewModels
                  foreach(BaseElementViewModel item in e.OldItems)
                  {
                      RemoveFromCategory(item);
+                     item.PropertyChanged -= OnElementPropertyChanged;
+                     RemoveFromTrackChildren(item);
                  }
              }
+        }
+
+        private void OnElementPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (sender is SignalViewModel || sender is TrackCircuitBorderViewModel)
+            {
+                if (e.PropertyName == nameof(SignalViewModel.RelatedTrackId))
+                {
+                    UpdateTrackChildrenBinding(sender as BaseElementViewModel);
+                }
+            }
+        }
+
+        private void RemoveFromTrackChildren(BaseElementViewModel item)
+        {
+            foreach (var track in Elements.OfType<TrackViewModel>())
+            {
+                if (track.Children.Contains(item))
+                {
+                    track.Children.Remove(item);
+                }
+            }
+        }
+
+        private void UpdateTrackChildrenBinding(BaseElementViewModel item)
+        {
+            string? relatedId = null;
+            if (item is SignalViewModel s) relatedId = s.RelatedTrackId;
+            else if (item is TrackCircuitBorderViewModel b) relatedId = b.RelatedTrackId;
+
+            if (relatedId == null)
+            {
+                RemoveFromTrackChildren(item);
+                return;
+            }
+
+            var targetTrack = Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == relatedId);
+            
+            if (targetTrack != null && targetTrack.Children.Contains(item)) return;
+
+            RemoveFromTrackChildren(item);
+
+            if (targetTrack != null)
+            {
+                targetTrack.Children.Add(item);
+            }
         }
 
         private void AddToCategory(BaseElementViewModel item)

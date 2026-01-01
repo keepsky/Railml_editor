@@ -926,6 +926,7 @@ namespace RailmlEditor.Services
                                 }
 
                                 viewModel.Elements.Add(signalVm);
+                                trackVm.Children.Add(signalVm); // Synchronize with Children collection
                             }
                         }
 
@@ -950,6 +951,7 @@ namespace RailmlEditor.Services
                                 };
 
                                 viewModel.Elements.Add(borderVm);
+                                trackVm.Children.Add(borderVm); // Synchronize with Children collection
                             }
                         }
                     }
