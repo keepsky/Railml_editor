@@ -90,6 +90,40 @@ namespace RailmlEditor.ViewModels
                 ConnectEndpoints(track, track.BeginNode, 0, trackLookup);
                 ConnectEndpoints(track, track.EndNode, track.Length, trackLookup);
             }
+
+            EnforceMinimumEdgeLength(40);
+        }
+
+        private void EnforceMinimumEdgeLength(double minLength)
+        {
+            const int iterations = 30;
+            for (int i = 0; i < iterations; i++)
+            {
+                foreach (var edge in Edges)
+                {
+                    double dx = edge.ToNode.X - edge.FromNode.X;
+                    double dy = edge.ToNode.Y - edge.FromNode.Y;
+                    double distance = Math.Sqrt(dx * dx + dy * dy);
+
+                    if (distance < minLength)
+                    {
+                        if (distance < 0.001)
+                        {
+                            dx = 1.0;
+                            dy = 0.0;
+                            distance = 1.0;
+                        }
+
+                        double push = (minLength - distance) / 2.0;
+                        double ratio = push / distance;
+
+                        edge.FromNode.X -= dx * ratio;
+                        edge.FromNode.Y -= dy * ratio;
+                        edge.ToNode.X += dx * ratio;
+                        edge.ToNode.Y += dy * ratio;
+                    }
+                }
+            }
         }
 
         private void ConnectEndpoints(TrackViewModel track, TrackNodeViewModel nodeVm, double anchorPos, Dictionary<string, TrackViewModel> trackLookup)
