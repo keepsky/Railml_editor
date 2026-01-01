@@ -345,40 +345,36 @@ namespace RailmlEditor
         {
             if (_ghostBorder == null) return;
 
-            // Find nearest track
             TrackViewModel? nearestTrack = null;
             double minDist = 20; // Snap distance
+            Point snapPoint = pos;
+            double snapAngle = 0;
 
             foreach (var t in _viewModel.Elements.OfType<TrackViewModel>())
             {
-                // Simple horizontal track assumption for Y check
-                // For curved tracks or rotated tracks, we'd need more complex math.
-                // User said "임의의 track위에(y 좌표가 동일)".
-                double distY = Math.Abs(pos.Y - t.Y);
-                if (distY < minDist && pos.X >= Math.Min(t.X, t.X2) && pos.X <= Math.Max(t.X, t.X2))
+                GetNearestPointOnTrack(pos, t, out Point nearest, out double dist, out double angle);
+                if (dist < minDist)
                 {
                     nearestTrack = t;
-                    minDist = distY;
+                    minDist = dist;
+                    snapPoint = nearest;
+                    snapAngle = angle;
                 }
             }
 
             if (nearestTrack != null)
             {
                 var oldState = _viewModel.TakeSnapshot();
-                _ghostBorder.X = pos.X;
-                _ghostBorder.Y = nearestTrack.Y;
+                _ghostBorder.X = snapPoint.X;
+                _ghostBorder.Y = snapPoint.Y;
+                _ghostBorder.Angle = snapAngle;
                 _ghostBorder.RelatedTrackId = nearestTrack.Id;
                 
                 // Calculate relative pos
-                double trackLen = nearestTrack.Length;
-                if (trackLen > 0)
-                {
-                    double dx = _ghostBorder.X - nearestTrack.X;
-                    _ghostBorder.Pos = dx; // Or absolute? User said "relative position value between trackbegin and trackEnd"
-                    // Usually RailML pos is absolute from infrastructure start, but often relative to track.
-                    // "pos는 trackbegin과 trackEnd 사이 상대적인 위치의 값" - usually [0, Length].
-                }
-
+                double dx = _ghostBorder.X - nearestTrack.X;
+                double dy = _ghostBorder.Y - nearestTrack.Y;
+                _ghostBorder.Pos = Math.Sqrt(dx * dx + dy * dy); 
+            
                 var finalBorder = _ghostBorder;
                 _ghostBorder = null;
                 _isPlacingBorder = false;
@@ -417,13 +413,17 @@ namespace RailmlEditor
                 var pos = e.GetPosition(MainDesigner);
                 _ghostBorder.X = pos.X;
                 _ghostBorder.Y = pos.Y;
+                _ghostBorder.Angle = 0;
                 
                 // Snapping preview
                 foreach (var t in _viewModel.Elements.OfType<TrackViewModel>())
                 {
-                    if (Math.Abs(pos.Y - t.Y) < 20 && pos.X >= Math.Min(t.X, t.X2) && pos.X <= Math.Max(t.X, t.X2))
+                    GetNearestPointOnTrack(pos, t, out Point nearest, out double dist, out double angle);
+                    if (dist < 20)
                     {
-                        _ghostBorder.Y = t.Y;
+                        _ghostBorder.X = nearest.X;
+                        _ghostBorder.Y = nearest.Y;
+                        _ghostBorder.Angle = angle;
                         break;
                     }
                 }
@@ -610,19 +610,7 @@ namespace RailmlEditor
                     return;
                 }
                 
-                if (viewModel is TrackCircuitBorderViewModel borderVm && e.ChangedButton == MouseButton.Left)
-                {
-                   // Restart placement for existing border
-                   foreach (var el in _viewModel.Elements) el.IsSelected = false;
-                   borderVm.IsSelected = true;
-                   _viewModel.SelectedElement = borderVm;
 
-                   _isPlacingBorder = true;
-                   _ghostBorder = borderVm;
-                   MainDesigner.Cursor = Cursors.Cross;
-                   e.Handled = true;
-                   return;
-                }
 
                 if (e.ChangedButton == MouseButton.Left)
                 {
@@ -753,6 +741,42 @@ namespace RailmlEditor
                                  if (snapped) break;
                              }
                          }
+                     }
+                     else if (element is TrackCircuitBorderViewModel borderVm)
+                     {
+                          TrackViewModel? nearestTrack = null;
+                          double minDist = 10; 
+                          Point snapPos = new Point(borderVm.X, borderVm.Y);
+                          double snapAngle = 0;
+
+                          foreach (var t in _viewModel.Elements.OfType<TrackViewModel>())
+                          {
+                              GetNearestPointOnTrack(new Point(borderVm.X, borderVm.Y), t, out Point nearest, out double dist, out double angle);
+                              if (dist < minDist)
+                              {
+                                  minDist = dist;
+                                  nearestTrack = t;
+                                  snapPos = nearest;
+                                  snapAngle = angle;
+                              }
+                          }
+
+                          if (nearestTrack != null)
+                          {
+                              borderVm.RelatedTrackId = nearestTrack.Id;
+                              borderVm.X = snapPos.X;
+                              borderVm.Y = snapPos.Y;
+                              borderVm.Angle = snapAngle;
+                              
+                              double dx = borderVm.X - nearestTrack.X;
+                              double dy = borderVm.Y - nearestTrack.Y;
+                              borderVm.Pos = Math.Sqrt(dx * dx + dy * dy);
+                          }
+                          else
+                          {
+                              borderVm.RelatedTrackId = null;
+                              borderVm.Angle = 0;
+                          }
                      }
                 }
             }
@@ -1160,6 +1184,31 @@ namespace RailmlEditor
                     MessageBox.Show($"Error saving file: {ex.Message}");
                 }
             }
+        }
+        private void GetNearestPointOnTrack(Point p, TrackViewModel track, out Point nearest, out double dist, out double angle)
+        {
+            double x1 = track.X, y1 = track.Y;
+            double x2 = track.X2, y2 = track.Y2;
+
+            double dx = x2 - x1;
+            double dy = y2 - y1;
+            double lenSq = dx * dx + dy * dy;
+
+            if (lenSq == 0)
+            {
+                nearest = new Point(x1, y1);
+                dist = Math.Sqrt(Math.Pow(p.X - x1, 2) + Math.Pow(p.Y - y1, 2));
+                angle = 0;
+                return;
+            }
+
+            double t = ((p.X - x1) * dx + (p.Y - y1) * dy) / lenSq;
+            t = Math.Max(0, Math.Min(1, t));
+
+            nearest = new Point(x1 + t * dx, y1 + t * dy);
+            dist = Math.Sqrt(Math.Pow(p.X - nearest.X, 2) + Math.Pow(p.Y - nearest.Y, 2));
+
+            angle = Math.Atan2(dy, dx) * 180 / Math.PI;
         }
     }
 }

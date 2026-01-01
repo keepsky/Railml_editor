@@ -1392,6 +1392,13 @@ namespace RailmlEditor.ViewModels
                     UpdateSelectionState();
                 }
             }
+            else if (e.PropertyName == "RelatedTrackId")
+            {
+                if (sender is BaseElementViewModel vm)
+                {
+                    UpdateTrackChildrenBinding(vm);
+                }
+            }
             else if (e.PropertyName == nameof(SignalViewModel.Direction)) // Handle Direction Change
             {
                 if (sender is SignalViewModel signal && !string.IsNullOrEmpty(signal.RelatedTrackId))

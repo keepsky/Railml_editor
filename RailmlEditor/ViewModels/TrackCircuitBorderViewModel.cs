@@ -34,5 +34,12 @@ namespace RailmlEditor.ViewModels
             get => _pos;
             set => SetProperty(ref _pos, value);
         }
+
+        private double _angle;
+        public double Angle
+        {
+            get => _angle;
+            set => SetProperty(ref _angle, value);
+        }
     }
 }
