@@ -21,6 +21,7 @@
         <local:TagPositionConverter x:Key="TagPos"/>
         <local:MidPointConverter x:Key="MidPoint"/>
         <local:ReadableAngleConverter x:Key="ReadableAngle"/>
+        <local:ConnectionToVisibilityConverter x:Key="ConnectionToVis"/>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
         <!-- Grid Background Brush (10px dots) -->
@@ -1025,22 +1026,52 @@
                                                 <RowDefinition Height="Auto"/>
                                                 <RowDefinition Height="Auto"/>
                                                 <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
                                             </Grid.RowDefinitions>
 
                                             <TextBlock Text="Type" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <ComboBox ItemsSource="{Binding AvailableNodeTypes}" SelectedItem="{Binding NodeType, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center" Style="{StaticResource PropCombo}"/>
+                                            <!-- Make Type ReadOnly for Connection -->
+                                            <ContentControl Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch">
+                                                <ContentControl.Style>
+                                                    <Style TargetType="ContentControl">
+                                                        <Setter Property="Content">
+                                                            <Setter.Value>
+                                                                <ComboBox ItemsSource="{Binding AvailableNodeTypes}" SelectedItem="{Binding NodeType, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,5" VerticalAlignment="Center" Style="{StaticResource PropCombo}"/>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding NodeType}" Value="Connection">
+                                                                <Setter Property="Content">
+                                                                    <Setter.Value>
+                                                                        <TextBox Text="Connection" IsReadOnly="True" Background="LightGray" Margin="0,0,0,5" Style="{StaticResource PropValue}"/>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ContentControl.Style>
+                                            </ContentControl>
 
-                                            <TextBlock Text="ID" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Id, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsIdReadOnly}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                            <!-- Regular Fields -->
+                                            <TextBlock Text="ID" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Normal}"/>
+                                            <TextBox Text="{Binding Id, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Normal}"/>
 
-                                            <TextBlock Text="Code" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Code, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                            <TextBlock Text="Code" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Normal}"/>
+                                            <TextBox Text="{Binding Code, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Normal}"/>
 
-                                            <TextBlock Text="Name" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                            <TextBlock Text="Name" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Normal}"/>
+                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Normal}"/>
 
-                                            <TextBlock Text="Desc" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                            <TextBlock Text="Desc" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Normal}"/>
+                                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Style="{StaticResource PropValue}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Normal}"/>
+
+                                            <!-- Connection Info Fields -->
+                                            <TextBlock Text="Conn. ID" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Connection}"/>
+                                            <TextBox Text="{Binding ConnectedNodeId}" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}" Background="LightYellow" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Connection}"/>
+
+                                            <TextBlock Text="Conn. Ref" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Connection}"/>
+                                            <TextBox Text="{Binding ConnectedTrackId}" IsReadOnly="True" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}" Background="LightYellow" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Connection}"/>
                                         </Grid>
                                     </DataTemplate>
 

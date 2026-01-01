@@ -55,10 +55,27 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _isIdReadOnly, value);
         }
 
+        private string? _connectedTrackId;
+        public string? ConnectedTrackId
+        {
+            get => _connectedTrackId;
+            set => SetProperty(ref _connectedTrackId, value);
+        }
+
+        private string? _connectedNodeId;
+        public string? ConnectedNodeId
+        {
+            get => _connectedNodeId;
+            set => SetProperty(ref _connectedNodeId, value);
+        }
+
         public TrackNodeViewModel()
         {
-            IsIdReadOnly = true; // Default to read-only as per recent user request
+            IsIdReadOnly = true; 
         }
-        public System.Collections.Generic.IEnumerable<TrackNodeType> AvailableNodeTypes => System.Enum.GetValues(typeof(TrackNodeType)).Cast<TrackNodeType>();
+        public System.Collections.Generic.IEnumerable<TrackNodeType> AvailableNodeTypes => 
+            System.Enum.GetValues(typeof(TrackNodeType))
+            .Cast<TrackNodeType>()
+            .Where(t => t != TrackNodeType.Connection);
     }
 }

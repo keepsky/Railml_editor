@@ -112,6 +112,15 @@ namespace RailmlEditor.ViewModels
                     EndNode.Id = $"{Id}_end";
                 }
             }
+            // Trigger connection check on geometry change
+            if (e.PropertyName == nameof(X) || e.PropertyName == nameof(Y) || 
+                e.PropertyName == nameof(X2) || e.PropertyName == nameof(Y2) ||
+                e.PropertyName == nameof(CurvedTrackViewModel.MX) || e.PropertyName == nameof(CurvedTrackViewModel.MY))
+            {
+                // We need access to the MainViewModel instance or Elements collection to check others.
+                // TrackViewModel doesn't know about MainViewModel.
+                // We must handle this in MainViewModel.Elements_CollectionChanged -> Item.PropertyChanged (already there!)
+            }
         }
 
         private void OnNodePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -1132,6 +1141,87 @@ namespace RailmlEditor.ViewModels
                     UpdateTrackChildrenBinding(sender as BaseElementViewModel);
                 }
             }
+            else if (sender is TrackViewModel track)
+            {
+                 // Check geometry changes
+                 if (e.PropertyName == nameof(TrackViewModel.X) || e.PropertyName == nameof(TrackViewModel.Y) || 
+                     e.PropertyName == nameof(TrackViewModel.X2) || e.PropertyName == nameof(TrackViewModel.Y2) ||
+                     e.PropertyName == nameof(CurvedTrackViewModel.MX) || e.PropertyName == nameof(CurvedTrackViewModel.MY))
+                 {
+                     CheckConnections(track);
+                 }
+            }
+        }
+
+        private void CheckConnections(TrackViewModel source)
+        {
+             // Check Begin Node (X, Y)
+             CheckNodeConnection(source, source.BeginNode, source.X, source.Y);
+
+             // Check End Node (X2, Y2)
+             CheckNodeConnection(source, source.EndNode, source.X2, source.Y2);
+        }
+
+        private void CheckNodeConnection(TrackViewModel sourceTrack, TrackNodeViewModel sourceNode, double x, double y)
+        {
+             double tolerance = 1.0;
+             TrackNodeViewModel? nearestNode = null;
+             TrackViewModel? nearestTrack = null;
+             double minDist = double.MaxValue;
+
+             foreach(var other in Elements.OfType<TrackViewModel>())
+             {
+                  if (other == sourceTrack) continue;
+                  
+                  // Check other Begin
+                  double d1 = Math.Sqrt(Math.Pow(other.X - x, 2) + Math.Pow(other.Y - y, 2));
+                  if (d1 < minDist && d1 < tolerance)
+                  {
+                      minDist = d1;
+                      nearestTrack = other;
+                      nearestNode = other.BeginNode;
+                  }
+
+                  // Check other End
+                  double d2 = Math.Sqrt(Math.Pow(other.X2 - x, 2) + Math.Pow(other.Y2 - y, 2));
+                  if (d2 < minDist && d2 < tolerance)
+                  {
+                      minDist = d2;
+                      nearestTrack = other;
+                      nearestNode = other.EndNode;
+                  }
+             }
+
+             if (nearestTrack != null && nearestNode != null)
+             {
+                  // Connect
+                  sourceNode.NodeType = TrackNodeType.Connection;
+                  sourceNode.ConnectedTrackId = nearestTrack.Id;
+                  sourceNode.ConnectedNodeId = nearestNode.Id; // Ref to node ID or Role? Usually just Track Ref is enough, but user asked for Conn. ID and Ref.
+                  // Assuming Node ID is enough. 
+                  
+                  // Bidirectional? User requirement implies automatic update.
+                  // If source connects to dest, dest should connect to source.
+                  nearestNode.NodeType = TrackNodeType.Connection;
+                  nearestNode.ConnectedTrackId = sourceTrack.Id;
+                  nearestNode.ConnectedNodeId = sourceNode.Id;
+             }
+             else
+             {
+                  // Disconnect if it WAS a connection (and now no overlap)
+                  // User said: "if disconnected... auto change to None"
+                  // But only if it WAS a Connection to avoid overwriting BufferStop/OpenEnd manually set?
+                  // Logic: If it IS a Connection, and no overlap -> revert to None.
+                  // If it is NOT a Connection (e.g. BufferStop), and no overlap -> do nothing.
+                  // Wait, if I move a BufferStop into overlap, it should become Connection? Yes.
+                  
+                  if (sourceNode.NodeType == TrackNodeType.Connection)
+                  {
+                      sourceNode.NodeType = TrackNodeType.None;
+                      sourceNode.ConnectedTrackId = null;
+                      sourceNode.ConnectedNodeId = null;
+                  }
+             }
         }
 
         private void RemoveFromTrackChildren(BaseElementViewModel item)
