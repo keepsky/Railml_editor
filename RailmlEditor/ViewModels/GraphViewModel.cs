@@ -91,7 +91,7 @@ namespace RailmlEditor.ViewModels
                 ConnectEndpoints(track, track.EndNode, track.Length, trackLookup);
             }
 
-            EnforceMinimumEdgeLength(40);
+            EnforceMinimumEdgeLength(120);
         }
 
         private void EnforceMinimumEdgeLength(double minLength)

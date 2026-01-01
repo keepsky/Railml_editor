@@ -2,9 +2,9 @@ using System;
 using System.Globalization;
 using System.Windows.Data;
 
-namespace RailmlEditor
+namespace RailmlEditor.Utils
 {
-    public class AngleConverter : IMultiValueConverter
+    public class ReadableAngleConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
@@ -17,7 +17,13 @@ namespace RailmlEditor
                 double deltaX = x2 - x;
                 double deltaY = y2 - y;
                 double angleRad = Math.Atan2(deltaY, deltaX);
-                return angleRad * 180 / Math.PI;
+                double angleDeg = angleRad * 180 / Math.PI;
+
+                // Normalize to [-90, 90] range to keep text readable (not upside down)
+                while (angleDeg <= -90) angleDeg += 180;
+                while (angleDeg > 90) angleDeg -= 180;
+
+                return angleDeg;
             }
             return 0.0;
         }
@@ -28,3 +34,4 @@ namespace RailmlEditor
         }
     }
 }
+

@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Data;
 using RailmlEditor.ViewModels;
 
-namespace RailmlEditor
+namespace RailmlEditor.Utils
 {
     public class ConnectionToVisibilityConverter : IValueConverter
     {
@@ -32,3 +32,4 @@ namespace RailmlEditor
         }
     }
 }
+

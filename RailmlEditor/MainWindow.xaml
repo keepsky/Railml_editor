@@ -4,6 +4,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:RailmlEditor.ViewModels"
+    xmlns:utils="clr-namespace:RailmlEditor.Utils"
     xmlns:local="clr-namespace:RailmlEditor" mc:Ignorable="d" Title="MainWindow" Height="900" Width="1300" KeyDown="Window_KeyDown" Icon="images/london.png">
     <Window.InputBindings>
         <KeyBinding Key="Delete" Command="{Binding DeleteCommand}"/>
@@ -13,15 +14,15 @@
         <KeyBinding Key="Y" Modifiers="Control" Command="{Binding RedoCommand}"/>
     </Window.InputBindings>
     <Window.Resources>
-        <local:DiffConverter x:Key="DiffConverter"/>
-        <local:AngleConverter x:Key="AngleConverter"/>
-        <local:AddConverter x:Key="AddConverter"/>
-        <!-- <local:BezierConverter x:Key="BezierConverter"/> -->
-        <local:SegmentLengthConverter x:Key="SegmentLengthConverter"/>
-        <local:TagPositionConverter x:Key="TagPos"/>
-        <local:MidPointConverter x:Key="MidPoint"/>
-        <local:ReadableAngleConverter x:Key="ReadableAngle"/>
-        <local:ConnectionToVisibilityConverter x:Key="ConnectionToVis"/>
+        <utils:DiffConverter x:Key="DiffConverter"/>
+        <utils:AngleConverter x:Key="AngleConverter"/>
+        <utils:AddConverter x:Key="AddConverter"/>
+        <!-- <utils:BezierConverter x:Key="BezierConverter"/> -->
+        <utils:SegmentLengthConverter x:Key="SegmentLengthConverter"/>
+        <utils:TagPositionConverter x:Key="TagPos"/>
+        <utils:MidPointConverter x:Key="MidPoint"/>
+        <utils:ReadableAngleConverter x:Key="ReadableAngle"/>
+        <utils:ConnectionToVisibilityConverter x:Key="ConnectionToVis"/>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
         <!-- Grid Background Brush (10px dots) -->
@@ -1661,7 +1662,7 @@
                             <Style TargetType="ContentPresenter">
                                 <Setter Property="Canvas.Left" Value="{Binding X}"/>
                                 <Setter Property="Canvas.Top" Value="{Binding Y}"/>
-                                <Setter Property="Opacity" Value="{Binding IsSelected, Converter={local:BoolToOpacityConverter}}"/>
+                                <Setter Property="Opacity" Value="{Binding IsSelected, Converter={utils:BoolToOpacityConverter}}"/>
                                 <EventSetter Event="MouseDown" Handler="Item_MouseDown"/>
                                 <EventSetter Event="MouseMove" Handler="Item_MouseMove"/>
                                 <EventSetter Event="MouseUp" Handler="Item_MouseUp"/>

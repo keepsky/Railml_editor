@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.Windows.Data;
 
-namespace RailmlEditor
+namespace RailmlEditor.Utils
 {
     public class SegmentLengthConverter : IMultiValueConverter
     {
@@ -33,3 +33,4 @@ namespace RailmlEditor
         }
     }
 }
+

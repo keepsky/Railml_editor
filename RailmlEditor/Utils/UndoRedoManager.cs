@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using RailmlEditor.ViewModels;
 
-namespace RailmlEditor
+namespace RailmlEditor.Utils
 {
     public interface IUndoableAction
     {
@@ -70,3 +70,4 @@ namespace RailmlEditor
         }
     }
 }
+

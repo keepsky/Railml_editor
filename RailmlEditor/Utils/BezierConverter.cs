@@ -4,7 +4,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows;
 
-namespace RailmlEditor
+namespace RailmlEditor.Utils
 {
     public class BezierConverter : IMultiValueConverter
     {
@@ -28,3 +28,4 @@ namespace RailmlEditor
         }
     }
 }
+

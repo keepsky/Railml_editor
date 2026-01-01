@@ -4,7 +4,7 @@ using System.Windows.Data;
 
 using System.Windows.Markup;
 
-namespace RailmlEditor
+namespace RailmlEditor.Utils
 {
     public class BoolToOpacityConverter : MarkupExtension, IValueConverter
     {
@@ -25,3 +25,4 @@ namespace RailmlEditor
         }
     }
 }
+

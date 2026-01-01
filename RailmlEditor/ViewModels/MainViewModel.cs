@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using RailmlEditor.Models;
+using RailmlEditor.Utils;
 
 namespace RailmlEditor.ViewModels
 {
