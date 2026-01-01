@@ -31,14 +31,14 @@ namespace RailmlEditor.Models
         [XmlAttribute(AttributeName = "name")]
         public string Name { get; set; }
 
-        [XmlElement(ElementName = "tracks")]
-        public Tracks Tracks { get; set; }
-
         [XmlElement(ElementName = "routes")]
         public Routes Routes { get; set; }
 
         [XmlElement(ElementName = "areas", Namespace = "http://www.sehwa.co.kr/railml")]
         public Areas Areas { get; set; }
+
+        [XmlElement(ElementName = "tracks")]
+        public Tracks Tracks { get; set; }
     }
 
     public class Tracks

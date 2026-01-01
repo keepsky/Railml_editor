@@ -1155,11 +1155,11 @@ namespace RailmlEditor.ViewModels
                 Id = "inf001",
                 Name = "Default Infrastructure"
             };
+            ActiveInfrastructure.Categories.Add(new CategoryViewModel { Title = "Route" });
+            ActiveInfrastructure.Categories.Add(new CategoryViewModel { Title = "Area" });
             ActiveInfrastructure.Categories.Add(new CategoryViewModel { Title = "Track" });
             ActiveInfrastructure.Categories.Add(new CategoryViewModel { Title = "Signal" });
             ActiveInfrastructure.Categories.Add(new CategoryViewModel { Title = "Point" });
-            ActiveInfrastructure.Categories.Add(new CategoryViewModel { Title = "Route" });
-            ActiveInfrastructure.Categories.Add(new CategoryViewModel { Title = "Area" });
             
             TreeRoots.Add(ActiveInfrastructure);
         }

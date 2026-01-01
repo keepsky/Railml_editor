@@ -4,7 +4,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:RailmlEditor.ViewModels"
-    xmlns:local="clr-namespace:RailmlEditor" mc:Ignorable="d" Title="MainWindow" Height="900" Width="1300" KeyDown="Window_KeyDown">
+    xmlns:local="clr-namespace:RailmlEditor" mc:Ignorable="d" Title="MainWindow" Height="900" Width="1300" KeyDown="Window_KeyDown" Icon="images/london.png">
     <Window.InputBindings>
         <KeyBinding Key="Delete" Command="{Binding DeleteCommand}"/>
         <KeyBinding Key="C" Modifiers="Control" Command="{Binding CopyCommand}"/>
