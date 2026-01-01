@@ -94,7 +94,9 @@ namespace RailmlEditor.ViewModels
             // I need to find MainViewModel constructor.
             // Initialize Nodes
             BeginNode.Role = "Begin";
+            BeginNode.Pos = 0;
             EndNode.Role = "End";
+            EndNode.Pos = Length;
             Children.Add(BeginNode);
             Children.Add(EndNode);
 
@@ -121,6 +123,10 @@ namespace RailmlEditor.ViewModels
                 // We need access to the MainViewModel instance or Elements collection to check others.
                 // TrackViewModel doesn't know about MainViewModel.
                 // We must handle this in MainViewModel.Elements_CollectionChanged -> Item.PropertyChanged (already there!)
+            }
+            if (e.PropertyName == nameof(Length))
+            {
+                EndNode.Pos = Length;
             }
         }
 
@@ -529,6 +535,13 @@ namespace RailmlEditor.ViewModels
         {
             get => _relatedTrackId;
             set => SetProperty(ref _relatedTrackId, value);
+        }
+
+        private double _pos;
+        public double Pos
+        {
+            get => _pos;
+            set => SetProperty(ref _pos, value);
         }
 
         public System.Collections.Generic.List<string> AvailableDirections { get; } = new System.Collections.Generic.List<string> { "up", "down" };

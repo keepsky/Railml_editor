@@ -69,6 +69,13 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _connectedNodeId, value);
         }
 
+        private double _pos;
+        public double Pos
+        {
+            get => _pos;
+            set => SetProperty(ref _pos, value);
+        }
+
         public TrackNodeViewModel()
         {
             IsIdReadOnly = true; 

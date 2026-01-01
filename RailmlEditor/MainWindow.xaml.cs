@@ -370,10 +370,9 @@ namespace RailmlEditor
                 _ghostBorder.Angle = snapAngle;
                 _ghostBorder.RelatedTrackId = nearestTrack.Id;
                 
-                // Calculate relative pos
                 double dx = _ghostBorder.X - nearestTrack.X;
                 double dy = _ghostBorder.Y - nearestTrack.Y;
-                _ghostBorder.Pos = Math.Sqrt(dx * dx + dy * dy); 
+                _ghostBorder.Pos = Math.Round(Math.Sqrt(dx * dx + dy * dy)); 
             
                 var finalBorder = _ghostBorder;
                 _ghostBorder = null;
@@ -728,6 +727,7 @@ namespace RailmlEditor
                                      signalVm.X = t.X;
                                      signalVm.Y = t.Y - 15;
                                      signalVm.RelatedTrackId = t.Id;
+                                     signalVm.Pos = 0;
                                      snapped = true;
                                  }
                                  else if (signalVm.Direction == "down" && distEndSq < 400.0)
@@ -735,6 +735,7 @@ namespace RailmlEditor
                                      signalVm.X = t.X2;
                                      signalVm.Y = t.Y2 + 5;
                                      signalVm.RelatedTrackId = t.Id;
+                                     signalVm.Pos = Math.Round(t.Length);
                                      snapped = true;
                                  }
                                  
@@ -770,12 +771,13 @@ namespace RailmlEditor
                               
                               double dx = borderVm.X - nearestTrack.X;
                               double dy = borderVm.Y - nearestTrack.Y;
-                              borderVm.Pos = Math.Sqrt(dx * dx + dy * dy);
+                              borderVm.Pos = Math.Round(Math.Sqrt(dx * dx + dy * dy));
                           }
                           else
                           {
                               borderVm.RelatedTrackId = null;
                               borderVm.Angle = 0;
+                              borderVm.Pos = 0;
                           }
                      }
                 }
