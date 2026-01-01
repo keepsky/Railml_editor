@@ -1138,7 +1138,6 @@ namespace RailmlEditor.ViewModels
             {
                 var clone = CloneElement(el);
                 Elements.Add(clone);
-                AddToCategory(clone);
                 if (selectedIds.Contains(clone.Id))
                 {
                     clone.IsSelected = true; // This will trigger Element_PropertyChanged and add to SelectedElements
@@ -1327,10 +1326,13 @@ namespace RailmlEditor.ViewModels
              else if (item is RouteViewModel) catTitle = "Route";
              else if (item is AreaViewModel) catTitle = "Area";
              
-             if (!string.IsNullOrEmpty(catTitle))
+              if (!string.IsNullOrEmpty(catTitle))
              {
                  var cat = ActiveInfrastructure.Categories.FirstOrDefault(c => c.Title == catTitle);
-                 cat?.Items.Add(item);
+                 if (cat != null && !cat.Items.Contains(item))
+                 {
+                     cat.Items.Add(item);
+                 }
              }
              else if (item is TrackCircuitBorderViewModel border)
              {

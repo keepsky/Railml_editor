@@ -542,7 +542,7 @@ namespace RailmlEditor.Services
                 trackVm.Code = track.Code;
                 trackVm.X = track.TrackTopology?.TrackBegin?.ScreenPos?.X ?? 0;
                 trackVm.Y = track.TrackTopology?.TrackBegin?.ScreenPos?.Y ?? 0;
-                
+
                 if (track.TrackTopology?.TrackEnd != null)
                 {
                     trackVm.X2 = track.TrackTopology.TrackEnd.ScreenPos?.X ?? 0;
@@ -551,6 +551,58 @@ namespace RailmlEditor.Services
                 else
                 {
                     trackVm.Length = 100;
+                }
+
+                if (track.TrackTopology?.TrackBegin != null)
+                {
+                    if (track.TrackTopology.TrackBegin.BufferStop != null)
+                    {
+                        trackVm.BeginType = TrackNodeType.BufferStop;
+                        trackVm.BeginNode.Id = track.TrackTopology.TrackBegin.BufferStop.Id;
+                    }
+                    else if (track.TrackTopology.TrackBegin.OpenEnd != null)
+                    {
+                        trackVm.BeginType = TrackNodeType.OpenEnd;
+                        trackVm.BeginNode.Id = track.TrackTopology.TrackBegin.OpenEnd.Id;
+                    }
+                    else if (track.TrackTopology.TrackBegin.ConnectionList != null && track.TrackTopology.TrackBegin.ConnectionList.Any())
+                    {
+                        trackVm.BeginType = TrackNodeType.Connection;
+                        trackVm.HasBeginConnection = true;
+                        var conn = track.TrackTopology.TrackBegin.ConnectionList.First();
+                        if (conn.Ref != null)
+                        {
+                            var parts = conn.Ref.Split('_');
+                            if (idMap.ContainsKey(parts[0])) trackVm.BeginNode.ConnectedTrackId = idMap[parts[0]];
+                            trackVm.BeginNode.ConnectedNodeId = conn.Ref;
+                        }
+                    }
+                }
+
+                if (track.TrackTopology?.TrackEnd != null)
+                {
+                    if (track.TrackTopology.TrackEnd.BufferStop != null)
+                    {
+                        trackVm.EndType = TrackNodeType.BufferStop;
+                        trackVm.EndNode.Id = track.TrackTopology.TrackEnd.BufferStop.Id;
+                    }
+                    else if (track.TrackTopology.TrackEnd.OpenEnd != null)
+                    {
+                        trackVm.EndType = TrackNodeType.OpenEnd;
+                        trackVm.EndNode.Id = track.TrackTopology.TrackEnd.OpenEnd.Id;
+                    }
+                    else if (track.TrackTopology.TrackEnd.ConnectionList != null && track.TrackTopology.TrackEnd.ConnectionList.Any())
+                    {
+                        trackVm.EndType = TrackNodeType.Connection;
+                        trackVm.HasEndConnection = true;
+                        var conn = track.TrackTopology.TrackEnd.ConnectionList.First();
+                        if (conn.Ref != null)
+                        {
+                            var parts = conn.Ref.Split('_');
+                            if (idMap.ContainsKey(parts[0])) trackVm.EndNode.ConnectedTrackId = idMap[parts[0]];
+                            trackVm.EndNode.ConnectedNodeId = conn.Ref;
+                        }
+                    }
                 }
 
                 newElements.Add(trackVm);
@@ -750,6 +802,17 @@ namespace RailmlEditor.Services
                                 trackVm.BeginNode.Name = track.TrackTopology.TrackBegin.OpenEnd.Name;
                                 trackVm.BeginNode.Description = track.TrackTopology.TrackBegin.OpenEnd.Description;
                             }
+                            else if (track.TrackTopology.TrackBegin.ConnectionList != null && track.TrackTopology.TrackBegin.ConnectionList.Any())
+                            {
+                                trackVm.BeginType = TrackNodeType.Connection;
+                                var conn = track.TrackTopology.TrackBegin.ConnectionList.First();
+                                if (conn.Ref != null)
+                                {
+                                    var parts = conn.Ref.Split('_');
+                                    trackVm.BeginNode.ConnectedTrackId = parts[0];
+                                    trackVm.BeginNode.ConnectedNodeId = conn.Ref;
+                                }
+                            }
                             else
                             {
                                 trackVm.BeginType = TrackNodeType.None;
@@ -779,6 +842,17 @@ namespace RailmlEditor.Services
                                 trackVm.EndNode.Code = track.TrackTopology.TrackEnd.OpenEnd.Code;
                                 trackVm.EndNode.Name = track.TrackTopology.TrackEnd.OpenEnd.Name;
                                 trackVm.EndNode.Description = track.TrackTopology.TrackEnd.OpenEnd.Description;
+                            }
+                            else if (track.TrackTopology.TrackEnd.ConnectionList != null && track.TrackTopology.TrackEnd.ConnectionList.Any())
+                            {
+                                trackVm.EndType = TrackNodeType.Connection;
+                                var conn = track.TrackTopology.TrackEnd.ConnectionList.First();
+                                if (conn.Ref != null)
+                                {
+                                    var parts = conn.Ref.Split('_');
+                                    trackVm.EndNode.ConnectedTrackId = parts[0];
+                                    trackVm.EndNode.ConnectedNodeId = conn.Ref;
+                                }
                             }
                             else
                             {
@@ -976,7 +1050,6 @@ namespace RailmlEditor.Services
                                 }
 
                                 viewModel.Elements.Add(signalVm);
-                                trackVm.Children.Add(signalVm); // Synchronize with Children collection
                             }
                         }
 
@@ -1001,7 +1074,6 @@ namespace RailmlEditor.Services
                                 };
 
                                 viewModel.Elements.Add(borderVm);
-                                trackVm.Children.Add(borderVm); // Synchronize with Children collection
                             }
                         }
                     }

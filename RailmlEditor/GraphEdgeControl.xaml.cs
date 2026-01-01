@@ -44,22 +44,26 @@ namespace RailmlEditor
             {
                 ArrowHead.Visibility = Visibility.Visible;
                 
-                // Direction "up" means arrow at x2,y2 pointing away from x1,y1
-                // Direction "down" means arrow at x1,y1 pointing away from x2,y2
-                
-                double targetX = (vm.Direction == "up") ? x2 : x1;
-                double targetY = (vm.Direction == "up") ? y2 : y1;
+                // Calculate midpoint
+                double xm = (x1 + x2) / 2;
+                double ym = (y1 + y2) / 2;
+
+                // Direction "up": arrow points from Begin (x1,y1) to End (x2,y2)
+                // Direction "down": arrow points from End (x2,y2) to Begin (x1,y1)
                 double anchorX = (vm.Direction == "up") ? x1 : x2;
                 double anchorY = (vm.Direction == "up") ? y1 : y2;
+                double targetX = (vm.Direction == "up") ? x2 : x1;
+                double targetY = (vm.Direction == "up") ? y2 : y1;
 
                 double angle = Math.Atan2(targetY - anchorY, targetX - anchorX) * 180 / Math.PI;
 
                 var transform = new TransformGroup();
-                transform.Children.Add(new RotateTransform(angle, 5, 2.5)); // Rotate around center of head
-                transform.Children.Add(new TranslateTransform(targetX - 5, targetY - 2.5));
+                // Rotate around center of the 10x10 polygon
+                transform.Children.Add(new RotateTransform(angle, 5, 5)); 
+                // Translate so the center of the polygon is at the midpoint of the edge
+                transform.Children.Add(new TranslateTransform(xm - 5, ym - 5));
                 ArrowHead.RenderTransform = transform;
                 
-                // Adjust points for a better look
                 ArrowHead.Points = new PointCollection(new[] { new Point(0, 0), new Point(10, 5), new Point(0, 10) });
             }
         }
