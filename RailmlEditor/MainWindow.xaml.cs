@@ -26,6 +26,9 @@ namespace RailmlEditor
         private System.Collections.Generic.Dictionary<BaseElementViewModel, Point> _originalPositions = new System.Collections.Generic.Dictionary<BaseElementViewModel, Point>();
         private System.Collections.Generic.List<BaseElementViewModel>? _beforeDragSnapshot;
 
+        private bool _isPlacingBorder = false;
+        private TrackCircuitBorderViewModel? _ghostBorder;
+
         private void Toolbox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _toolboxDragStart = e.GetPosition(null);
@@ -125,6 +128,10 @@ namespace RailmlEditor
                 else if (type == "Cross")
                 {
                     _viewModel.AddDoubleTrack("cross.railml", defaultPos);
+                }
+                else if (type == "Border")
+                {
+                    StartBorderPlacement();
                 }
                 
 
@@ -296,6 +303,98 @@ namespace RailmlEditor
                 MainDesigner.Cursor = Cursors.SizeAll;
                 e.Handled = true;
             }
+            
+            if (_isPlacingBorder)
+            {
+                if (e.ChangedButton == MouseButton.Left)
+                {
+                    FinalizeBorderPlacement(e.GetPosition(MainDesigner));
+                    e.Handled = true;
+                }
+                else if (e.ChangedButton == MouseButton.Right)
+                {
+                    CancelBorderPlacement();
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void StartBorderPlacement()
+        {
+            _isPlacingBorder = true;
+            _ghostBorder = new TrackCircuitBorderViewModel
+            {
+                Id = _viewModel.GetNextId("td"),
+                Name = "Border",
+                X = -1000,
+                Y = -1000
+            };
+            _viewModel.Elements.Add(_ghostBorder);
+            MainDesigner.Cursor = Cursors.Cross;
+        }
+
+        private void CancelBorderPlacement()
+        {
+            if (_ghostBorder != null) _viewModel.Elements.Remove(_ghostBorder);
+            _isPlacingBorder = false;
+            _ghostBorder = null;
+            MainDesigner.Cursor = Cursors.Arrow;
+        }
+
+        private void FinalizeBorderPlacement(Point pos)
+        {
+            if (_ghostBorder == null) return;
+
+            // Find nearest track
+            TrackViewModel? nearestTrack = null;
+            double minDist = 20; // Snap distance
+
+            foreach (var t in _viewModel.Elements.OfType<TrackViewModel>())
+            {
+                // Simple horizontal track assumption for Y check
+                // For curved tracks or rotated tracks, we'd need more complex math.
+                // User said "임의의 track위에(y 좌표가 동일)".
+                double distY = Math.Abs(pos.Y - t.Y);
+                if (distY < minDist && pos.X >= Math.Min(t.X, t.X2) && pos.X <= Math.Max(t.X, t.X2))
+                {
+                    nearestTrack = t;
+                    minDist = distY;
+                }
+            }
+
+            if (nearestTrack != null)
+            {
+                var oldState = _viewModel.TakeSnapshot();
+                _ghostBorder.X = pos.X;
+                _ghostBorder.Y = nearestTrack.Y;
+                _ghostBorder.RelatedTrackId = nearestTrack.Id;
+                
+                // Calculate relative pos
+                double trackLen = nearestTrack.Length;
+                if (trackLen > 0)
+                {
+                    double dx = _ghostBorder.X - nearestTrack.X;
+                    _ghostBorder.Pos = dx; // Or absolute? User said "relative position value between trackbegin and trackEnd"
+                    // Usually RailML pos is absolute from infrastructure start, but often relative to track.
+                    // "pos는 trackbegin과 trackEnd 사이 상대적인 위치의 값" - usually [0, Length].
+                }
+
+                var finalBorder = _ghostBorder;
+                _ghostBorder = null;
+                _isPlacingBorder = false;
+                MainDesigner.Cursor = Cursors.Arrow;
+                
+                _viewModel.AddHistory(oldState);
+                
+                // Force update explorer parent
+                _viewModel.UpdateBorderParent(finalBorder);
+            }
+            else
+            {
+                // Just place it if no track? User said "임의의 track위에 ... 클릭하면 ... 바인딩"
+                // If not on track, maybe do nothing or just cancel?
+                // Let's just keep it following mouse until a track is clicked or right-click to cancel.
+            }
         }
 
         private void MainGrid_MouseMove(object sender, MouseEventArgs e)
@@ -312,6 +411,22 @@ namespace RailmlEditor
                 Canvas.SetTop(SelectionBox, y);
                 SelectionBox.Width = w;
                 SelectionBox.Height = h;
+            }
+            else if (_isPlacingBorder && _ghostBorder != null)
+            {
+                var pos = e.GetPosition(MainDesigner);
+                _ghostBorder.X = pos.X;
+                _ghostBorder.Y = pos.Y;
+                
+                // Snapping preview
+                foreach (var t in _viewModel.Elements.OfType<TrackViewModel>())
+                {
+                    if (Math.Abs(pos.Y - t.Y) < 20 && pos.X >= Math.Min(t.X, t.X2) && pos.X <= Math.Max(t.X, t.X2))
+                    {
+                        _ghostBorder.Y = t.Y;
+                        break;
+                    }
+                }
             }
             else if (_isPanning)
             {
@@ -489,6 +604,20 @@ namespace RailmlEditor
                         e.Handled = true;
                     }
                     return;
+                }
+                
+                if (viewModel is TrackCircuitBorderViewModel borderVm && e.ChangedButton == MouseButton.Left)
+                {
+                   // Restart placement for existing border
+                   foreach (var el in _viewModel.Elements) el.IsSelected = false;
+                   borderVm.IsSelected = true;
+                   _viewModel.SelectedElement = borderVm;
+
+                   _isPlacingBorder = true;
+                   _ghostBorder = borderVm;
+                   MainDesigner.Cursor = Cursors.Cross;
+                   e.Handled = true;
+                   return;
                 }
 
                 if (e.ChangedButton == MouseButton.Left)

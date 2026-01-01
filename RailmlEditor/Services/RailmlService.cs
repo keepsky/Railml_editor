@@ -97,36 +97,88 @@ namespace RailmlEditor.Services
                     });
                 }
 
-                // Add Signals bound to this track
-                var boundSignals = viewModel.Elements.OfType<SignalViewModel>().Where(s => s.RelatedTrackId == element.Id).ToList();
-                
-                if (boundSignals.Count > 0)
-                {
-                    track.OcsElements = new OcsElements { Signals = new Signals() };
-                    
-                    foreach (var sigVm in boundSignals)
-                    {
-                        // Calculate Pos relative to track start
-                        double dist = Math.Sqrt(Math.Pow(sigVm.X - element.X, 2) + Math.Pow(sigVm.Y - element.Y, 2));
-                        
-                        var signal = new Signal
-                        {
-                            Id = sigVm.Id,
-                            Dir = sigVm.Direction,
-                            Type = sigVm.Type,
-                            Function = sigVm.Function,
-                            AdditionalName = new AdditionalName { Name = sigVm.Name },
-                            Pos = (int)dist,
-                            ScreenPos = new ScreenPos { X = sigVm.X, Y = sigVm.Y }
-                        };
-                        track.OcsElements.Signals.SignalList.Add(signal);
+                // Add Signals and Borders bound to this track
+                var trackVm = element as TrackViewModel; // Cast to access properties
 
-                        // Signal Vis
-                        trackVis.TrackElementVisList.Add(new TrackElementVis
+                // Map BufferStop/OpenEnd from ViewModel
+                if (trackVm != null)
+                {
+                    if (trackVm.BeginType == TrackNodeType.BufferStop)
+                    {
+                        track.TrackTopology.TrackBegin.BufferStop = new BufferStop { Id = trackVm.BeginNode.Id, Code = trackVm.BeginNode.Code, Name = trackVm.BeginNode.Name, Description = trackVm.BeginNode.Description };
+                    }
+                    else if (trackVm.BeginType == TrackNodeType.OpenEnd)
+                    {
+                        track.TrackTopology.TrackBegin.OpenEnd = new OpenEnd { Id = trackVm.BeginNode.Id, Code = trackVm.BeginNode.Code, Name = trackVm.BeginNode.Name, Description = trackVm.BeginNode.Description };
+                    }
+
+                    if (trackVm.EndType == TrackNodeType.BufferStop)
+                    {
+                        track.TrackTopology.TrackEnd.BufferStop = new BufferStop { Id = trackVm.EndNode.Id, Code = trackVm.EndNode.Code, Name = trackVm.EndNode.Name, Description = trackVm.EndNode.Description };
+                    }
+                    else if (trackVm.EndType == TrackNodeType.OpenEnd)
+                    {
+                        track.TrackTopology.TrackEnd.OpenEnd = new OpenEnd { Id = trackVm.EndNode.Id, Code = trackVm.EndNode.Code, Name = trackVm.EndNode.Name, Description = trackVm.EndNode.Description };
+                    }
+                }
+                var boundSignals = viewModel.Elements.OfType<SignalViewModel>().Where(s => s.RelatedTrackId == element.Id).ToList();
+                var boundBorders = viewModel.Elements.OfType<TrackCircuitBorderViewModel>().Where(b => b.RelatedTrackId == element.Id).ToList();
+                
+                if (boundSignals.Count > 0 || boundBorders.Count > 0)
+                {
+                    track.OcsElements = new OcsElements();
+                    
+                    if (boundSignals.Count > 0)
+                    {
+                        track.OcsElements.Signals = new Signals();
+                        foreach (var sigVm in boundSignals)
                         {
-                            Ref = signal.Id,
-                            Position = new VisualizationPosition { X = sigVm.X, Y = sigVm.Y }
-                        });
+                            // Calculate Pos relative to track start
+                            double dist = Math.Sqrt(Math.Pow(sigVm.X - element.X, 2) + Math.Pow(sigVm.Y - element.Y, 2));
+                            
+                            var signal = new Signal
+                            {
+                                Id = sigVm.Id,
+                                Dir = sigVm.Direction,
+                                Type = sigVm.Type,
+                                Function = sigVm.Function,
+                                AdditionalName = new AdditionalName { Name = sigVm.Name },
+                                Pos = (int)dist,
+                                ScreenPos = new ScreenPos { X = sigVm.X, Y = sigVm.Y }
+                            };
+                            track.OcsElements.Signals.SignalList.Add(signal);
+
+                            // Signal Vis
+                            trackVis.TrackElementVisList.Add(new TrackElementVis
+                            {
+                                Ref = signal.Id,
+                                Position = new VisualizationPosition { X = sigVm.X, Y = sigVm.Y }
+                            });
+                        }
+                    }
+
+                    if (boundBorders.Count > 0)
+                    {
+                        track.OcsElements.TrainDetectionElements = new TrainDetectionElements();
+                        foreach (var borderVm in boundBorders)
+                        {
+                            var border = new TrackCircuitBorder
+                            {
+                                Id = borderVm.Id,
+                                Name = borderVm.Name,
+                                Code = borderVm.Code,
+                                Description = borderVm.Description,
+                                Pos = (int)borderVm.Pos
+                            };
+                            track.OcsElements.TrainDetectionElements.TrackCircuitBorderList.Add(border);
+
+                            // Border Vis
+                            trackVis.TrackElementVisList.Add(new TrackElementVis
+                            {
+                                Ref = border.Id,
+                                Position = new VisualizationPosition { X = borderVm.X, Y = borderVm.Y }
+                            });
+                        }
                     }
                 }
 
@@ -629,6 +681,68 @@ namespace RailmlEditor.Services
                         trackVm.MainDir = track.MainDir;
                         trackVm.Code = track.Code;
 
+                        // Load BufferStop/OpenEnd
+                        if (track.TrackTopology?.TrackBegin != null)
+                        {
+                            if (track.TrackTopology.TrackBegin.BufferStop != null)
+                            {
+                                trackVm.BeginType = TrackNodeType.BufferStop;
+                                trackVm.BeginNode.Id = track.TrackTopology.TrackBegin.BufferStop.Id;
+                                trackVm.BeginNode.Code = track.TrackTopology.TrackBegin.BufferStop.Code;
+                                trackVm.BeginNode.Name = track.TrackTopology.TrackBegin.BufferStop.Name;
+                                trackVm.BeginNode.Description = track.TrackTopology.TrackBegin.BufferStop.Description;
+                            }
+                            else if (track.TrackTopology.TrackBegin.OpenEnd != null)
+                            {
+                                trackVm.BeginType = TrackNodeType.OpenEnd;
+                                trackVm.BeginNode.Id = track.TrackTopology.TrackBegin.OpenEnd.Id;
+                                trackVm.BeginNode.Code = track.TrackTopology.TrackBegin.OpenEnd.Code;
+                                trackVm.BeginNode.Name = track.TrackTopology.TrackBegin.OpenEnd.Name;
+                                trackVm.BeginNode.Description = track.TrackTopology.TrackBegin.OpenEnd.Description;
+                            }
+                            else
+                            {
+                                trackVm.BeginType = TrackNodeType.None;
+                            }
+
+                            // Check connection
+                            if (track.TrackTopology.TrackBegin.ConnectionList != null && track.TrackTopology.TrackBegin.ConnectionList.Any())
+                            {
+                                trackVm.HasBeginConnection = true;
+                            }
+                        }
+
+                        if (track.TrackTopology?.TrackEnd != null)
+                        {
+                            if (track.TrackTopology.TrackEnd.BufferStop != null)
+                            {
+                                trackVm.EndType = TrackNodeType.BufferStop;
+                                trackVm.EndNode.Id = track.TrackTopology.TrackEnd.BufferStop.Id;
+                                trackVm.EndNode.Code = track.TrackTopology.TrackEnd.BufferStop.Code;
+                                trackVm.EndNode.Name = track.TrackTopology.TrackEnd.BufferStop.Name;
+                                trackVm.EndNode.Description = track.TrackTopology.TrackEnd.BufferStop.Description;
+                            }
+                            else if (track.TrackTopology.TrackEnd.OpenEnd != null)
+                            {
+                                trackVm.EndType = TrackNodeType.OpenEnd;
+                                trackVm.EndNode.Id = track.TrackTopology.TrackEnd.OpenEnd.Id;
+                                trackVm.EndNode.Code = track.TrackTopology.TrackEnd.OpenEnd.Code;
+                                trackVm.EndNode.Name = track.TrackTopology.TrackEnd.OpenEnd.Name;
+                                trackVm.EndNode.Description = track.TrackTopology.TrackEnd.OpenEnd.Description;
+                            }
+                            else
+                            {
+                                trackVm.EndType = TrackNodeType.None;
+                            }
+
+                            // Check connection
+                            if (track.TrackTopology.TrackEnd.ConnectionList != null && track.TrackTopology.TrackEnd.ConnectionList.Any())
+                            {
+                                trackVm.HasEndConnection = true;
+                            }
+                        }
+                        trackVm.Code = track.Code;
+
                         // Set X, Y
                         if (startPos != null)
                         {
@@ -812,6 +926,30 @@ namespace RailmlEditor.Services
                                 }
 
                                 viewModel.Elements.Add(signalVm);
+                            }
+                        }
+
+                        // Load Borders
+                        if (track.OcsElements?.TrainDetectionElements?.TrackCircuitBorderList != null)
+                        {
+                            foreach (var border in track.OcsElements.TrainDetectionElements.TrackCircuitBorderList)
+                            {
+                                VisualizationPosition? borderPos = null;
+                                coordMap.TryGetValue(border.Id, out borderPos);
+
+                                var borderVm = new TrackCircuitBorderViewModel
+                                {
+                                    Id = border.Id,
+                                    Name = border.Name,
+                                    Code = border.Code,
+                                    Description = border.Description,
+                                    Pos = border.Pos,
+                                    X = borderPos?.X ?? 0,
+                                    Y = borderPos?.Y ?? 0,
+                                    RelatedTrackId = track.Id
+                                };
+
+                                viewModel.Elements.Add(borderVm);
                             }
                         }
                     }

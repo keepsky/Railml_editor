@@ -1,40 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <railml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:sehwa="http://www.sehwa.co.kr/railml" version="2.5" xmlns="http://www.railml.org/schemas/2013">
-  <infrastructure id="inf001" name="main station">
+  <infrastructure id="inf001" name="Default Infrastructure">
     <tracks>
-      <track id="T001" name="21T" mainDir="up" code="plain">
+      <track id="T001" code="plain">
         <trackTopology>
-          <trackBegin pos="0" id="T001_begin" />
-          <trackEnd pos="80" id="T001_end">
+          <trackBegin pos="0" id="T001_begin">
+            <openEnd id="bs1" />
+          </trackBegin>
+          <trackEnd pos="100" id="T001_end">
             <connection id="conn_T001_end_to_T002_begin" ref="T002_begin" />
+            <bufferStop id="bs2" />
           </trackEnd>
         </trackTopology>
-        <ocsElements>
-          <signals>
-            <signal id="S001" dir="up" pos="15">
-              <additionalName />
-            </signal>
-          </signals>
-        </ocsElements>
       </track>
-      <track id="T002" name="21T" mainDir="up" code="plain">
+      <track id="T002" code="plain">
         <trackTopology>
           <trackBegin pos="0" id="T002_begin">
             <connection id="conn_T002_begin_to_T001_end" ref="T001_end" />
+            <openEnd id="oe1" />
           </trackBegin>
-          <trackEnd pos="110" id="T002_end" />
-          <connections>
-            <switch id="P001" pos="0" trackContinueCourse="straight" normalPosition="straight">
-              <additionalName name="21" />
-              <connection id="conn_P001_to_T003_begin" ref="T003_begin" orientation="outgoing" course="left" />
-            </switch>
-          </connections>
-        </trackTopology>
-      </track>
-      <track id="T003" name="21T" mainDir="up" code="corner">
-        <trackTopology>
-          <trackBegin pos="0" id="T003_begin" />
-          <trackEnd pos="134" id="T003_end" />
+          <trackEnd pos="100" id="T002_end">
+            <bufferStop id="bs3" />
+          </trackEnd>
         </trackTopology>
       </track>
     </tracks>
@@ -44,35 +31,18 @@
       <lineVis>
         <trackVis ref="T001">
           <trackElementVis ref="T001_begin">
-            <position x="30" y="120" />
+            <position x="100" y="100" />
           </trackElementVis>
           <trackElementVis ref="T001_end">
-            <position x="110" y="120" />
-          </trackElementVis>
-          <trackElementVis ref="S001">
-            <position x="30" y="105" />
+            <position x="200" y="100" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="T002">
           <trackElementVis ref="T002_begin">
-            <position x="110" y="120" />
+            <position x="200" y="100" />
           </trackElementVis>
           <trackElementVis ref="T002_end">
-            <position x="220" y="120" />
-          </trackElementVis>
-          <trackElementVis ref="P001">
-            <position x="110" y="120" />
-          </trackElementVis>
-        </trackVis>
-        <trackVis ref="T003">
-          <trackElementVis ref="T003_begin">
-            <position x="110" y="120" />
-          </trackElementVis>
-          <trackElementVis ref="T003_end">
-            <position x="220" y="80" />
-          </trackElementVis>
-          <trackElementVis ref="T003_mid">
-            <position x="130" y="80" />
+            <position x="300" y="100" />
           </trackElementVis>
         </trackVis>
       </lineVis>

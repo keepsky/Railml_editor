@@ -56,6 +56,13 @@ namespace RailmlEditor.ViewModels
         public abstract string TypeName { get; }
     }
 
+    public enum TrackNodeType
+    {
+        None,
+        BufferStop,
+        OpenEnd
+    }
+
     public class TrackViewModel : BaseElementViewModel
     {
         public override string TypeName => "Track";
@@ -82,6 +89,30 @@ namespace RailmlEditor.ViewModels
         {
             FlipHorizontallyCommand = new RelayCommand(_ => FlipHorizontally());
             FlipVerticallyCommand = new RelayCommand(_ => FlipVertically());
+
+            // Initialize Nodes
+            BeginNode.Role = "Begin";
+            EndNode.Role = "End";
+            Children.Add(BeginNode);
+            Children.Add(EndNode);
+
+            BeginNode.PropertyChanged += OnNodePropertyChanged;
+            EndNode.PropertyChanged += OnNodePropertyChanged;
+        }
+
+        private void OnNodePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(TrackNodeViewModel.NodeType))
+            {
+                if (sender == BeginNode && BeginType != BeginNode.NodeType)
+                {
+                    BeginType = BeginNode.NodeType;
+                }
+                else if (sender == EndNode && EndType != EndNode.NodeType)
+                {
+                    EndType = EndNode.NodeType;
+                }
+            }
         }
 
         protected virtual void FlipHorizontally()
@@ -197,6 +228,129 @@ namespace RailmlEditor.ViewModels
                 OnPropertyChanged(nameof(Length));
             }
         }
+
+        public ObservableCollection<BaseElementViewModel> Children { get; } = new();
+
+        public TrackNodeViewModel BeginNode { get; } = new TrackNodeViewModel();
+        public TrackNodeViewModel EndNode { get; } = new TrackNodeViewModel();
+
+        // Begin/End Configuration
+        private TrackNodeType _beginType;
+        public TrackNodeType BeginType
+        {
+            get => _beginType;
+            set
+            {
+                if (SetProperty(ref _beginType, value))
+                {
+                    OnBeginTypeChanged();
+                }
+            }
+        }
+
+        private TrackNodeType _endType;
+        public TrackNodeType EndType
+        {
+            get => _endType;
+            set
+            {
+                if (SetProperty(ref _endType, value))
+                {
+                    OnEndTypeChanged();
+                }
+            }
+        }
+
+        // Connection State (to disable fields)
+        private bool _hasBeginConnection;
+        public bool HasBeginConnection
+        {
+            get => _hasBeginConnection;
+            set
+            {
+                if (SetProperty(ref _hasBeginConnection, value))
+                {
+                    OnPropertyChanged(nameof(IsBeginEnabled));
+                }
+            }
+        }
+
+        private bool _hasEndConnection;
+        public bool HasEndConnection
+        {
+            get => _hasEndConnection;
+            set
+            {
+                if (SetProperty(ref _hasEndConnection, value))
+                {
+                    OnPropertyChanged(nameof(IsEndEnabled));
+                }
+            }
+        }
+
+        public bool IsBeginEnabled => !HasBeginConnection;
+        public bool IsEndEnabled => !HasEndConnection;
+
+        // Auto-ID Logic & Children Management
+        private void OnBeginTypeChanged()
+        {
+            BeginNode.NodeType = BeginType;
+            BeginNode.Role = "Begin";
+            
+            if (!Children.Contains(BeginNode)) Children.Insert(0, BeginNode); // Insert at top
+
+            if (BeginType == TrackNodeType.BufferStop)
+            {
+                 // Update ID every type change as requested
+                 BeginNode.Id = GenerateId("bs");
+            }
+            else if (BeginType == TrackNodeType.OpenEnd)
+            {
+                 BeginNode.Id = GenerateId("oe");
+            }
+            else
+            {
+                BeginNode.Id = null; 
+                BeginNode.Code = null;
+                BeginNode.Name = null;
+                BeginNode.Description = null;
+            }
+        }
+
+        private void OnEndTypeChanged()
+        {
+            EndNode.NodeType = EndType;
+            EndNode.Role = "End";
+
+            if (!Children.Contains(EndNode)) Children.Add(EndNode); // Add at bottom (or after Begin)
+
+            if (EndType == TrackNodeType.BufferStop)
+            {
+                 // Update ID every type change as requested
+                 EndNode.Id = GenerateId("bs");
+            }
+            else if (EndType == TrackNodeType.OpenEnd)
+            {
+                 EndNode.Id = GenerateId("oe");
+            }
+            else
+            {
+                EndNode.Id = null;
+                EndNode.Code = null;
+                EndNode.Name = null;
+                EndNode.Description = null;
+            }
+        }
+
+        private string GenerateId(string prefix)
+        {
+            // Extract number from Track ID
+            var match = System.Text.RegularExpressions.Regex.Match(Id ?? "", @"\d+$");
+            string number = match.Success ? match.Value : "1";
+            return $"{prefix}{number}";
+        }
+
+        public IEnumerable<TrackNodeType> AvailableTrackNodeTypes => System.Enum.GetValues(typeof(TrackNodeType)).Cast<TrackNodeType>();
     }
 
     public class SwitchViewModel : BaseElementViewModel
@@ -756,7 +910,7 @@ namespace RailmlEditor.ViewModels
         {
             if (el is CurvedTrackViewModel curved)
             {
-                return new CurvedTrackViewModel
+                var newCurved = new CurvedTrackViewModel
                 {
                     Id = curved.Id,
                     Name = curved.Name,
@@ -769,12 +923,21 @@ namespace RailmlEditor.ViewModels
                     Y2 = curved.Y2,
                     MX = curved.MX,
                     MY = curved.MY,
-                    ShowCoordinates = curved.ShowCoordinates
+                    ShowCoordinates = curved.ShowCoordinates,
+                    BeginType = curved.BeginType,
+                    EndType = curved.EndType
                 };
+                newCurved.BeginNode.Code = curved.BeginNode.Code;
+                newCurved.BeginNode.Name = curved.BeginNode.Name;
+                newCurved.BeginNode.Description = curved.BeginNode.Description;
+                newCurved.EndNode.Code = curved.EndNode.Code;
+                newCurved.EndNode.Name = curved.EndNode.Name;
+                newCurved.EndNode.Description = curved.EndNode.Description;
+                return newCurved;
             }
             if (el is TrackViewModel track)
             {
-                return new TrackViewModel
+                var newTrack = new TrackViewModel
                 {
                     Id = track.Id,
                     Name = track.Name,
@@ -785,8 +948,17 @@ namespace RailmlEditor.ViewModels
                     Y = track.Y,
                     X2 = track.X2,
                     Y2 = track.Y2,
-                    ShowCoordinates = track.ShowCoordinates
+                    ShowCoordinates = track.ShowCoordinates,
+                    BeginType = track.BeginType,
+                    EndType = track.EndType
                 };
+                newTrack.BeginNode.Code = track.BeginNode.Code;
+                newTrack.BeginNode.Name = track.BeginNode.Name;
+                newTrack.BeginNode.Description = track.BeginNode.Description;
+                newTrack.EndNode.Code = track.EndNode.Code;
+                newTrack.EndNode.Name = track.EndNode.Name;
+                newTrack.EndNode.Description = track.EndNode.Description;
+                return newTrack;
             }
             if (el is SignalViewModel signal)
             {
@@ -814,6 +986,21 @@ namespace RailmlEditor.ViewModels
                     MX = sw.MX,
                     MY = sw.MY,
                     ShowCoordinates = sw.ShowCoordinates
+                };
+            }
+            if (el is TrackCircuitBorderViewModel border)
+            {
+                return new TrackCircuitBorderViewModel
+                {
+                    Id = border.Id,
+                    Name = border.Name,
+                    Code = border.Code,
+                    Description = border.Description,
+                    X = border.X,
+                    Y = border.Y,
+                    Pos = border.Pos,
+                    RelatedTrackId = border.RelatedTrackId,
+                    ShowCoordinates = border.ShowCoordinates
                 };
             }
             if (el is RouteViewModel r)
@@ -925,10 +1112,55 @@ namespace RailmlEditor.ViewModels
              else if (item is SwitchViewModel) catTitle = "Point";
              else if (item is RouteViewModel) catTitle = "Route";
              
-             var cat = ActiveInfrastructure.Categories.FirstOrDefault(c => c.Title == catTitle);
-             cat?.Items.Add(item);
+             if (!string.IsNullOrEmpty(catTitle))
+             {
+                 var cat = ActiveInfrastructure.Categories.FirstOrDefault(c => c.Title == catTitle);
+                 cat?.Items.Add(item);
+             }
+             else if (item is TrackCircuitBorderViewModel border)
+             {
+                 // Handle nested border
+                 if (!string.IsNullOrEmpty(border.RelatedTrackId))
+                 {
+                     var track = Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == border.RelatedTrackId);
+                     if (track != null && !track.Children.Contains(border))
+                     {
+                         track.Children.Add(border);
+                     }
+                 }
+             }
+             else if (item is SignalViewModel signal)
+             {
+                 catTitle = "Signal";
+                 if (!string.IsNullOrEmpty(signal.RelatedTrackId))
+                 {
+                     var track = Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == signal.RelatedTrackId);
+                     if (track != null && !track.Children.Contains(signal))
+                     {
+                         track.Children.Add(signal);
+                     }
+                 }
+             }
              
              item.PropertyChanged += Element_PropertyChanged;
+        }
+
+        public void UpdateBorderParent(TrackCircuitBorderViewModel border)
+        {
+            if (string.IsNullOrEmpty(border.RelatedTrackId)) return;
+
+            // Remove from ANY existing parent
+            foreach(var t in Elements.OfType<TrackViewModel>())
+            {
+                if (t.Children.Contains(border)) t.Children.Remove(border);
+            }
+
+            // Add to new parent
+            var track = Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == border.RelatedTrackId);
+            if (track != null)
+            {
+                if (!track.Children.Contains(border)) track.Children.Add(border);
+            }
         }
 
         private void RemoveFromCategory(BaseElementViewModel item)
@@ -940,12 +1172,23 @@ namespace RailmlEditor.ViewModels
                  UpdateSelectionState();
              }
 
-             foreach(var cat in ActiveInfrastructure.Categories)
+             if (item is TrackCircuitBorderViewModel border)
              {
-                 if (cat.Items.Contains(item))
+                 if (!string.IsNullOrEmpty(border.RelatedTrackId))
                  {
-                     cat.Items.Remove(item);
-                     break;
+                     var track = Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == border.RelatedTrackId);
+                     track?.Children.Remove(border);
+                 }
+             }
+             else
+             {
+                 foreach(var cat in ActiveInfrastructure.Categories)
+                 {
+                     if (cat.Items.Contains(item))
+                     {
+                         cat.Items.Remove(item);
+                         break;
+                     }
                  }
              }
         }

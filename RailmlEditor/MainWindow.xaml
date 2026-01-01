@@ -178,6 +178,33 @@
                 <!-- That is good. -->
             </Canvas>
         </DataTemplate>
+
+        <ControlTemplate x:Key="BorderIcon">
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="90" Height="160">
+                    <!-- Rect 1 (Top Left Horizontal) -->
+                    <Rectangle Canvas.Left="0" Canvas.Top="0" Width="40" Height="20" Fill="#B3B3B3"/>
+                    <!-- Rect 2 (Right Vertical) -->
+                    <Rectangle Canvas.Left="50" Canvas.Top="0" Width="20" Height="160" Fill="#B3B3B3"/>
+                    <!-- Rect 3 (Left Vertical) -->
+                    <Rectangle Canvas.Left="20" Canvas.Top="0" Width="20" Height="160" Fill="#B3B3B3"/>
+                    <!-- Rect 4 (Top Right Horizontal) -->
+                    <Rectangle Canvas.Left="50" Canvas.Top="0" Width="40" Height="20" Fill="#B3B3B3"/>
+                    <!-- Rect 5 (Bottom Left Horizontal) -->
+                    <Rectangle Canvas.Left="0" Canvas.Top="140" Width="40" Height="20" Fill="#B3B3B3"/>
+                    <!-- Rect 6 (Bottom Right Horizontal) -->
+                    <Rectangle Canvas.Left="50" Canvas.Top="140" Width="40" Height="20" Fill="#B3B3B3"/>
+                </Canvas>
+            </Viewbox>
+        </ControlTemplate>
+        <DataTemplate DataType="{x:Type viewmodels:TrackCircuitBorderViewModel}">
+            <Grid Width="20" Height="10">
+                <Grid.RenderTransform>
+                    <TranslateTransform X="-10" Y="-5"/>
+                </Grid.RenderTransform>
+                <Control Template="{StaticResource BorderIcon}" Width="20" Height="10"/>
+            </Grid>
+        </DataTemplate>
         <!-- Signal Icon Template -->
         <ControlTemplate x:Key="SignalIcon">
             <Viewbox Stretch="Uniform">
@@ -269,18 +296,6 @@
             </Viewbox>
         </ControlTemplate>
 
-        <ControlTemplate x:Key="BorderIcon">
-            <Viewbox Stretch="Uniform">
-                <Canvas Width="200" Height="160">
-                    <Rectangle Canvas.Left="40" Canvas.Top="0" Width="40" Height="160" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
-                    <Rectangle Canvas.Left="0" Canvas.Top="0" Width="80" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
-                    <Rectangle Canvas.Left="0" Canvas.Top="120" Width="80" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
-                    <Rectangle Canvas.Left="120" Canvas.Top="0" Width="80" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
-                    <Rectangle Canvas.Left="120" Canvas.Top="0" Width="40" Height="160" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
-                    <Rectangle Canvas.Left="120" Canvas.Top="120" Width="80" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
-                </Canvas>
-            </Viewbox>
-        </ControlTemplate>
 
         <!-- Route Icon Template -->
         <ControlTemplate x:Key="RouteIcon">
@@ -855,18 +870,35 @@
                                 </HierarchicalDataTemplate>
 
                                 <!-- Level 3: Elements (restoring text-only display) -->
-                                <DataTemplate DataType="{x:Type viewmodels:TrackViewModel}">
+                                <HierarchicalDataTemplate DataType="{x:Type viewmodels:TrackViewModel}" ItemsSource="{Binding Children}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding Id}"/>
                                         <TextBlock Text=" - " Foreground="Gray"/>
                                         <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
                                     </StackPanel>
-                                </DataTemplate>
-                                <DataTemplate DataType="{x:Type viewmodels:CurvedTrackViewModel}">
+                                </HierarchicalDataTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type viewmodels:CurvedTrackViewModel}" ItemsSource="{Binding Children}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding Id}"/>
                                         <TextBlock Text=" - " Foreground="Gray"/>
                                         <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
+                                    </StackPanel>
+                                </HierarchicalDataTemplate>
+                                <DataTemplate DataType="{x:Type viewmodels:TrackNodeViewModel}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Role}" FontWeight="Bold" Foreground="DarkMagenta"/>
+                                        <TextBlock Text=" (" Foreground="Gray"/>
+                                        <TextBlock Text="{Binding TypeName}" Foreground="Purple"/>
+                                        <TextBlock Text=")" Foreground="Gray"/>
+                                        <TextBlock Text=" : " Foreground="Gray"/>
+                                        <TextBlock Text="{Binding Id}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type viewmodels:TrackCircuitBorderViewModel}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Id}" Foreground="Navy"/>
+                                        <TextBlock Text=" - " Foreground="Gray"/>
+                                        <TextBlock Text="{Binding Name}" Foreground="Navy" FontStyle="Italic"/>
                                     </StackPanel>
                                 </DataTemplate>
                                 <DataTemplate DataType="{x:Type viewmodels:SignalViewModel}">
@@ -979,6 +1011,38 @@
                                         </Grid>
                                     </DataTemplate>
 
+                                    <!-- TrackNode Properties -->
+                                    <DataTemplate DataType="{x:Type viewmodels:TrackNodeViewModel}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Text="Type" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <ComboBox ItemsSource="{Binding AvailableNodeTypes}" SelectedItem="{Binding NodeType, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center" Style="{StaticResource PropCombo}"/>
+
+                                            <TextBlock Text="ID" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Id, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsIdReadOnly}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <TextBlock Text="Code" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Code, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <TextBlock Text="Name" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <TextBlock Text="Desc" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                        </Grid>
+                                    </DataTemplate>
+
                                     <!-- Track Properties -->
                                     <DataTemplate DataType="{x:Type local:ViewModels.TrackViewModel}">
                                         <Grid>
@@ -987,6 +1051,11 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
                                                 <RowDefinition Height="Auto"/>
                                                 <RowDefinition Height="Auto"/>
                                                 <RowDefinition Height="Auto"/>
@@ -1017,12 +1086,15 @@
                                             <ComboBox ItemsSource="{Binding AvailableMainDirs}" SelectedItem="{Binding MainDir, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
 
 
-                                            <TextBlock Text="Length" Grid.Row="7" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Length, Mode=OneWay, StringFormat=N2}" IsReadOnly="True" Grid.Row="7" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
+                                            <Separator Grid.Row="11" Grid.ColumnSpan="2" Margin="0,5"/>
 
-                                            <CheckBox Content="Show Coordinates" IsChecked="{Binding ShowCoordinates}" Grid.Row="8" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="0,10,0,5"/>
 
-                                            <StackPanel Grid.Row="9" Grid.ColumnSpan="2" Visibility="{Binding ShowCoordinates, Converter={StaticResource BoolToVis}}">
+                                            <TextBlock Text="Length" Grid.Row="12" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Length, Mode=OneWay, StringFormat=N2}" IsReadOnly="True" Grid.Row="12" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
+
+                                            <CheckBox Content="Show Coordinates" IsChecked="{Binding ShowCoordinates}" Grid.Row="13" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="0,10,0,5"/>
+
+                                            <StackPanel Grid.Row="14" Grid.ColumnSpan="2" Visibility="{Binding ShowCoordinates, Converter={StaticResource BoolToVis}}">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
@@ -1087,16 +1159,19 @@
                                             <TextBlock Text="Type" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
                                             <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding Type, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
 
+
+                                            <Separator Grid.Row="11" Grid.ColumnSpan="2" Margin="0,5"/>
+
                                             <TextBlock Text="MainDir" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
                                             <ComboBox ItemsSource="{Binding AvailableMainDirs}" SelectedItem="{Binding MainDir, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
 
 
-                                            <TextBlock Text="Length" Grid.Row="7" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Length, Mode=OneWay, StringFormat=N2}" IsReadOnly="True" Grid.Row="7" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
+                                            <TextBlock Text="Length" Grid.Row="12" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Length, Mode=OneWay, StringFormat=N2}" IsReadOnly="True" Grid.Row="12" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
 
-                                            <CheckBox Content="Show Coordinates" IsChecked="{Binding ShowCoordinates}" Grid.Row="8" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="0,10,0,5"/>
+                                            <CheckBox Content="Show Coordinates" IsChecked="{Binding ShowCoordinates}" Grid.Row="13" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="0,10,0,5"/>
 
-                                            <StackPanel Grid.Row="9" Grid.ColumnSpan="2" Visibility="{Binding ShowCoordinates, Converter={StaticResource BoolToVis}}">
+                                            <StackPanel Grid.Row="14" Grid.ColumnSpan="2" Visibility="{Binding ShowCoordinates, Converter={StaticResource BoolToVis}}">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
@@ -1389,6 +1464,64 @@
                                                 </ItemsControl>
                                             </StackPanel>
                                         </StackPanel>
+                                    </DataTemplate>
+
+                                    <DataTemplate DataType="{x:Type viewmodels:TrackCircuitBorderViewModel}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Id}" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" IsReadOnly="True" Foreground="Gray"/>
+
+                                            <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <TextBlock Text="Code" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Code, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <TextBlock Text="Description" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <TextBlock Text="Pos" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding Pos, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                            <TextBlock Text="Track Ref" Grid.Row="5" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                            <TextBox Text="{Binding RelatedTrackId}" Grid.Row="5" Grid.Column="1" Style="{StaticResource PropValue}" IsReadOnly="True" Foreground="Gray"/>
+
+                                            <CheckBox Content="Show Coordinates" IsChecked="{Binding ShowCoordinates}" Grid.Row="6" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="0,10,0,5"/>
+
+                                            <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Visibility="{Binding ShowCoordinates, Converter={StaticResource BoolToVis}}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+                                                    <TextBlock Text="X" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                                    <TextBox Text="{Binding X}" IsReadOnly="True" Foreground="Gray" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                                    <TextBlock Text="Y" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                                    <TextBox Text="{Binding Y}" IsReadOnly="True" Foreground="Gray" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Grid>
                                     </DataTemplate>
 
                                     <!-- Infrastructure Properties -->

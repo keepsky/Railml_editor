@@ -75,6 +75,33 @@ namespace RailmlEditor.Models
     {
         [XmlElement(ElementName = "signals")]
         public Signals Signals { get; set; }
+
+        [XmlElement(ElementName = "trainDetectionElements")]
+        public TrainDetectionElements TrainDetectionElements { get; set; }
+    }
+
+    public class TrainDetectionElements
+    {
+        [XmlElement(ElementName = "trackCircuitBorder")]
+        public List<TrackCircuitBorder> TrackCircuitBorderList { get; set; } = new List<TrackCircuitBorder>();
+    }
+
+    public class TrackCircuitBorder
+    {
+        [XmlAttribute(AttributeName = "id")]
+        public string Id { get; set; }
+
+        [XmlAttribute(AttributeName = "name")]
+        public string Name { get; set; }
+
+        [XmlAttribute(AttributeName = "pos")]
+        public double Pos { get; set; }
+
+        [XmlAttribute(AttributeName = "code")]
+        public string Code { get; set; }
+
+        [XmlAttribute(AttributeName = "description")]
+        public string Description { get; set; }
     }
 
     public class Signals
@@ -162,10 +189,40 @@ namespace RailmlEditor.Models
         [XmlElement(ElementName = "connection")]
         public List<Connection> ConnectionList { get; set; } = new List<Connection>();
 
+        [XmlElement(ElementName = "bufferStop")]
+        public BufferStop BufferStop { get; set; }
+
+        [XmlElement(ElementName = "openEnd")]
+        public OpenEnd OpenEnd { get; set; }
+
         // Legacy ScreenPos (Hide from Save)
         [XmlElement(ElementName = "screenPos", Namespace = "http://www.sehwa.co.kr/railml")]
         public ScreenPos ScreenPos { get; set; }
         public bool ShouldSerializeScreenPos() => false;
+    }
+
+    public class BufferStop
+    {
+        [XmlAttribute(AttributeName = "id")]
+        public string Id { get; set; }
+        [XmlAttribute(AttributeName = "code")]
+        public string Code { get; set; }
+        [XmlAttribute(AttributeName = "name")]
+        public string Name { get; set; }
+        [XmlAttribute(AttributeName = "description")]
+        public string Description { get; set; }
+    }
+
+    public class OpenEnd
+    {
+        [XmlAttribute(AttributeName = "id")]
+        public string Id { get; set; }
+        [XmlAttribute(AttributeName = "code")]
+        public string Code { get; set; }
+        [XmlAttribute(AttributeName = "name")]
+        public string Name { get; set; }
+        [XmlAttribute(AttributeName = "description")]
+        public string Description { get; set; }
     }
 
     public class Connection
