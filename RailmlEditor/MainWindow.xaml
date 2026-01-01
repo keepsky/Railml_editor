@@ -792,7 +792,9 @@
                 <MenuItem Header="Undo" Command="{Binding UndoCommand}"/>
                 <MenuItem Header="Redo" Command="{Binding RedoCommand}"/>
             </MenuItem>
-            <MenuItem Header="View" />
+            <MenuItem Header="View">
+                <MenuItem Header="Graph" Click="ViewGraph_Click"/>
+            </MenuItem>
         </Menu>
 
         <ToolBarTray DockPanel.Dock="Top">

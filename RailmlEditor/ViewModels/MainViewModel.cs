@@ -176,7 +176,7 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _type, value);
         }
 
-        private string? _mainDir;
+        private string? _mainDir = "up";
         public string? MainDir
         {
             get => _mainDir;

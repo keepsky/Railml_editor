@@ -1192,6 +1192,13 @@ namespace RailmlEditor
             _viewModel.CreateAreaFromSelectedBorders();
         }
 
+        private void ViewGraph_Click(object sender, RoutedEventArgs e)
+        {
+            var graphWin = new GraphWindow(_viewModel);
+            graphWin.Owner = this;
+            graphWin.Show();
+        }
+
         private void GetNearestPointOnTrack(Point p, TrackViewModel track, out Point nearest, out double dist, out double angle)
         {
             double x1 = track.X, y1 = track.Y;
