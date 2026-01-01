@@ -387,6 +387,28 @@ namespace RailmlEditor.Services
                 }
             }
 
+            // 5. Create Areas
+            var areaList = viewModel.Elements.OfType<AreaViewModel>().ToList();
+            if (areaList.Any())
+            {
+                railml.Infrastructure.Areas = new Areas();
+                foreach (var aVm in areaList)
+                {
+                    var a = new Area
+                    {
+                        Id = aVm.Id,
+                        Name = aVm.Name,
+                        Description = aVm.Description,
+                        Type = aVm.Type
+                    };
+                    foreach (var b in aVm.Borders)
+                    {
+                        a.IsLimitedByList.Add(new IsLimitedBy { Ref = b.Id });
+                    }
+                    railml.Infrastructure.Areas.AreaList.Add(a);
+                }
+            }
+
 
             // Serialize
             try
@@ -1047,6 +1069,29 @@ namespace RailmlEditor.Services
                     }
                 }
 
+                // Load Areas
+                if (railml?.Infrastructure?.Areas?.AreaList != null)
+                {
+                    foreach (var aObj in railml.Infrastructure.Areas.AreaList)
+                    {
+                        var aVm = new AreaViewModel
+                        {
+                            Id = aObj.Id,
+                            Name = aObj.Name,
+                            Description = aObj.Description,
+                            Type = aObj.Type
+                        };
+                        foreach (var lim in aObj.IsLimitedByList)
+                        {
+                            var border = viewModel.Elements.OfType<TrackCircuitBorderViewModel>().FirstOrDefault(b => b.Id == lim.Ref);
+                            if (border != null)
+                            {
+                                aVm.Borders.Add(border);
+                            }
+                        }
+                        viewModel.Elements.Add(aVm);
+                    }
+                }
             }
 
             // Post-process to update DisplayNames in DivergingConnections

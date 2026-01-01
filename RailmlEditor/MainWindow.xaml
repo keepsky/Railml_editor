@@ -199,7 +199,12 @@
             </Viewbox>
         </ControlTemplate>
         <DataTemplate DataType="{x:Type viewmodels:TrackCircuitBorderViewModel}">
-            <Grid Width="20" Height="10" RenderTransformOrigin="0.5,0.5">
+            <Grid Width="20" Height="10" RenderTransformOrigin="0.5,0.5" Background="Transparent">
+                <Grid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Area 생성" Click="CreateArea_Click"/>
+                    </ContextMenu>
+                </Grid.ContextMenu>
                 <Grid.RenderTransform>
                     <TransformGroup>
                         <RotateTransform Angle="{Binding Angle}"/>
@@ -933,6 +938,13 @@
                                         <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
                                     </StackPanel>
                                 </DataTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type viewmodels:AreaViewModel}" ItemsSource="{Binding Borders}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Id}" FontWeight="Bold" Foreground="DarkGreen"/>
+                                        <TextBlock Text=" - " Foreground="Gray"/>
+                                        <TextBlock Text="{Binding Name}" Foreground="DarkGreen" FontStyle="Italic"/>
+                                    </StackPanel>
+                                </HierarchicalDataTemplate>
                             </TreeView.Resources>
                             <TreeView.ItemContainerStyle>
                                 <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource RailmlTreeViewItemStyle}"/>
@@ -1569,6 +1581,36 @@
                                                 </Grid>
                                             </StackPanel>
                                         </Grid>
+                                    </DataTemplate>
+
+                                    <!-- Area Properties -->
+                                    <DataTemplate DataType="{x:Type viewmodels:AreaViewModel}">
+                                        <StackPanel>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                                <TextBox Text="{Binding Id}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
+
+                                                <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
+
+                                                <TextBlock Text="Type" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                                <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding Type, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropCombo}"/>
+
+                                                <TextBlock Text="Description" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                            </Grid>
+                                        </StackPanel>
                                     </DataTemplate>
 
                                     <!-- Infrastructure Properties -->

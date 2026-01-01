@@ -1089,8 +1089,26 @@ namespace RailmlEditor.ViewModels
                     nr.OverlapSwitchAndPositions.Add(new SwitchPositionViewModel { SwitchRef = s.SwitchRef, SwitchPosition = s.SwitchPosition, RemoveCommand = new RelayCommand(p => nr.OverlapSwitchAndPositions.Remove(p as SwitchPositionViewModel)) });
                 foreach (var s in r.ReleaseSections)
                     nr.ReleaseSections.Add(new ReleaseSectionViewModel { TrackRef = s.TrackRef, FlankProtection = s.FlankProtection, RemoveCommand = new RelayCommand(p => nr.ReleaseSections.Remove(p as ReleaseSectionViewModel)) });
-                nr.ShowCoordinates = r.ShowCoordinates;
+                 nr.ShowCoordinates = r.ShowCoordinates;
                 return nr;
+            }
+            if (el is AreaViewModel a)
+            {
+                var na = new AreaViewModel
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    Description = a.Description,
+                    Type = a.Type
+                };
+                foreach (var b in a.Borders)
+                {
+                    // Find the border in new elements or assume it's already there
+                    // This is tricky during clone for undo/redo.
+                    // Usually we search by ID in the context of the snapshot.
+                    na.Borders.Add(b); 
+                }
+                return na;
             }
             return null;
         }
@@ -1141,6 +1159,7 @@ namespace RailmlEditor.ViewModels
             ActiveInfrastructure.Categories.Add(new CategoryViewModel { Title = "Signal" });
             ActiveInfrastructure.Categories.Add(new CategoryViewModel { Title = "Point" });
             ActiveInfrastructure.Categories.Add(new CategoryViewModel { Title = "Route" });
+            ActiveInfrastructure.Categories.Add(new CategoryViewModel { Title = "Area" });
             
             TreeRoots.Add(ActiveInfrastructure);
         }
@@ -1306,6 +1325,7 @@ namespace RailmlEditor.ViewModels
              else if (item is SignalViewModel) catTitle = "Signal";
              else if (item is SwitchViewModel) catTitle = "Point";
              else if (item is RouteViewModel) catTitle = "Route";
+             else if (item is AreaViewModel) catTitle = "Area";
              
              if (!string.IsNullOrEmpty(catTitle))
              {
@@ -1580,6 +1600,34 @@ namespace RailmlEditor.ViewModels
                 }
             }
         }
+
+        public void CreateAreaFromSelectedBorders()
+        {
+            var selectedBorders = SelectedElements.OfType<TrackCircuitBorderViewModel>().ToList();
+            if (selectedBorders.Count == 0) return;
+
+            var oldState = TakeSnapshot();
+
+            var area = new AreaViewModel
+            {
+                Id = GetNextId("ar"),
+                Name = "New Area",
+                Type = "trackSection"
+            };
+
+            foreach (var b in selectedBorders)
+            {
+                area.Borders.Add(b);
+            }
+
+            Elements.Add(area);
+            AddHistory(oldState);
+
+            // Select the new area
+            foreach (var el in Elements) el.IsSelected = (el == area);
+            SelectedElement = area;
+        }
+
         public string GetNextId(string prefix)
         {
             int max = 0;

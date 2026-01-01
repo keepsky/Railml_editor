@@ -4,45 +4,39 @@
     <tracks>
       <track id="T001" code="plain">
         <trackTopology>
-          <trackBegin pos="0" id="T001_begin">
-            <openEnd id="bs1" />
-          </trackBegin>
-          <trackEnd pos="100" id="T001_end">
-            <connection id="conn_T001_end_to_T002_begin" ref="T002_begin" />
-            <bufferStop id="bs2" />
-          </trackEnd>
+          <trackBegin pos="0" id="T001_begin" />
+          <trackEnd pos="290" id="T001_end" />
         </trackTopology>
-      </track>
-      <track id="T002" code="plain">
-        <trackTopology>
-          <trackBegin pos="0" id="T002_begin">
-            <connection id="conn_T002_begin_to_T001_end" ref="T001_end" />
-            <openEnd id="oe1" />
-          </trackBegin>
-          <trackEnd pos="100" id="T002_end">
-            <bufferStop id="bs3" />
-          </trackEnd>
-        </trackTopology>
+        <ocsElements>
+          <trainDetectionElements>
+            <trackCircuitBorder id="td001" name="Border" pos="47" />
+            <trackCircuitBorder id="td002" name="Border" pos="201" />
+          </trainDetectionElements>
+        </ocsElements>
       </track>
     </tracks>
+    <sehwa:areas>
+      <sehwa:area id="ar001" name="sec1" type="trackSection">
+        <sehwa:isLimitedBy ref="td001" />
+        <sehwa:isLimitedBy ref="td002" />
+      </sehwa:area>
+    </sehwa:areas>
   </infrastructure>
   <infrastructureVisualizations>
     <visualization id="vis1" infrastructureRef="inf001">
       <lineVis>
         <trackVis ref="T001">
           <trackElementVis ref="T001_begin">
-            <position x="100" y="100" />
+            <position x="60" y="150" />
           </trackElementVis>
           <trackElementVis ref="T001_end">
-            <position x="200" y="100" />
+            <position x="350" y="150" />
           </trackElementVis>
-        </trackVis>
-        <trackVis ref="T002">
-          <trackElementVis ref="T002_begin">
-            <position x="200" y="100" />
+          <trackElementVis ref="td001">
+            <position x="106.87499999999994" y="150" />
           </trackElementVis>
-          <trackElementVis ref="T002_end">
-            <position x="300" y="100" />
+          <trackElementVis ref="td002">
+            <position x="260.6249999999999" y="150" />
           </trackElementVis>
         </trackVis>
       </lineVis>

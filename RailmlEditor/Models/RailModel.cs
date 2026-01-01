@@ -36,6 +36,9 @@ namespace RailmlEditor.Models
 
         [XmlElement(ElementName = "routes")]
         public Routes Routes { get; set; }
+
+        [XmlElement(ElementName = "areas", Namespace = "http://www.sehwa.co.kr/railml")]
+        public Areas Areas { get; set; }
     }
 
     public class Tracks
@@ -342,6 +345,36 @@ namespace RailmlEditor.Models
 
         [XmlAttribute(AttributeName = "flankProtection")]
         public bool FlankProtection { get; set; }
+    }
+
+    public class Areas
+    {
+        [XmlElement(ElementName = "area", Namespace = "http://www.sehwa.co.kr/railml")]
+        public List<Area> AreaList { get; set; } = new List<Area>();
+    }
+
+    public class Area
+    {
+        [XmlAttribute(AttributeName = "id")]
+        public string Id { get; set; }
+
+        [XmlAttribute(AttributeName = "name")]
+        public string Name { get; set; }
+
+        [XmlAttribute(AttributeName = "description")]
+        public string Description { get; set; }
+
+        [XmlAttribute(AttributeName = "type")]
+        public string Type { get; set; }
+
+        [XmlElement(ElementName = "isLimitedBy", Namespace = "http://www.sehwa.co.kr/railml")]
+        public List<IsLimitedBy> IsLimitedByList { get; set; } = new List<IsLimitedBy>();
+    }
+
+    public class IsLimitedBy
+    {
+        [XmlAttribute(AttributeName = "ref")]
+        public string Ref { get; set; }
     }
 
     public class SwitchAndPosition

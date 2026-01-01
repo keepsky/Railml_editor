@@ -1187,6 +1187,11 @@ namespace RailmlEditor
                 }
             }
         }
+        private void CreateArea_Click(object sender, RoutedEventArgs e)
+        {
+            _viewModel.CreateAreaFromSelectedBorders();
+        }
+
         private void GetNearestPointOnTrack(Point p, TrackViewModel track, out Point nearest, out double dist, out double angle)
         {
             double x1 = track.X, y1 = track.Y;

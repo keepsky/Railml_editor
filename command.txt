@@ -1,6 +1,11 @@
 ======================
 ======================
 ======================
+좌측 탐색창에 infrastructure 하위에 Area 그룹을 추가하고 하위의 area 요소는 id, name, type, description 속성을 가지고 id는 ar1, ar2, ar3 형태로 자동할당하고, type은 (trackSection, project)에서 선택하도록 하고, name, description은 사용자가 입력할수 있도록 하고 area 요소 하위에 다중 선택한 border들의 id, name이 한줄씩 표시되도록 구현하고 area 요소가 생성되는 절차는 아래와 같이 구현해줘
+area 요소 생성 절차 : border 여러개를 shift+마우스 왼쪽 버튼 클릭으로 다중 선택해서 마우스 오른쪽 클릭했을때 "Area 생성" 팝업 메뉴를 표시하고 해당 옵션을 선택했을때 좌측 탐색창에 Area 그룹 하위에 area 요소를 생성하도록 구현해줘
+area 요소들이 railml로 저장할때는 아래의 방법에 따르도록 구현해줘
+(1) infrastructure -> sehwa:areas -> sehwa:area 태그를 추가하고 <sehwa:area> 내에 id, name, description, type를 추가
+(2) sehwa:area -> sehwa:isLimitedBy 태그를 추가하고 ref 속성에는 area 요소 하위의 border id를 값으로 저장해서 sehwa:isLimitedBy 태그가 area 요소 하위의 border 개수만큼 만들어줘
 ======================
 border 이미지를 track 요소와 바인딩 시키는 로직을 아래와 같이 수정해줘
 (1) 수평한 track 요소(trackBegin 과 trackEnd의 y 좌표값이 동일)의 경우 현재의 바인딩 로직과 동일
