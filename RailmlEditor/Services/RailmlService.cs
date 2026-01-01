@@ -424,6 +424,34 @@ namespace RailmlEditor.Services
                 return newElements;
             }
 
+            return ConvertRailmlToViewModels(railml, viewModel);
+        }
+
+        public System.Collections.Generic.List<BaseElementViewModel> LoadSnippetFromXml(string xmlContent, MainViewModel viewModel)
+        {
+            var newElements = new System.Collections.Generic.List<BaseElementViewModel>();
+            XmlSerializer serializer = new XmlSerializer(typeof(Railml));
+            
+            Railml? railml = null;
+            try
+            {
+                using (StringReader sr = new StringReader(xmlContent))
+                {
+                    railml = (Railml?)serializer.Deserialize(sr);
+                }
+            }
+            catch
+            {
+                // Return empty or throw? Empty for safety.
+                return newElements;
+            }
+
+            return ConvertRailmlToViewModels(railml, viewModel);
+        }
+
+        private System.Collections.Generic.List<BaseElementViewModel> ConvertRailmlToViewModels(Railml? railml, MainViewModel viewModel)
+        {
+            var newElements = new System.Collections.Generic.List<BaseElementViewModel>();
             if (railml?.Infrastructure?.Tracks?.TrackList == null) return newElements;
 
             var idMap = new System.Collections.Generic.Dictionary<string, string>();

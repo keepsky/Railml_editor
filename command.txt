@@ -1,8 +1,17 @@
 ======================
 ======================
+File > preferencces 메뉴를 만들고 하위에 Settings, Templates 메뉴를 만들고 Template을 선택하면 아래의 기능을 구현해줘
+Templates 윈도우를 생성하고 툴바에 있는 corner, single, singleR, double, doubleR, cross에 대해서 탭 메뉴를 만들고 사용자가 railml을 직접 입력해서 툴바의 해당 버튼을 누르면 입력한 railml 내용으로 표시되도록 구현해줘
 ======================
+begin, end의 type 속성중에 connection은 기본적으로 hidden으로 처리해서 사용자가 선택할수 없도록 수정하고 type의 값이 connection이 되는 경우는 아래의 방법에 따라서 수정해줘
+track 요소를 이동하다가 위치된 좌표에서 다른 track과 연결되는 경우 각 track의 연결 부분(trackBegin, trackEnd)의 속성인 type은 connection으로 자동 변경되고 begin, end 각각의 속성창에는 connection 정보(id, ref)를 표시하도록 수정해줘 (id, ref 속성은 변경 불가)
+다시 track 요소를 이동하다가 위치된 좌표에서 다른 track과 연결이 해제되는 경우  각 track의 연결 부분(trackBegin, trackEnd)의 속성인 type은 none으로 자동 변경되고 begin, end 각각의 속성창에는 connection 정보(id, ref)를 표시하지 않고 원래의 begin, end 속성들을 표시하도록 수정해줘
 ======================
-
+trackBegin과 trackEnd의 id로 type에 따라서 openEnd인 경우 oe001, oe002, bufferStop인 경우 bs001, bs002로 자동할당하는 방식을 취소하고 기존 track에 id를 명명하던 방식대로 [track id + "_" + begin 또는 end]와 같이 수정하고 trackBegin, trackEnd의 속성중에 type은 openEnd, bufferStop, connection 중에 하나의 값을 가질수 있도록 수정해줘 그리고 탐색창에서 track 하위 요소들의 타이틀 부분은 아래와 같이 수정해줘
+(1) Begin : "Begin"+"(" + type + ") - "+ id
+(2) End : "End"+"(" + type + ") - "+ id
+(3) signal : id + "(" + type + ") - "+ name
+(4) border : id + "-"+ name
 ======================
 좌측 탐색창의 track 하위 요소인 border 처럼 해당 track의 하위 태그인 trackBegin, trackEnd, signal도 하위 요소로 표시하고 선택하면 속성창에 관련 속성을 표시하고 변경할수 있게 수정해주고 signal의 경우는 현재 구현처럼 Signal 하위 메뉴에도 동일하게 유지 해줘
 ======================

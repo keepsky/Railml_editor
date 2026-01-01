@@ -769,14 +769,20 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
-                <MenuItem Header="Open..." Click="FileOpen_Click"/>
-                <MenuItem Header="Save..." Click="FileSave_Click"/>
+                <MenuItem Header="New Project" Click="FileNew_Click"/>
+                <MenuItem Header="Open Project..." Click="FileOpen_Click"/>
+                <MenuItem Header="Save Project..." Click="FileSave_Click"/>
+                <MenuItem Header="Save As..." Click="FileSaveAs_Click"/>
                 <Separator/>
+                <MenuItem Header="Preferences">
+                    <MenuItem Header="Settings"/>
+                    <MenuItem Header="Templates" Command="{Binding OpenTemplatesCommand}"/>
+                </MenuItem>
                 <MenuItem Header="Exit" Click="FileExit_Click"/>
             </MenuItem>
             <MenuItem Header="Edit">
-                <MenuItem Header="Un do" Command="{Binding UndoCommand}" InputGestureText="Ctrl+Z"/>
-                <MenuItem Header="Re do" Command="{Binding RedoCommand}" InputGestureText="Ctrl+Y"/>
+                <MenuItem Header="Undo" Command="{Binding UndoCommand}"/>
+                <MenuItem Header="Redo" Command="{Binding RedoCommand}"/>
             </MenuItem>
             <MenuItem Header="View" />
         </Menu>

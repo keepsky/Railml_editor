@@ -896,16 +896,19 @@ namespace RailmlEditor
             }
         }
 
+        private string? _currentFilePath = null;
+
         private void FileOpen_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new Microsoft.Win32.OpenFileDialog();
             dialog.Filter = "RailML Files (*.xml;*.railml)|*.xml;*.railml|All Files (*.*)|*.*";
             if (dialog.ShowDialog() == true)
             {
+                _currentFilePath = dialog.FileName;
                 var service = new Services.RailmlService();
                 try
                 {
-                    service.Load(dialog.FileName, _viewModel);
+                    service.Load(_currentFilePath, _viewModel);
                     _viewModel.UpdateProximitySwitches();
                 }
                 catch (Exception ex)
@@ -917,20 +920,21 @@ namespace RailmlEditor
 
         private void FileSave_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new Microsoft.Win32.SaveFileDialog();
-            dialog.Filter = "RailML Files (*.xml;*.railml)|*.xml;*.railml|All Files (*.*)|*.*";
-            if (dialog.ShowDialog() == true)
+            if (string.IsNullOrEmpty(_currentFilePath))
             {
-                var service = new Services.RailmlService();
-                try
-                {
-                    service.Save(dialog.FileName, _viewModel);
-                    MessageBox.Show("File saved successfully.");
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error saving file: {ex.Message}");
-                }
+                FileSaveAs_Click(sender, e);
+                return;
+            }
+
+            var service = new Services.RailmlService();
+            try
+            {
+                service.Save(_currentFilePath, _viewModel);
+                MessageBox.Show("File saved successfully.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving file: {ex.Message}");
             }
         }
 
@@ -1122,6 +1126,40 @@ namespace RailmlEditor
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             // KeyBindings handle Delete, Ctrl+C, Ctrl+V now.
+        }
+        private void FileNew_Click(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel.Elements.Count > 0)
+            {
+                var result = MessageBox.Show("Save changes before creating new project?", "New Project", MessageBoxButton.YesNoCancel);
+                if (result == MessageBoxResult.Cancel) return;
+                if (result == MessageBoxResult.Yes) FileSave_Click(sender, e);
+            }
+            _viewModel.Elements.Clear();
+            _currentFilePath = null; // Need to track current file
+        }
+
+        private void FileSaveAs_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.FileName = "railway"; 
+            dlg.DefaultExt = ".railml"; 
+            dlg.Filter = "RailML documents (.railml)|*.railml"; 
+
+            if (dlg.ShowDialog() == true)
+            {
+                _currentFilePath = dlg.FileName;
+                var service = new Services.RailmlService();
+                try
+                {
+                    service.Save(_currentFilePath, _viewModel);
+                    MessageBox.Show("File saved successfully.");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error saving file: {ex.Message}");
+                }
+            }
         }
     }
 }

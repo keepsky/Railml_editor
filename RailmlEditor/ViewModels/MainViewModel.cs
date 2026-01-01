@@ -85,12 +85,13 @@ namespace RailmlEditor.ViewModels
         public ICommand FlipHorizontallyCommand { get; }
         public ICommand FlipVerticallyCommand { get; }
 
-
         public TrackViewModel()
         {
             FlipHorizontallyCommand = new RelayCommand(_ => FlipHorizontally());
             FlipVerticallyCommand = new RelayCommand(_ => FlipVertically());
-
+            // This is TrackViewModel... oops. I need to edit MainViewModel!
+            // Wait, I am editing MainViewModel.cs, but scrolling shows TrackViewModel constructor.
+            // I need to find MainViewModel constructor.
             // Initialize Nodes
             BeginNode.Role = "Begin";
             EndNode.Role = "End";
@@ -680,6 +681,7 @@ namespace RailmlEditor.ViewModels
         public ICommand DeleteCommand { get; }
         public ICommand CopyCommand { get; }
         public ICommand PasteCommand { get; }
+        public ICommand OpenTemplatesCommand { get; }
         public ICommand UndoCommand { get; }
         public ICommand RedoCommand { get; }
 
@@ -718,6 +720,13 @@ namespace RailmlEditor.ViewModels
             DeleteCommand = new RelayCommand(_ => DeleteSelected());
             CopyCommand = new RelayCommand(_ => CopySelected());
             PasteCommand = new RelayCommand(_ => PasteElements());
+
+            OpenTemplatesCommand = new RelayCommand(_ => 
+            {
+                var win = new TemplatesWindow(this);
+                win.Owner = Application.Current.MainWindow;
+                win.ShowDialog();
+            });
 
             // Test Data
             // Test Data Removed
@@ -812,42 +821,60 @@ namespace RailmlEditor.ViewModels
             }
         }
 
+        // Custom Templates Storage
+        public System.Collections.Generic.Dictionary<string, string> CustomTemplates { get; } = new System.Collections.Generic.Dictionary<string, string>();
+
         public void AddDoubleTrack(string filePath, Point? targetPos = null)
         {
             var oldState = TakeSnapshot();
             string finalPath = filePath;
-            if (!System.IO.File.Exists(finalPath))
-            {
-                // Better path resolution: search up to project root
-                string currentDir = System.AppDomain.CurrentDomain.BaseDirectory;
-                string? candidate = null;
-                
-                // Also search relative to CWD
-                string workingDir = System.IO.Directory.GetCurrentDirectory();
-                
-                var searchDirs = new[] { workingDir, currentDir };
-                foreach (var baseDir in searchDirs)
-                {
-                    string probeRoot = baseDir;
-                    for (int i = 0; i < 5; i++)
-                    {
-                        string probe = System.IO.Path.Combine(probeRoot, filePath);
-                        if (System.IO.File.Exists(probe))
-                        {
-                            candidate = probe;
-                            break;
-                        }
-                        probeRoot = System.IO.Path.GetDirectoryName(probeRoot);
-                        if (string.IsNullOrEmpty(probeRoot)) break;
-                    }
-                    if (candidate != null) break;
-                }
-                
-                if (candidate != null) finalPath = candidate;
-            }
-
+            
+            // Check if there is a custom template for this type
+            // Extract key from filePath (e.g. "single.railml" -> "single")
+            string templateKey = System.IO.Path.GetFileNameWithoutExtension(filePath).ToLower();
+            
             var service = new RailmlEditor.Services.RailmlService();
-            var snippet = service.LoadSnippet(finalPath, this);
+            System.Collections.Generic.List<BaseElementViewModel> snippet = new System.Collections.Generic.List<BaseElementViewModel>();
+
+            if (CustomTemplates.ContainsKey(templateKey) && !string.IsNullOrWhiteSpace(CustomTemplates[templateKey]))
+            {
+                // Use custom template
+                snippet = service.LoadSnippetFromXml(CustomTemplates[templateKey], this);
+            }
+            else
+            {
+                // Fallback to file load
+                if (!System.IO.File.Exists(finalPath))
+                {
+                    // Better path resolution: search up to project root
+                    string currentDir = System.AppDomain.CurrentDomain.BaseDirectory;
+                    string? candidate = null;
+                    
+                    // Also search relative to CWD
+                    string workingDir = System.IO.Directory.GetCurrentDirectory();
+                    
+                    var searchDirs = new[] { workingDir, currentDir };
+                    foreach (var baseDir in searchDirs)
+                    {
+                        string probeRoot = baseDir;
+                        for (int i = 0; i < 5; i++)
+                        {
+                            string probe = System.IO.Path.Combine(probeRoot, filePath);
+                            if (System.IO.File.Exists(probe))
+                            {
+                                candidate = probe;
+                                break;
+                            }
+                            probeRoot = System.IO.Path.GetDirectoryName(probeRoot);
+                            if (string.IsNullOrEmpty(probeRoot)) break;
+                        }
+                        if (candidate != null) break;
+                    }
+                    
+                    if (candidate != null) finalPath = candidate;
+                }
+                snippet = service.LoadSnippet(finalPath, this);
+            }
 
             if (snippet.Count > 0)
             {
