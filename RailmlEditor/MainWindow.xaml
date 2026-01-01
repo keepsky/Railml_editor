@@ -887,24 +887,25 @@
                                 <DataTemplate DataType="{x:Type viewmodels:TrackNodeViewModel}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding Role}" FontWeight="Bold" Foreground="DarkMagenta"/>
-                                        <TextBlock Text=" (" Foreground="Gray"/>
+                                        <TextBlock Text="(" Foreground="Gray"/>
                                         <TextBlock Text="{Binding TypeName}" Foreground="Purple"/>
-                                        <TextBlock Text=")" Foreground="Gray"/>
-                                        <TextBlock Text=" : " Foreground="Gray"/>
+                                        <TextBlock Text=") - " Foreground="Gray"/>
                                         <TextBlock Text="{Binding Id}"/>
                                     </StackPanel>
                                 </DataTemplate>
                                 <DataTemplate DataType="{x:Type viewmodels:TrackCircuitBorderViewModel}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding Id}" Foreground="Navy"/>
-                                        <TextBlock Text=" - " Foreground="Gray"/>
+                                        <TextBlock Text="-" Foreground="Gray"/>
                                         <TextBlock Text="{Binding Name}" Foreground="Navy" FontStyle="Italic"/>
                                     </StackPanel>
                                 </DataTemplate>
                                 <DataTemplate DataType="{x:Type viewmodels:SignalViewModel}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding Id}"/>
-                                        <TextBlock Text=" - " Foreground="Gray"/>
+                                        <TextBlock Text="(" Foreground="Gray"/>
+                                        <TextBlock Text="{Binding Type}" Foreground="Gray"/>
+                                        <TextBlock Text=") - " Foreground="Gray"/>
                                         <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
                                     </StackPanel>
                                 </DataTemplate>

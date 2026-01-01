@@ -60,7 +60,8 @@ namespace RailmlEditor.ViewModels
     {
         None,
         BufferStop,
-        OpenEnd
+        OpenEnd,
+        Connection
     }
 
     public class TrackViewModel : BaseElementViewModel
@@ -98,6 +99,19 @@ namespace RailmlEditor.ViewModels
 
             BeginNode.PropertyChanged += OnNodePropertyChanged;
             EndNode.PropertyChanged += OnNodePropertyChanged;
+            this.PropertyChanged += OnTrackPropertyChanged;
+        }
+
+        private void OnTrackPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Id))
+            {
+                if (!string.IsNullOrEmpty(Id))
+                {
+                    BeginNode.Id = $"{Id}_begin";
+                    EndNode.Id = $"{Id}_end";
+                }
+            }
         }
 
         private void OnNodePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -112,6 +126,7 @@ namespace RailmlEditor.ViewModels
                 {
                     EndType = EndNode.NodeType;
                 }
+                // ID Generation logic removed as per request to revert to T_begin/end format
             }
         }
 
@@ -332,23 +347,6 @@ namespace RailmlEditor.ViewModels
             BeginNode.Role = "Begin";
             
             if (!Children.Contains(BeginNode)) Children.Insert(0, BeginNode); // Insert at top
-
-            if (BeginType == TrackNodeType.BufferStop)
-            {
-                 // Update ID every type change as requested
-                 BeginNode.Id = GenerateId("bs");
-            }
-            else if (BeginType == TrackNodeType.OpenEnd)
-            {
-                 BeginNode.Id = GenerateId("oe");
-            }
-            else
-            {
-                BeginNode.Id = null; 
-                BeginNode.Code = null;
-                BeginNode.Name = null;
-                BeginNode.Description = null;
-            }
         }
 
         private void OnEndTypeChanged()
@@ -357,23 +355,6 @@ namespace RailmlEditor.ViewModels
             EndNode.Role = "End";
 
             if (!Children.Contains(EndNode)) Children.Add(EndNode); // Add at bottom (or after Begin)
-
-            if (EndType == TrackNodeType.BufferStop)
-            {
-                 // Update ID every type change as requested
-                 EndNode.Id = GenerateId("bs");
-            }
-            else if (EndType == TrackNodeType.OpenEnd)
-            {
-                 EndNode.Id = GenerateId("oe");
-            }
-            else
-            {
-                EndNode.Id = null;
-                EndNode.Code = null;
-                EndNode.Name = null;
-                EndNode.Description = null;
-            }
         }
 
         private string GenerateId(string prefix)
