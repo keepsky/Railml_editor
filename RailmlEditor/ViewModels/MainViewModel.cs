@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -218,6 +219,7 @@ namespace RailmlEditor.ViewModels
                                 border.X += delta;
                             }
                         }
+                        UpdateBorderAngles();
                     }
                 }
             }
@@ -249,12 +251,12 @@ namespace RailmlEditor.ViewModels
                                 border.Y += delta;
                             }
                         }
+                        UpdateBorderAngles();
                     }
                 }
             }
         }
 
-        // End Point relative to X,Y? No, let's store absolute properties.
         private double _x2;
         public virtual double X2
         {
@@ -264,6 +266,7 @@ namespace RailmlEditor.ViewModels
                 if (SetProperty(ref _x2, value))
                 {
                     OnPropertyChanged(nameof(Length));
+                    UpdateBorderAngles();
                 }
             }
         }
@@ -277,7 +280,18 @@ namespace RailmlEditor.ViewModels
                 if (SetProperty(ref _y2, value))
                 {
                     OnPropertyChanged(nameof(Length));
+                    UpdateBorderAngles();
                 }
+            }
+        }
+
+        private void UpdateBorderAngles()
+        {
+            if (Children == null) return;
+            double angle = Math.Atan2(Y2 - Y, X2 - X) * 180 / Math.PI;
+            foreach (var border in Children.OfType<TrackCircuitBorderViewModel>())
+            {
+                border.Angle = angle;
             }
         }
 
@@ -388,34 +402,6 @@ namespace RailmlEditor.ViewModels
     public class SwitchViewModel : BaseElementViewModel
     {
         public override string TypeName => "Switch";
-        
-        [ReadOnly(true)]
-        public override double X
-        {
-            get => base.X;
-            set => base.X = value;
-        }
-
-        [ReadOnly(true)]
-        public override double Y
-        {
-            get => base.Y;
-            set => base.Y = value;
-        }
-
-        private double? _mx;
-        public double? MX
-        {
-            get => _mx;
-            set => SetProperty(ref _mx, value);
-        }
-
-        private double? _my;
-        public double? MY
-        {
-            get => _my;
-            set => SetProperty(ref _my, value);
-        }
 
         private string _trackContinueCourse = "straight";
         public string TrackContinueCourse
@@ -803,8 +789,6 @@ namespace RailmlEditor.ViewModels
                 else if (clone is SwitchViewModel sw)
                 {
                     clone.Id = GetNextId("P");
-                    if (sw.MX.HasValue) sw.MX += 20;
-                    if (sw.MY.HasValue) sw.MY += 20;
                 }
 
                 clone.IsSelected = true;
@@ -829,8 +813,7 @@ namespace RailmlEditor.ViewModels
                 }
                 else if (_clipboard[i] is SwitchViewModel sw)
                 {
-                    if (sw.MX.HasValue) sw.MX += 20;
-                    if (sw.MY.HasValue) sw.MY += 20;
+                    // Sw coordinates already handled by base property increment in PasteElements if needed
                 }
             }
         }
@@ -954,8 +937,7 @@ namespace RailmlEditor.ViewModels
                             }
                             else if (el is SwitchViewModel sw)
                             {
-                                if (sw.MX.HasValue) sw.MX += dx;
-                                if (sw.MY.HasValue) sw.MY += dy;
+                                // Sw coordinates already handled by base property increment above
                             }
                         }
                     }
@@ -1048,8 +1030,6 @@ namespace RailmlEditor.ViewModels
                     Name = sw.Name,
                     X = sw.X,
                     Y = sw.Y,
-                    MX = sw.MX,
-                    MY = sw.MY,
                     ShowCoordinates = sw.ShowCoordinates
                 };
             }
@@ -1315,6 +1295,10 @@ namespace RailmlEditor.ViewModels
             if (targetTrack != null)
             {
                 targetTrack.Children.Add(item);
+                if (item is TrackCircuitBorderViewModel border)
+                {
+                    border.Angle = Math.Atan2(targetTrack.Y2 - targetTrack.Y, targetTrack.X2 - targetTrack.X) * 180 / Math.PI;
+                }
             }
         }
 
@@ -1597,9 +1581,7 @@ namespace RailmlEditor.ViewModels
                 }
                 else
                 {
-                    // Existing switch, update its position just in case
-                    sw.X = c.X;
-                    sw.Y = c.Y;
+                    // Existing switch, keep its current position (respect manual placement)
                 }
             }
         }

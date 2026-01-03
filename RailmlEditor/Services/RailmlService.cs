@@ -288,21 +288,8 @@ namespace RailmlEditor.Services
                                          TrackContinueCourse = swVm.TrackContinueCourse,
                                          NormalPosition = swVm.NormalPosition,
                                          AdditionalName = new AdditionalName { Name = swVm.Name },
-                                         ScreenPos = (swVm.MX.HasValue && swVm.MY.HasValue)
-                                             ? new ScreenPos { X = swVm.MX.Value, XSpecified = true, Y = swVm.MY.Value, YSpecified = true }
-                                             : null
+                                         ScreenPos = new ScreenPos { X = swVm.X, XSpecified = true, Y = swVm.Y, YSpecified = true }
                                      };
-
-                                     // Switch Vis
-                                     var parentTrackVis = lineVis.TrackVisList.FirstOrDefault(tv => tv.Ref == parentTrack.Id);
-                                     if (parentTrackVis != null)
-                                     {
-                                         parentTrackVis.TrackElementVisList.Add(new TrackElementVis
-                                         {
-                                             Ref = swVm.Id,
-                                             Position = new VisualizationPosition { X = swVm.X, Y = swVm.Y }
-                                         });
-                                     }
 
                                      // (1-f) & (2-f) adding diverging connections
                                      foreach (var divId in swVm.DivergingTrackIds)
@@ -409,6 +396,16 @@ namespace RailmlEditor.Services
                 }
             }
 
+            // 6. Save Switch Visualizations (Point Coordinates)
+            foreach (var swVm in viewModel.Elements.OfType<SwitchViewModel>())
+            {
+                var objVis = new ObjectVis
+                {
+                    Ref = swVm.Id,
+                    Position = new VisualizationPosition { X = swVm.X, Y = swVm.Y }
+                };
+                mainVis.ObjectVisList.Add(objVis);
+            }
 
             // Serialize
             try
@@ -630,8 +627,6 @@ namespace RailmlEditor.Services
                             Name = sw.AdditionalName?.Name,
                             X = swX,
                             Y = swY,
-                            MX = (sw.ScreenPos != null && sw.ScreenPos.XSpecified) ? sw.ScreenPos.X : (double?)null,
-                            MY = (sw.ScreenPos != null && sw.ScreenPos.YSpecified) ? sw.ScreenPos.Y : (double?)null,
                             TrackContinueCourse = sw.TrackContinueCourse ?? "straight",
                             NormalPosition = sw.NormalPosition ?? "straight"
                         };
@@ -726,6 +721,18 @@ namespace RailmlEditor.Services
                                     {
                                         coordMap[eVis.Ref] = eVis.Position;
                                     }
+                                }
+                            }
+                        }
+
+                        // Load Object Visualizations (Switches, etc.)
+                        if (vis.ObjectVisList != null)
+                        {
+                            foreach (var oVis in vis.ObjectVisList)
+                            {
+                                if (oVis.Ref != null && oVis.Position != null)
+                                {
+                                    coordMap[oVis.Ref] = oVis.Position;
                                 }
                             }
                         }
@@ -905,20 +912,19 @@ namespace RailmlEditor.Services
                             foreach (var sw in track.TrackTopology.Connections.Switches)
                             {
                                 var switchVm = viewModel.Elements.OfType<SwitchViewModel>().FirstOrDefault(e => e.Id == sw.Id);
-                                    // Try to get coordinates from Visualization Map first
-                                    VisualizationPosition? swPos = null;
-                                    coordMap.TryGetValue(sw.Id, out swPos);
+                                VisualizationPosition? swPos = null;
+                                coordMap.TryGetValue(sw.Id, out swPos);
 
+                                if (switchVm == null)
+                                {
                                     if (swPos != null)
                                     {
                                         switchVm = new SwitchViewModel
                                         {
                                             Id = sw.Id,
                                             Name = sw.AdditionalName?.Name,
-                                            X = swPos.X,
-                                            Y = swPos.Y,
-                                            MX = (sw.ScreenPos != null && sw.ScreenPos.XSpecified) ? sw.ScreenPos.X : (double?)null,
-                                            MY = (sw.ScreenPos != null && sw.ScreenPos.YSpecified) ? sw.ScreenPos.Y : (double?)null,
+                                             X = swPos.X,
+                                             Y = swPos.Y,
                                             TrackContinueCourse = sw.TrackContinueCourse ?? "straight",
                                             NormalPosition = sw.NormalPosition ?? "straight"
                                         };
@@ -941,15 +947,20 @@ namespace RailmlEditor.Services
                                         {
                                             Id = sw.Id,
                                             Name = sw.AdditionalName?.Name,
-                                            X = calcX,
-                                            Y = calcY,
-                                            MX = (sw.ScreenPos != null && sw.ScreenPos.XSpecified) ? sw.ScreenPos.X : (double?)null,
-                                            MY = (sw.ScreenPos != null && sw.ScreenPos.YSpecified) ? sw.ScreenPos.Y : (double?)null,
+                                             X = calcX,
+                                             Y = calcY,
                                             TrackContinueCourse = sw.TrackContinueCourse ?? "straight",
                                             NormalPosition = sw.NormalPosition ?? "straight"
                                         };
                                     }
                                     viewModel.Elements.Add(switchVm);
+                                }
+                                else if (swPos != null)
+                                {
+                                    // Update existing switch position if found in visualization map
+                                    switchVm.X = swPos.X;
+                                    switchVm.Y = swPos.Y;
+                                }
 
                                     // Topological reconstruction
                                 var firstConn = sw.ConnectionList.FirstOrDefault();
@@ -1070,6 +1081,7 @@ namespace RailmlEditor.Services
                                     Pos = border.Pos,
                                     X = borderPos?.X ?? 0,
                                     Y = borderPos?.Y ?? 0,
+                                    Angle = Math.Atan2(trackVm.Y2 - trackVm.Y, trackVm.X2 - trackVm.X) * 180 / Math.PI,
                                     RelatedTrackId = track.Id
                                 };
 

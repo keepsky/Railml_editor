@@ -465,11 +465,6 @@ namespace RailmlEditor
                                     curved.MY += snapY;
                                 }
                             }
-                            else if (element is SwitchViewModel sw)
-                            {
-                                if (sw.MX.HasValue) sw.MX += snapX;
-                                if (sw.MY.HasValue) sw.MY += snapY;
-                            }
                         }
                         // Update "Last Point" by the snapped amount to avoid drift
                         _panStartPoint.X += snapX;
@@ -538,8 +533,8 @@ namespace RailmlEditor
                     else if (element is SwitchViewModel sw)
                     {
                         // Also check for the "Point Tag" if it has specific coordinates or default offset
-                        double tagX = sw.MX ?? (sw.X - 15.0);
-                        double tagY = sw.MY ?? (sw.Y + 7.0);
+                        double tagX = sw.X - 15.0;
+                        double tagY = sw.Y + 7.0;
                         Rect tagBounds = new Rect(tagX, tagY, 35, 12);
                         if (selectionRect.IntersectsWith(tagBounds)) hit = true;
                     }
@@ -697,8 +692,7 @@ namespace RailmlEditor
                     }
                     else if (element is SwitchViewModel sw)
                     {
-                        if (sw.MX.HasValue) sw.MX += shiftX;
-                        if (sw.MY.HasValue) sw.MY += shiftY;
+                        // X/Y already updated above
                     }
                 }
                 
@@ -935,7 +929,6 @@ namespace RailmlEditor
                 try
                 {
                     service.Load(_currentFilePath, _viewModel);
-                    _viewModel.UpdateProximitySwitches();
                 }
                 catch (Exception ex)
                 {
@@ -1022,10 +1015,10 @@ namespace RailmlEditor
                 _draggedTagSwitch = swVm;
                 _tagDragStartPoint = e.GetPosition(MainDesigner);
                 
-                double currentMX = swVm.MX ?? (swVm.X - 15.0);
-                double currentMY = swVm.MY ?? (swVm.Y + 7.0);
+                double currentX = swVm.X;
+                double currentY = swVm.Y;
 
-                _tagDragOriginalAbsPoint = new Point(currentMX, currentMY);
+                _tagDragOriginalAbsPoint = new Point(currentX, currentY);
 
                 el.CaptureMouse();
                 e.Handled = true; 
@@ -1054,15 +1047,15 @@ namespace RailmlEditor
                     double deltaY = currentPos.Y - startPoint.Y;
 
                     // Calculate New Absolute Position
-                    double newMX = _tagDragOriginalAbsPoint.X + deltaX;
-                    double newMY = _tagDragOriginalAbsPoint.Y + deltaY;
+                    double newX = _tagDragOriginalAbsPoint.X + deltaX;
+                    double newY = _tagDragOriginalAbsPoint.Y + deltaY;
 
-                    // Snap to 5px Grid
-                    newMX = Math.Round(newMX / 5.0) * 5.0;
-                    newMY = Math.Round(newMY / 5.0) * 5.0;
+                    // Snap to 10px Grid (Matches tracks)
+                    newX = Math.Round(newX / 10.0) * 10.0;
+                    newY = Math.Round(newY / 10.0) * 10.0;
 
-                    _draggedTagSwitch.MX = newMX;
-                    _draggedTagSwitch.MY = newMY;
+                    _draggedTagSwitch.X = newX;
+                    _draggedTagSwitch.Y = newY;
                 }
             }
         }
@@ -1073,19 +1066,7 @@ namespace RailmlEditor
             {
                 if (_isTagDragging)
                 {
-                    // Reset Condition: "If moved coordinate mx, my is same as pos x,y"
-                    if (_draggedTagSwitch.MX.HasValue && _draggedTagSwitch.MY.HasValue)
-                    {
-                        double dist = Math.Sqrt(Math.Pow(_draggedTagSwitch.MX.Value - _draggedTagSwitch.X, 2) + 
-                                                Math.Pow(_draggedTagSwitch.MY.Value - _draggedTagSwitch.Y, 2));
-                        
-                        if (dist < 5.0)
-                        {
-                            // Reset to Default
-                            _draggedTagSwitch.MX = null;
-                            _draggedTagSwitch.MY = null;
-                        }
-                    }
+                    // Snap at end too? Already snapped in mouseMove
                 }
 
                 _isTagDragging = false;

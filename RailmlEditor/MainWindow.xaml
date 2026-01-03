@@ -145,19 +145,7 @@
                 <!-- Scaled to Height 12px (Original 82px). Scale 0.146. -->
                 <!-- Width 35.4px (Original 242px). -->
                 <!-- User requested X = -15. Y = 7. -->
-                <Grid Width="35" Height="12" MouseLeftButtonDown="Tag_MouseLeftButtonDown" MouseMove="Tag_MouseMove" MouseLeftButtonUp="Tag_MouseLeftButtonUp">
-                    <Canvas.Left>
-                        <MultiBinding Converter="{StaticResource TagPos}" ConverterParameter="X">
-                            <Binding Path="MX"/>
-                            <Binding Path="X"/>
-                        </MultiBinding>
-                    </Canvas.Left>
-                    <Canvas.Top>
-                        <MultiBinding Converter="{StaticResource TagPos}" ConverterParameter="Y">
-                            <Binding Path="MY"/>
-                            <Binding Path="Y"/>
-                        </MultiBinding>
-                    </Canvas.Top>
+                <Grid Width="35" Height="12" Canvas.Left="-15" Canvas.Top="7" MouseLeftButtonDown="Tag_MouseLeftButtonDown" MouseMove="Tag_MouseMove" MouseLeftButtonUp="Tag_MouseLeftButtonUp">
                     <!-- Replaced SVG Image with XAML Vector Graphics due to lack of native SVG support -->
                     <Viewbox Stretch="Uniform">
                         <Canvas Width="242" Height="82">
@@ -1251,10 +1239,8 @@
                                                     <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
 
                                                     <TextBlock Text="Mid X" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding MX, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                    <TextBlock Text="Mid Y" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding MY, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                                    <!-- <TextBox Text="{Binding MX, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/> -->
+                                                    <!-- <TextBox Text="{Binding MY, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/> -->
 
                                                     <TextBlock Text="End X" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
                                                     <TextBox Text="{Binding X2, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="4" Grid.Column="1" Style="{StaticResource PropValue}"/>
@@ -1323,11 +1309,11 @@
                                                         <RowDefinition Height="Auto"/>
                                                         <RowDefinition Height="Auto"/>
                                                     </Grid.RowDefinitions>
-                                                    <TextBlock Text="Pos X" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                                    <TextBlock Text="X" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                                    <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}"/>
 
-                                                    <TextBlock Text="Pos Y" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
+                                                    <TextBlock Text="Y" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
+                                                    <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
                                                 </Grid>
                                             </StackPanel>
                                         </Grid>

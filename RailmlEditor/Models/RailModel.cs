@@ -433,6 +433,18 @@ namespace RailmlEditor.Models
 
         [XmlElement(ElementName = "lineVis")]
         public List<LineVis> LineVisList { get; set; } = new List<LineVis>();
+
+        [XmlElement(ElementName = "objectVis")]
+        public List<ObjectVis> ObjectVisList { get; set; } = new List<ObjectVis>();
+    }
+
+    public class ObjectVis
+    {
+        [XmlAttribute(AttributeName = "ref")]
+        public string Ref { get; set; }
+
+        [XmlElement(ElementName = "position")]
+        public VisualizationPosition Position { get; set; }
     }
 
     public class LineVis
