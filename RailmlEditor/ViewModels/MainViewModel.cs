@@ -1439,7 +1439,47 @@ namespace RailmlEditor.ViewModels
                     }
                 }
             }
-        }
+            else if (sender is SwitchViewModel sw && (e.PropertyName == nameof(BaseElementViewModel.X) || e.PropertyName == nameof(BaseElementViewModel.Y)))
+    {
+        // Update connected track endpoints to follow the switch
+        UpdateTrackNodesToSwitch(sw);
+    }
+}
+
+private void UpdateTrackNodesToSwitch(SwitchViewModel sw)
+{
+    // If Scenario 1: One End (Entering) -> Multiple Begins (Principle/Diverging)
+    // If Scenario 2: One Begin (Entering) -> Multiple Ends (Principle/Diverging)
+    
+    UpdateTrackNode(sw.EnteringTrackId, !sw.IsScenario1, sw.X, sw.Y);
+    UpdateTrackNode(sw.PrincipleTrackId, sw.IsScenario1, sw.X, sw.Y);
+    foreach (var divId in sw.DivergingTrackIds)
+    {
+        UpdateTrackNode(divId, sw.IsScenario1, sw.X, sw.Y);
+    }
+}
+
+private void UpdateTrackNode(string? trackId, bool isBegin, double x, double y)
+{
+    if (string.IsNullOrEmpty(trackId)) return;
+    var track = Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == trackId);
+    if (track == null) return;
+
+    if (isBegin)
+    {
+        // Don't trigger if already at the same position to avoid circular updates if we add back-sync later
+        if (Math.Abs(track.X - x) < 0.001 && Math.Abs(track.Y - y) < 0.001) return;
+        track.X = x;
+        track.Y = y;
+    }
+    else
+    {
+        if (Math.Abs(track.X2 - x) < 0.001 && Math.Abs(track.Y2 - y) < 0.001) return;
+        track.X2 = x;
+        track.Y2 = y;
+    }
+}
+
 
         private void UpdateSelectionState()
         {
@@ -1512,7 +1552,7 @@ namespace RailmlEditor.ViewModels
             }
 
             var existingSwitches = Elements.OfType<SwitchViewModel>().ToList();
-            var switchesToRemove = existingSwitches.Where(sw => !clusters.Any(c => Math.Sqrt(Math.Pow(sw.X - c.X, 2) + Math.Pow(sw.Y - c.Y, 2)) < 10.0)).ToList();
+            var switchesToRemove = existingSwitches.Where(sw => !clusters.Any(c => Math.Sqrt(Math.Pow(sw.X - c.X, 2) + Math.Pow(sw.Y - c.Y, 2)) < 20.0)).ToList();
 
             foreach (var sw in switchesToRemove) Elements.Remove(sw);
 
@@ -1525,7 +1565,7 @@ namespace RailmlEditor.ViewModels
 
             foreach (var c in clusters)
             {
-                var sw = Elements.OfType<SwitchViewModel>().FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - c.X, 2) + Math.Pow(s.Y - c.Y, 2)) < 10.0);
+                var sw = Elements.OfType<SwitchViewModel>().FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - c.X, 2) + Math.Pow(s.Y - c.Y, 2)) < 20.0);
                 if (sw == null)
                 {
                     maxId++;
