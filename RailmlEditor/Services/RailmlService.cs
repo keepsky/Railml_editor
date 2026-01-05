@@ -246,7 +246,7 @@ namespace RailmlEditor.Services
                          var nodeCoordX = nodeA.ScreenPos?.X ?? 0;
                          var nodeCoordY = nodeA.ScreenPos?.Y ?? 0;
                          var swVm = viewModel.Elements.OfType<SwitchViewModel>()
-                                 .FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - nodeCoordX, 2) + Math.Pow(s.Y - nodeCoordY, 2)) < 20.0);
+                                 .FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - nodeCoordX, 2) + Math.Pow(s.Y - nodeCoordY, 2)) < 500.0);
                          
                          if (swVm != null)
                          {
@@ -473,6 +473,39 @@ namespace RailmlEditor.Services
             var newElements = new System.Collections.Generic.List<BaseElementViewModel>();
             if (railml?.Infrastructure?.Tracks?.TrackList == null) return newElements;
 
+            // Build Coordinate Map from Visualizations
+            var coordMap = new System.Collections.Generic.Dictionary<string, VisualizationPosition>();
+            if (railml?.InfrastructureVisualizations?.VisualizationList != null)
+            {
+                foreach (var vis in railml.InfrastructureVisualizations.VisualizationList)
+                {
+                    foreach (var lVis in vis.LineVisList)
+                    {
+                        foreach (var tVis in lVis.TrackVisList)
+                        {
+                            foreach (var eVis in tVis.TrackElementVisList)
+                            {
+                                if (eVis.Ref != null && eVis.Position != null)
+                                {
+                                    coordMap[eVis.Ref] = eVis.Position;
+                                }
+                            }
+                        }
+                    }
+
+                    if (vis.ObjectVisList != null)
+                    {
+                        foreach (var oVis in vis.ObjectVisList)
+                        {
+                            if (oVis.Ref != null && oVis.Position != null)
+                            {
+                                coordMap[oVis.Ref] = oVis.Position;
+                            }
+                        }
+                    }
+                }
+            }
+
             var idMap = new System.Collections.Generic.Dictionary<string, string>();
             
             // Track local counters to avoid duplicates within snippet
@@ -518,7 +551,21 @@ namespace RailmlEditor.Services
             foreach (var track in railml.Infrastructure.Tracks.TrackList)
             {
                 TrackViewModel trackVm;
-                if (track.Code == "corner" && track.TrackTopology?.CornerPos != null)
+
+                // Get coordinates from Visualization Map or falling back
+                VisualizationPosition? startPos = null;
+                VisualizationPosition? endPos = null;
+                VisualizationPosition? midPos = null;
+
+                coordMap.TryGetValue($"{track.Id}_begin", out startPos);
+                coordMap.TryGetValue($"{track.Id}_end", out endPos);
+                coordMap.TryGetValue($"{track.Id}_mid", out midPos);
+
+                if (track.Code == "corner" && midPos != null)
+                {
+                    trackVm = new CurvedTrackViewModel { MX = midPos.X, MY = midPos.Y };
+                }
+                else if (track.Code == "corner" && track.TrackTopology?.CornerPos != null)
                 {
                     trackVm = new CurvedTrackViewModel
                     {
@@ -537,10 +584,24 @@ namespace RailmlEditor.Services
                 trackVm.Type = track.Type;
                 trackVm.MainDir = track.MainDir;
                 trackVm.Code = track.Code;
-                trackVm.X = track.TrackTopology?.TrackBegin?.ScreenPos?.X ?? 0;
-                trackVm.Y = track.TrackTopology?.TrackBegin?.ScreenPos?.Y ?? 0;
 
-                if (track.TrackTopology?.TrackEnd != null)
+                if (startPos != null)
+                {
+                    trackVm.X = startPos.X;
+                    trackVm.Y = startPos.Y;
+                }
+                else
+                {
+                    trackVm.X = track.TrackTopology?.TrackBegin?.ScreenPos?.X ?? 0;
+                    trackVm.Y = track.TrackTopology?.TrackBegin?.ScreenPos?.Y ?? 0;
+                }
+
+                if (endPos != null)
+                {
+                    trackVm.X2 = endPos.X;
+                    trackVm.Y2 = endPos.Y;
+                }
+                else if (track.TrackTopology?.TrackEnd != null)
                 {
                     trackVm.X2 = track.TrackTopology.TrackEnd.ScreenPos?.X ?? 0;
                     trackVm.Y2 = track.TrackTopology.TrackEnd.ScreenPos?.Y ?? 0;
@@ -617,9 +678,16 @@ namespace RailmlEditor.Services
                         double endY = trackVm.Y2;
                         double length = Math.Sqrt(Math.Pow(endX - startX, 2) + Math.Pow(endY - startY, 2));
                         if (length < 0.1) length = 1;
-                        double ratio = pos / length;
-                        double swX = startX + ratio * (endX - startX);
-                        double swY = startY + ratio * (endY - startY);
+                        coordMap.TryGetValue(sw.Id, out var swPos);
+                        double swX = swPos?.X ?? 0;
+                        double swY = swPos?.Y ?? 0;
+
+                        if (swPos == null)
+                        {
+                             double ratio = pos / length;
+                             swX = startX + ratio * (endX - startX);
+                             swY = startY + ratio * (endY - startY);
+                        }
                         
                         var switchVm = new SwitchViewModel
                         {

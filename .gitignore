@@ -2,7 +2,7 @@
 build*
 RailmlEditor/obj/*
 RailmlEditor/bin/*
-*.railml
+./*.railml
 TestSerializer/obj/*
 TestSerializer/bin/*
 TestSerializer/error.log

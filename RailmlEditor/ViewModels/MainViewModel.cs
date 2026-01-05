@@ -7,6 +7,8 @@ using System.Windows;
 using System.Windows.Input;
 using RailmlEditor.Models;
 using RailmlEditor.Utils;
+using System.IO;
+using System.Text.Json;
 
 namespace RailmlEditor.ViewModels
 {
@@ -730,6 +732,8 @@ namespace RailmlEditor.ViewModels
 
             // Test Data
             // Test Data Removed
+
+            LoadCustomTemplates();
         }
 
 
@@ -819,7 +823,45 @@ namespace RailmlEditor.ViewModels
         }
 
         // Custom Templates Storage
+        private readonly string _templatesPath = "templates.json";
         public System.Collections.Generic.Dictionary<string, string> CustomTemplates { get; } = new System.Collections.Generic.Dictionary<string, string>();
+
+        public void SaveCustomTemplates()
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(CustomTemplates, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(_templatesPath, json);
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show($"Error saving templates: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void LoadCustomTemplates()
+        {
+            try
+            {
+                if (File.Exists(_templatesPath))
+                {
+                    var json = File.ReadAllText(_templatesPath);
+                    var loaded = JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, string>>(json);
+                    if (loaded != null)
+                    {
+                        CustomTemplates.Clear();
+                        foreach (var kvp in loaded)
+                        {
+                            CustomTemplates[kvp.Key] = kvp.Value;
+                        }
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show($"Error loading templates: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
         public void AddDoubleTrack(string filePath, Point? targetPos = null)
         {
@@ -1439,11 +1481,7 @@ namespace RailmlEditor.ViewModels
                     }
                 }
             }
-            else if (sender is SwitchViewModel sw && (e.PropertyName == nameof(BaseElementViewModel.X) || e.PropertyName == nameof(BaseElementViewModel.Y)))
-    {
-        // Update connected track endpoints to follow the switch
-        UpdateTrackNodesToSwitch(sw);
-    }
+
 }
 
 private void UpdateTrackNodesToSwitch(SwitchViewModel sw)
@@ -1499,6 +1537,15 @@ private void UpdateTrackNode(string? trackId, bool isBegin, double x, double y)
                 BulkEdit = null;
             }
         }
+
+        public void ClearAllSelections()
+        {
+            var selected = SelectedElements.ToList();
+            foreach (var el in selected)
+            {
+                el.IsSelected = false;
+            }
+        }
         public void UpdateProximitySwitches()
         {
             var tracks = Elements.OfType<TrackViewModel>().ToList();
@@ -1552,7 +1599,7 @@ private void UpdateTrackNode(string? trackId, bool isBegin, double x, double y)
             }
 
             var existingSwitches = Elements.OfType<SwitchViewModel>().ToList();
-            var switchesToRemove = existingSwitches.Where(sw => !clusters.Any(c => Math.Sqrt(Math.Pow(sw.X - c.X, 2) + Math.Pow(sw.Y - c.Y, 2)) < 20.0)).ToList();
+            var switchesToRemove = existingSwitches.Where(sw => !clusters.Any(c => Math.Sqrt(Math.Pow(sw.X - c.X, 2) + Math.Pow(sw.Y - c.Y, 2)) < 500.0)).ToList();
 
             foreach (var sw in switchesToRemove) Elements.Remove(sw);
 
@@ -1565,7 +1612,7 @@ private void UpdateTrackNode(string? trackId, bool isBegin, double x, double y)
 
             foreach (var c in clusters)
             {
-                var sw = Elements.OfType<SwitchViewModel>().FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - c.X, 2) + Math.Pow(s.Y - c.Y, 2)) < 20.0);
+                var sw = Elements.OfType<SwitchViewModel>().FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - c.X, 2) + Math.Pow(s.Y - c.Y, 2)) < 500.0);
                 if (sw == null)
                 {
                     maxId++;

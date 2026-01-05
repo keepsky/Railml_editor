@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<railml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:sehwa="http://www.sehwa.co.kr/railml" version="2.5" xmlns="http://www.railml.org/schemas/2013">
+  <infrastructure id="inf001" name="Default Infrastructure">
+    <tracks>
+      <track id="T001" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T001_begin">
+            <connection id="conn_T001_begin_to_T007_end" ref="T007_end" />
+          </trackBegin>
+          <trackEnd pos="10" id="T001_end">
+            <connection id="conn_T001_end_to_T002_begin" ref="T002_begin" />
+          </trackEnd>
+        </trackTopology>
+      </track>
+      <track id="T002" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T002_begin">
+            <connection id="conn_T002_begin_to_T001_end" ref="T001_end" />
+          </trackBegin>
+          <trackEnd pos="30" id="T002_end">
+            <connection id="conn_T002_end_to_T008_begin" ref="T008_begin" />
+          </trackEnd>
+          <connections>
+            <switch id="P001" pos="0" trackContinueCourse="straight" normalPosition="straight">
+              <additionalName name="P001" />
+              <connection id="conn_P001_to_T003_begin" ref="T003_begin" orientation="outgoing" course="right" />
+            </switch>
+          </connections>
+        </trackTopology>
+      </track>
+      <track id="T003" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T003_begin" />
+          <trackEnd pos="22" id="T003_end">
+            <connection id="conn_T003_end_to_T004_begin" ref="T004_begin" />
+          </trackEnd>
+        </trackTopology>
+      </track>
+      <track id="T004" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T004_begin">
+            <connection id="conn_T004_begin_to_T003_end" ref="T003_end" />
+          </trackBegin>
+          <trackEnd pos="22" id="T004_end" />
+        </trackTopology>
+      </track>
+      <track id="T005" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T005_begin">
+            <connection id="conn_T005_begin_to_T009_end" ref="T009_end" />
+          </trackBegin>
+          <trackEnd pos="30" id="T005_end" />
+        </trackTopology>
+      </track>
+      <track id="T006" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T006_begin" />
+          <trackEnd pos="10" id="T006_end">
+            <connection id="conn_T006_end_to_T010_begin" ref="T010_begin" />
+          </trackEnd>
+        </trackTopology>
+      </track>
+      <track id="T007" mainDir="up" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T007_begin">
+            <openEnd id="T007_begin" />
+          </trackBegin>
+          <trackEnd pos="100" id="T007_end">
+            <connection id="conn_T007_end_to_T001_begin" ref="T001_begin" />
+          </trackEnd>
+        </trackTopology>
+      </track>
+      <track id="T008" mainDir="up" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T008_begin">
+            <connection id="conn_T008_begin_to_T002_end" ref="T002_end" />
+          </trackBegin>
+          <trackEnd pos="100" id="T008_end">
+            <openEnd id="T008_end" />
+          </trackEnd>
+        </trackTopology>
+      </track>
+      <track id="T009" mainDir="up" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T009_begin">
+            <openEnd id="T009_begin" />
+          </trackBegin>
+          <trackEnd pos="100" id="T009_end">
+            <connection id="conn_T009_end_to_T005_begin" ref="T005_begin" />
+          </trackEnd>
+        </trackTopology>
+      </track>
+      <track id="T010" mainDir="up" code="plain">
+        <trackTopology>
+          <trackBegin pos="0" id="T010_begin">
+            <connection id="conn_T010_begin_to_T006_end" ref="T006_end" />
+          </trackBegin>
+          <trackEnd pos="100" id="T010_end">
+            <openEnd id="T010_end" />
+          </trackEnd>
+        </trackTopology>
+      </track>
+    </tracks>
+  </infrastructure>
+  <infrastructureVisualizations>
+    <visualization id="vis1" infrastructureRef="inf001">
+      <lineVis>
+        <trackVis ref="T001">
+          <trackElementVis ref="T001_begin">
+            <position x="160" y="120" />
+          </trackElementVis>
+          <trackElementVis ref="T001_end">
+            <position x="170" y="120" />
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="T002">
+          <trackElementVis ref="T002_begin">
+            <position x="170" y="120" />
+          </trackElementVis>
+          <trackElementVis ref="T002_end">
+            <position x="200" y="120" />
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="T003">
+          <trackElementVis ref="T003_begin">
+            <position x="170" y="120" />
+          </trackElementVis>
+          <trackElementVis ref="T003_end">
+            <position x="180" y="140" />
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="T004">
+          <trackElementVis ref="T004_begin">
+            <position x="180" y="140" />
+          </trackElementVis>
+          <trackElementVis ref="T004_end">
+            <position x="190" y="160" />
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="T005">
+          <trackElementVis ref="T005_begin">
+            <position x="160" y="160" />
+          </trackElementVis>
+          <trackElementVis ref="T005_end">
+            <position x="190" y="160" />
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="T006">
+          <trackElementVis ref="T006_begin">
+            <position x="190" y="160" />
+          </trackElementVis>
+          <trackElementVis ref="T006_end">
+            <position x="200" y="160" />
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="T007">
+          <trackElementVis ref="T007_begin">
+            <position x="60" y="120" />
+          </trackElementVis>
+          <trackElementVis ref="T007_end">
+            <position x="160" y="120" />
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="T008">
+          <trackElementVis ref="T008_begin">
+            <position x="200" y="120" />
+          </trackElementVis>
+          <trackElementVis ref="T008_end">
+            <position x="300" y="120" />
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="T009">
+          <trackElementVis ref="T009_begin">
+            <position x="60" y="160" />
+          </trackElementVis>
+          <trackElementVis ref="T009_end">
+            <position x="160" y="160" />
+          </trackElementVis>
+        </trackVis>
+        <trackVis ref="T010">
+          <trackElementVis ref="T010_begin">
+            <position x="200" y="160" />
+          </trackElementVis>
+          <trackElementVis ref="T010_end">
+            <position x="300" y="160" />
+          </trackElementVis>
+        </trackVis>
+      </lineVis>
+      <objectVis ref="P001">
+        <position x="170" y="120" />
+      </objectVis>
+      <objectVis ref="P002">
+        <position x="190" y="160" />
+      </objectVis>
+    </visualization>
+  </infrastructureVisualizations>
+</railml>

@@ -239,6 +239,18 @@ namespace RailmlEditor
             if (e.NewValue is BaseElementViewModel vm)
             {
                 _viewModel.SelectedElement = vm;
+                
+                // Ensure it's selected on canvas too
+                bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
+                if (!isMulti && !vm.IsSelected)
+                {
+                    _viewModel.ClearAllSelections();
+                    vm.IsSelected = true;
+                }
+                else if (isMulti)
+                {
+                    vm.IsSelected = true;
+                }
             }
         }
 
@@ -592,7 +604,7 @@ namespace RailmlEditor
                         bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
                         if (!viewModel.IsSelected && !isMulti)
                         {
-                            foreach (var el in _viewModel.Elements) el.IsSelected = false;
+                            _viewModel.ClearAllSelections();
                             viewModel.IsSelected = true;
                         }
                         else if (isMulti)
@@ -845,33 +857,17 @@ namespace RailmlEditor
 
         private void OnPrincipleTrackSelectionRequested(SwitchBranchInfo info)
         {
-            // Simple approach: show a ContextMenu at mouse position
-            var menu = new ContextMenu();
-            var header = new MenuItem { Header = "principle track 선택", IsEnabled = false, FontWeight = FontWeights.Bold };
-            menu.Items.Add(header);
-
-            foreach (var cand in info.Candidates)
+            var selector = new JunctionPrincipleSelector(info.Candidates);
+            selector.Owner = this;
+            if (selector.ShowDialog() == true)
             {
-                var item = new MenuItem { Header = $"{cand.Id}({cand.Name ?? "unnamed"})" };
-                item.Click += (s, e) => { 
-                    info.Callback(cand); 
-                };
-                menu.Items.Add(item);
+                info.Callback(selector.SelectedTrack);
             }
-
-            menu.Closed += (s, e) =>
+            else
             {
-                // If nothing was selected (Callback not called with non-null), we should rollback
-                // Actually, the Callback handles adding the switch. 
-                // We need to know if it COMPLETED.
-                // Let's check if the switch was added to the collection.
-                if (!_viewModel.Elements.Contains(info.Switch))
-                {
-                    RollbackMove();
-                }
-            };
-
-            menu.IsOpen = true;
+                RollbackMove();
+                info.Callback(null);
+            }
         }
 
         private void RollbackMove()
@@ -1084,7 +1080,11 @@ namespace RailmlEditor
                 bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
                 if (!isMulti)
                 {
-                    foreach (var el in _viewModel.Elements) el.IsSelected = (el == viewModel);
+                    if (!viewModel.IsSelected)
+                    {
+                        _viewModel.ClearAllSelections();
+                        viewModel.IsSelected = true;
+                    }
                 }
                 else
                 {

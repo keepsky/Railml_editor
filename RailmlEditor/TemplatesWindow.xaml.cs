@@ -53,6 +53,7 @@ namespace RailmlEditor
                     _viewModel.CustomTemplates[key] = textBox.Text;
                 }
             }
+            _viewModel.SaveCustomTemplates();
             // Optionally close or just indicate saved?
             // "Template selected... then toolbar button pressed uses it".
             // So saving is enough.
