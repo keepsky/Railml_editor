@@ -1,5 +1,64 @@
-======================
-======================
+
+=============
+track의 이동으로 변경된 좌표에 대해서 아래의 2가지 경우에 해당하면 각각의 경우에 대해서 가이드하는 방법에 따라 railml 태그를 생성한다.
+(1) 2개의 trackEnd와 1개의 trackBegin이 같은 좌표값을 가지는 경우
+팝업메뉴를 통해서 2개의 trackEnd가 속한 track의 id를 나열하고 principle track을 하나를 선택 한다. (선택이 안되면 이전 상태로)
+principle track(A), diverging track(B), entering track(C) 라고 하면
+track(A)의 <trackEnd><connection>과 track(C)의 <trackBegin><connection>이 서로 id, ref로 연결되고
+track(B)의 <trackEnd><connection>과 track(C)의 <connections><switch><connection>이 서로 id, ref로 연결된다. 
+track(C)의 <connections><switch><connection>의 orientation 속성은 "incoming" 값을 가진다
+(2) 1개의 trackEnd와 2개의 trackBegin이 만나는 경우
+팝업메뉴를 통해서 2개의 trackBegin이 속한 track의 id를 나열하고 principle track을 하나를 선택 한다. (선택이 안되면 이전 상태로)
+principle track(A), diverging track(B), entering track(C) 라고 하면
+track(A)의 <trackBegin><connection>과 track(C)의 <trackEnd><connection>이 서로 id, ref로 연결되고
+track(B)의 <trackbegin><connection>과 track(A)의 <connections><switch><connection>이 서로 id, ref로 연결된다. 
+track(A)의 <connections><switch><connection>의 orientation 속성은 "outgoing" 값을 가진다
+=============
+point의 좌표에 대해서 logical, visual로 분리해서 수현한것 같은데 아래와 같이 수정해줘
+(1) 이전과 같이 logical, visual 구분 없이 하나의 x, y 좌표만 사용
+(2) point 생성시는 기존 로직대로 좌표값 생성하여 표시
+(3) 사용자가 마우스로 point 좌표를 변경하는 경우 변경된 좌표를 x,y에 저장
+(4) railml로 저장할때 현재의 x, y 좌표 정보를 objectVis 태그의 position 속성에 저장
+(5) railml에서 읽어올때 objectVis 태그의 position 속성에서 x,y 좌표 사용
+
+=============
+선로전환기(point)의 좌표를 변경했을때 infrastructureVisualizations->visualization->objectVis 태그를 이용해서 아래와 같이 좌표 정보를 저장하고 railml을 로드할때 해당 좌표로 표시되도록 수정해줘
+objectVis 태그에 ref 속성으로 point의 id를 저장하고
+objectVis 하위에 position 태그를 만들고 x,y 속성에 좌표값을 저장
+=============
+railml 파일을 로드했을때 아래 두가지 문제 수정해줘
+(1) point(switch)의 위치를 변경해서 저장했는데 변경된 좌표로 표시되지 않음
+(2) 사선 track에 있는 border가 track 각도 맞게 사선으로 표시되지 않음
+=============
+railml 파일을 로드할때 trackEnd 또는 trackBegin에 connection 태그가 존재하는데 탐색창이나 속성창에서 type 값이 connection이 아니라 none으로 표시되는 문제 수정해줘
+=============
+edge를 그릴때 해당 노드가 속한 track의 mainDir 속성을 참고해서 아래와 같이 수정해줘
+해당 노드가 속한 track의 속성이 mainDir=up인경우 trackBegin에서 trackEnd방향 순서로 edge에 화살표를 표시하고 mainDir=down인경우 trackEnd에서 trackBegin방향 순서로 edge에 화살표를 표시하고 mainDir=none인 경우 화살표를 표시하지 않는다.
+=============
+trackEnd와 trackBegin 하위에 connection 태그로 두개의 track이 연결되는 경우 아래 규칙에서 설명하는 각각의 track에서 추출한 node 두 개를 연결하는 edge를 그리도록 수정해줘
+(1) trackBegin에 connection이 있는 track은 trackBegin 내의 pos 속성값 기준으로 가장 가까운 pos 값을 가지는 node
+(2) trackEnd에 connection이 있는 track은 trackEnd 내의 pos 속성값 기준으로 가장 가까운 pos 값을 가지는 node
+=============
+view 메뉴 하위에 graph 메뉴를 선택하면 별도의 graph canvas를 만들고 현재 railml 데이터를 기반으로 graph를 그려주는 기능이고 graph의 node와 edge를 처리하는 다음의 로직을 통해서 graph 기능 구현해줘
+(1) node가 되는 railml 요소는 아래의 경우가 있음
+(1-1) openEnd 또는 bufferEnd를 가지고 있는 trackBegin 이나 trackEnd
+(1-2) switch, trackCircuitBorder, signal
+(1-3) trackBegin에서 trackEnd까지 pos 값 기준으로 가까운 순서로 (1-1), (1-2)에서 정의한 node들을 edge로 연결한다.
+(1-4) edge는 방향을 가지는데 track의 mainDir 속성값에 따라서 mainDir=up인경우 trackBegin에서 trackEnd방향 순서로 화살표를 표시하고 mainDir=down인경우 trackEnd에서 trackBegin방향 순서로 화살표를 표시하고 mainDir=none인 경우 화살표를 표시하지 않는다.
+(2) 위의 (1)에서 trackBegin 또는 trackEnd 하위에 connection 태그의 ref 속성이 지시하는 track에 대해서도 위의 (1)의 과정을 거쳐서 graph을 그린다.
+(3) 해당 track의 하위에 connections 태그가 있는 경우 connections ->switch 또는 connections ->crossing 태그 하위에 connection 태그들의 ref 속성이 지시하는 모든 track에 대해서도 위의 (1)의 과정을 거쳐서 graph을 그린다. 이때 switch, crossing의 위치는 trackBegin이 되도록 한다.
+
+=============
+메뉴바의 view 메뉴 하위에 graph 메뉴를 추가해줘
+=============
+탐색창에 표시하는 요소 그룹의 표시 순서를 Route, Area, Track, Signal, Point 순으로 표시해주고 railml에 저장할때 <infrastructure> 하위에 <routes>, <areas>, <tracks> 순서로 저장하도록 수정해줘
+=============
+area 요소가 생성되었는데 속성창에 area 하위 속성 정보가 표시되지 않고 있습니다. 아래의 속성정보가 표시되도록 수정해줘
+(1) id
+(2) name
+(3) type
+(4) description
+(5) 선택된 border들의 id를 한줄씩 표시
 ======================
 좌측 탐색창에 infrastructure 하위에 Area 그룹을 추가하고 하위의 area 요소는 id, name, type, description 속성을 가지고 id는 ar1, ar2, ar3 형태로 자동할당하고, type은 (trackSection, project)에서 선택하도록 하고, name, description은 사용자가 입력할수 있도록 하고 area 요소 하위에 다중 선택한 border들의 id, name이 한줄씩 표시되도록 구현하고 area 요소가 생성되는 절차는 아래와 같이 구현해줘
 area 요소 생성 절차 : border 여러개를 shift+마우스 왼쪽 버튼 클릭으로 다중 선택해서 마우스 오른쪽 클릭했을때 "Area 생성" 팝업 메뉴를 표시하고 해당 옵션을 선택했을때 좌측 탐색창에 Area 그룹 하위에 area 요소를 생성하도록 구현해줘
