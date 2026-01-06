@@ -784,15 +784,15 @@ namespace RailmlEditor.ViewModels
                         curved.MX += 20;
                         curved.MY += 20;
                     }
-                    clone.Id = GetNextId("T");
+                    clone.Id = GetNextId("tr");
                 }
                 else if (clone is SignalViewModel signal)
                 {
-                    clone.Id = GetNextId("S");
+                    clone.Id = GetNextId("sig");
                 }
                 else if (clone is SwitchViewModel sw)
                 {
-                    clone.Id = GetNextId("P");
+                    clone.Id = GetNextId("sw");
                 }
 
                 clone.IsSelected = true;
@@ -1618,8 +1618,8 @@ private void UpdateTrackNode(string? trackId, bool isBegin, double x, double y)
                     maxId++;
                     sw = new SwitchViewModel
                     {
-                        Id = $"P{maxId:D3}",
-                        Name = $"P{maxId:D3}",
+                        Id = $"sw{maxId}",
+                        Name = $"sw{maxId}",
                         X = c.X,
                         Y = c.Y
                     };
@@ -1710,7 +1710,7 @@ private void UpdateTrackNode(string? trackId, bool isBegin, double x, double y)
                     if (num > max) max = num;
                 }
             }
-            return $"{prefix}{max + 1:D3}";
+            return $"{prefix}{max + 1}";
         }
     }
 }

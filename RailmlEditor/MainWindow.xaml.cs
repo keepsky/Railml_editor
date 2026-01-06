@@ -62,7 +62,7 @@ namespace RailmlEditor
                 {
                     newElement = new TrackViewModel
                     {
-                        Id = GetNextId("T"),
+                        Id = GetNextId("tr"),
                         X = defaultPos.X, 
                         Y = defaultPos.Y,
                         Length = 100 
@@ -72,7 +72,7 @@ namespace RailmlEditor
                 {
                     newElement = new SwitchViewModel
                     {
-                        Id = GetNextId("P"),
+                        Id = _viewModel.GetNextId("sw"),
                         X = defaultPos.X,
                         Y = defaultPos.Y
                     };
@@ -81,7 +81,7 @@ namespace RailmlEditor
                 {
                     newElement = new SignalViewModel
                     {
-                        Id = GetNextId("S"),
+                        Id = GetNextId("sig"),
                         X = defaultPos.X,
                         Y = defaultPos.Y
                     };
@@ -92,7 +92,7 @@ namespace RailmlEditor
                     double my = defaultPos.Y - 40;
                     newElement = new CurvedTrackViewModel
                     {
-                        Id = GetNextId("T"),
+                        Id = GetNextId("tr"),
                         Code = "corner",
                         X = defaultPos.X,
                         Y = defaultPos.Y,
