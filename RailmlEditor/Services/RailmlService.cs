@@ -227,17 +227,22 @@ namespace RailmlEditor.Services
                     {
                          foreach (var nodeB in overlappingNodes)
                          {
-                             bool isBeginB = nodeB.Id.EndsWith("_begin");
+                             bool isBeginB = nodeB.Id.StartsWith("tb");
                              if (isBeginA == isBeginB) continue; 
 
-                             if(!nodeA.ConnectionList.Any(c => c.Ref == nodeB.Id))
+                             var targetTrack = nodeToTrack[nodeB];
+                             string targetTrackPart = System.Text.RegularExpressions.Regex.Match(targetTrack.Id, @"\d+").Value;
+                             string targetConnId = (isBeginB ? "cb" : "ce") + targetTrackPart;
+
+                             if(!nodeA.ConnectionList.Any(c => c.Ref == targetConnId))
                              {
                                  string trackPart = System.Text.RegularExpressions.Regex.Match(parentTrack.Id, @"\d+").Value;
                                  string connPrefix = isBeginA ? "cb" : "ce";
+                                 
                                  nodeA.ConnectionList.Add(new Connection 
                                  { 
                                      Id = connPrefix + trackPart,
-                                     Ref = nodeB.Id 
+                                     Ref = targetConnId 
                                  });
                              }
                          }
@@ -268,10 +273,14 @@ namespace RailmlEditor.Services
                                  {
                                      string trackPart = System.Text.RegularExpressions.Regex.Match(parentTrack.Id, @"\d+").Value;
                                      string connPrefix = isBeginA ? "cb" : "ce";
+                                     
+                                     // targetId is a node ID like tb2 or te2. We need cb2 or ce2.
+                                     string targetConnId = targetId.Replace("tb", "cb").Replace("te", "ce");
+
                                      nodeA.ConnectionList.Add(new Connection 
                                      { 
                                          Id = connPrefix + trackPart,
-                                         Ref = targetId 
+                                         Ref = targetConnId 
                                      });
                                  }
                              }
@@ -299,18 +308,37 @@ namespace RailmlEditor.Services
                                      foreach (var divId in swVm.DivergingTrackIds)
                                      {
                                           var divTrackNum = System.Text.RegularExpressions.Regex.Match(GetRailmlId(divId), @"\d+").Value;
-                                         var divRefId = (swVm.IsScenario1 ? "tb" : "te") + divTrackNum;
+                                         var divRefId = (swVm.IsScenario1 ? "cb" : "ce") + divTrackNum;
                                          
                                          var connVm = swVm.DivergingConnections.FirstOrDefault(dc => dc.TrackId == divId);
 
                                           var switchPart = System.Text.RegularExpressions.Regex.Match(swVm.Id, @"\d+").Value;
+                                         var swConnId = $"c{switchPart}-{divRefId}";
                                          switchObj.ConnectionList.Add(new Connection
                                          {
-                                             Id = $"c{switchPart}-{divRefId}",
+                                             Id = swConnId,
                                              Ref = divRefId,
                                              Orientation = swVm.IsScenario1 ? "outgoing" : "incoming",
                                              Course = connVm?.Course ?? "straight"
                                          });
+
+                                         // Add reciprocal connection to diverging track node
+                                         var divTrackObj = railml.Infrastructure.Tracks.TrackList.FirstOrDefault(t => t.Id == GetRailmlId(divId));
+                                         if (divTrackObj != null)
+                                         {
+                                             var targetNode = swVm.IsScenario1 ? divTrackObj.TrackTopology.TrackBegin : divTrackObj.TrackTopology.TrackEnd;
+                                             if (targetNode != null)
+                                             {
+                                                 if (!targetNode.ConnectionList.Any(c => c.Ref == swConnId))
+                                                 {
+                                                     targetNode.ConnectionList.Add(new Connection
+                                                     {
+                                                         Id = divRefId,
+                                                         Ref = swConnId
+                                                     });
+                                                 }
+                                             }
+                                         }
                                      }
                                      parentTrack.TrackTopology.Connections.Switches.Add(switchObj);
                                  }
@@ -645,8 +673,11 @@ namespace RailmlEditor.Services
                         var conn = track.TrackTopology.TrackBegin.ConnectionList.First();
                         if (conn.Ref != null)
                         {
-                            var parts = conn.Ref.Split('_');
-                            if (idMap.ContainsKey(parts[0])) trackVm.BeginNode.ConnectedTrackId = idMap[parts[0]];
+                            string targetRef = conn.Ref.Contains("-") ? conn.Ref.Split('-')[1] : conn.Ref;
+                            string targetTrackNum = System.Text.RegularExpressions.Regex.Match(targetRef, @"\d+").Value;
+                            string targetTrackId = railml.Infrastructure.Tracks.TrackList.FirstOrDefault(t => System.Text.RegularExpressions.Regex.Match(t.Id, @"\d+").Value == targetTrackNum)?.Id ?? targetRef.Split('_')[0];
+
+                            if (idMap.ContainsKey(targetTrackId)) trackVm.BeginNode.ConnectedTrackId = idMap[targetTrackId];
                             trackVm.BeginNode.ConnectedNodeId = conn.Ref;
                         }
                     }
@@ -671,8 +702,11 @@ namespace RailmlEditor.Services
                         var conn = track.TrackTopology.TrackEnd.ConnectionList.First();
                         if (conn.Ref != null)
                         {
-                            var parts = conn.Ref.Split('_');
-                            if (idMap.ContainsKey(parts[0])) trackVm.EndNode.ConnectedTrackId = idMap[parts[0]];
+                            string targetRef = conn.Ref.Contains("-") ? conn.Ref.Split('-')[1] : conn.Ref;
+                            string targetTrackNum = System.Text.RegularExpressions.Regex.Match(targetRef, @"\d+").Value;
+                            string targetTrackId = railml.Infrastructure.Tracks.TrackList.FirstOrDefault(t => System.Text.RegularExpressions.Regex.Match(t.Id, @"\d+").Value == targetTrackNum)?.Id ?? targetRef.Split('_')[0];
+
+                            if (idMap.ContainsKey(targetTrackId)) trackVm.EndNode.ConnectedTrackId = idMap[targetTrackId];
                             trackVm.EndNode.ConnectedNodeId = conn.Ref;
                         }
                     }
@@ -908,12 +942,13 @@ namespace RailmlEditor.Services
                             {
                                 trackVm.BeginType = TrackNodeType.Connection;
                                 var conn = track.TrackTopology.TrackBegin.ConnectionList.First();
-                                if (conn.Ref != null)
-                                {
-                                    var parts = conn.Ref.Split('_');
-                                    trackVm.BeginNode.ConnectedTrackId = parts[0];
-                                    trackVm.BeginNode.ConnectedNodeId = conn.Ref;
-                                }
+                                    if (conn.Ref != null)
+                                    {
+                                        string targetRef = conn.Ref.Contains("-") ? conn.Ref.Split('-')[1] : conn.Ref;
+                                        string trackNum = System.Text.RegularExpressions.Regex.Match(targetRef, @"\d+").Value;
+                                        trackVm.BeginNode.ConnectedTrackId = "tr" + trackNum;
+                                        trackVm.BeginNode.ConnectedNodeId = conn.Ref;
+                                    }
                             }
                             else
                             {
@@ -949,12 +984,13 @@ namespace RailmlEditor.Services
                             {
                                 trackVm.EndType = TrackNodeType.Connection;
                                 var conn = track.TrackTopology.TrackEnd.ConnectionList.First();
-                                if (conn.Ref != null)
-                                {
-                                    var parts = conn.Ref.Split('_');
-                                    trackVm.EndNode.ConnectedTrackId = parts[0];
-                                    trackVm.EndNode.ConnectedNodeId = conn.Ref;
-                                }
+                                    if (conn.Ref != null)
+                                    {
+                                        string targetRef = conn.Ref.Contains("-") ? conn.Ref.Split('-')[1] : conn.Ref;
+                                        string trackNum = System.Text.RegularExpressions.Regex.Match(targetRef, @"\d+").Value;
+                                        trackVm.EndNode.ConnectedTrackId = "tr" + trackNum;
+                                        trackVm.EndNode.ConnectedNodeId = conn.Ref;
+                                    }
                             }
                             else
                             {
