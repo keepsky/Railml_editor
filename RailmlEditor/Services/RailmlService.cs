@@ -598,7 +598,7 @@ namespace RailmlEditor.Services
 
                 if (track.TrackTopology?.TrackEnd != null)
                 {
-                    if (!coordMap.TryGetValue(track.TrackTopology.TrackEnd.Id, out startPos))
+                    if (!coordMap.TryGetValue(track.TrackTopology.TrackEnd.Id, out endPos))
                         coordMap.TryGetValue($"{track.Id}_end", out endPos);
                 }
 

@@ -822,8 +822,8 @@ namespace RailmlEditor.ViewModels
                     clone.Id = GetNextId("sw");
                 }
 
-                clone.IsSelected = true;
                 Elements.Add(clone);
+                clone.IsSelected = true;
             }
             AddHistory(oldState);
 
@@ -1014,8 +1014,8 @@ namespace RailmlEditor.ViewModels
 
                 foreach (var el in snippet)
                 {
-                    el.IsSelected = true;
                     Elements.Add(el);
+                    el.IsSelected = true;
                 }
                 UpdateSelectionState();
                 AddHistory(oldState);
