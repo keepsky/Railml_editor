@@ -115,8 +115,11 @@ namespace RailmlEditor.ViewModels
             {
                 if (!string.IsNullOrEmpty(Id))
                 {
-                    BeginNode.Id = $"{Id}_begin";
-                    EndNode.Id = $"{Id}_end";
+                    string num = System.Text.RegularExpressions.Regex.Match(Id, @"\d+").Value;
+                    BeginNode.Id = "tb" + num;
+                    EndNode.Id = "te" + num;
+                    BeginNode.ConnectionId = "cb" + num;
+                    EndNode.ConnectionId = "ce" + num;
                 }
             }
             // Trigger connection check on geometry change
@@ -146,7 +149,22 @@ namespace RailmlEditor.ViewModels
                 {
                     EndType = EndNode.NodeType;
                 }
-                // ID Generation logic removed as per request to revert to T_begin/end format
+                
+                // Update ConnectionId when NodeType changes
+                if (!string.IsNullOrEmpty(Id))
+                {
+                    string num = System.Text.RegularExpressions.Regex.Match(Id, @"\d+").Value;
+                    if (sender == BeginNode) BeginNode.ConnectionId = "cb" + num;
+                    else if (sender == EndNode) EndNode.ConnectionId = "ce" + num;
+                }
+            }
+            if (e.PropertyName == nameof(TrackNodeViewModel.ConnectedNodeId) || e.PropertyName == nameof(TrackNodeViewModel.ConnectedTrackId))
+            {
+                var node = sender as TrackNodeViewModel;
+                if (node != null)
+                {
+                    node.ConnectionRef = node.ConnectedNodeId;
+                }
             }
         }
 

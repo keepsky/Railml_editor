@@ -679,6 +679,8 @@ namespace RailmlEditor.Services
 
                             if (idMap.ContainsKey(targetTrackId)) trackVm.BeginNode.ConnectedTrackId = idMap[targetTrackId];
                             trackVm.BeginNode.ConnectedNodeId = conn.Ref;
+                            trackVm.BeginNode.ConnectionId = conn.Id;
+                            trackVm.BeginNode.ConnectionRef = conn.Ref;
                         }
                     }
                 }
@@ -708,6 +710,8 @@ namespace RailmlEditor.Services
 
                             if (idMap.ContainsKey(targetTrackId)) trackVm.EndNode.ConnectedTrackId = idMap[targetTrackId];
                             trackVm.EndNode.ConnectedNodeId = conn.Ref;
+                            trackVm.EndNode.ConnectionId = conn.Id;
+                            trackVm.EndNode.ConnectionRef = conn.Ref;
                         }
                     }
                 }
@@ -948,6 +952,8 @@ namespace RailmlEditor.Services
                                         string trackNum = System.Text.RegularExpressions.Regex.Match(targetRef, @"\d+").Value;
                                         trackVm.BeginNode.ConnectedTrackId = "tr" + trackNum;
                                         trackVm.BeginNode.ConnectedNodeId = conn.Ref;
+                                        trackVm.BeginNode.ConnectionId = conn.Id;
+                                        trackVm.BeginNode.ConnectionRef = conn.Ref;
                                     }
                             }
                             else
@@ -990,6 +996,8 @@ namespace RailmlEditor.Services
                                         string trackNum = System.Text.RegularExpressions.Regex.Match(targetRef, @"\d+").Value;
                                         trackVm.EndNode.ConnectedTrackId = "tr" + trackNum;
                                         trackVm.EndNode.ConnectedNodeId = conn.Ref;
+                                        trackVm.EndNode.ConnectionId = conn.Id;
+                                        trackVm.EndNode.ConnectionRef = conn.Ref;
                                     }
                             }
                             else

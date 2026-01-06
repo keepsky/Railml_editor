@@ -69,6 +69,20 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _connectedNodeId, value);
         }
 
+        private string? _connectionId;
+        public string? ConnectionId
+        {
+            get => _connectionId;
+            set => SetProperty(ref _connectionId, value);
+        }
+
+        private string? _connectionRef;
+        public string? ConnectionRef
+        {
+            get => _connectionRef;
+            set => SetProperty(ref _connectionRef, value);
+        }
+
         private double _pos;
         public double Pos
         {
