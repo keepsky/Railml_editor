@@ -19,17 +19,17 @@
           <connections>
             <switch id="sw1" pos="0" trackContinueCourse="straight" normalPosition="straight">
               <additionalName name="sw1" />
-              <connection id="c1-ce3" ref="ce3" orientation="incoming" course="straight" />
+              <connection id="c1-cb3" ref="cb3" orientation="outgoing" course="straight" />
             </switch>
           </connections>
         </trackTopology>
       </track>
-      <track id="tr3" mainDir="up" code="plain">
+      <track id="tr3" mainDir="up" code="corner">
         <trackTopology>
-          <trackBegin pos="0" id="tb3" />
-          <trackEnd pos="92" id="te3">
-            <connection id="ce3" ref="c1-ce3" />
-          </trackEnd>
+          <trackBegin pos="0" id="tb3">
+            <connection id="cb3" ref="c1-cb3" />
+          </trackBegin>
+          <trackEnd pos="54" id="te3" />
         </trackTopology>
       </track>
     </tracks>
@@ -39,31 +39,34 @@
       <lineVis>
         <trackVis ref="tr1">
           <trackElementVis ref="tb1">
-            <position x="120" y="230" />
+            <position x="70" y="140" />
           </trackElementVis>
           <trackElementVis ref="te1">
-            <position x="220" y="230" />
+            <position x="170" y="140" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr2">
           <trackElementVis ref="tb2">
-            <position x="220" y="230" />
+            <position x="170" y="140" />
           </trackElementVis>
           <trackElementVis ref="te2">
-            <position x="320" y="230" />
+            <position x="270" y="140" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr3">
           <trackElementVis ref="tb3">
-            <position x="150" y="170" />
+            <position x="170" y="140" />
           </trackElementVis>
           <trackElementVis ref="te3">
-            <position x="220" y="230" />
+            <position x="200" y="100" />
+          </trackElementVis>
+          <trackElementVis ref="tr3_mid">
+            <position x="190" y="100" />
           </trackElementVis>
         </trackVis>
       </lineVis>
       <objectVis ref="sw1">
-        <position x="220" y="230" />
+        <position x="170" y="140" />
       </objectVis>
     </visualization>
   </infrastructureVisualizations>

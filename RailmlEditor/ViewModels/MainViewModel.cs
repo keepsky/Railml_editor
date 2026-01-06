@@ -1250,6 +1250,13 @@ namespace RailmlEditor.ViewModels
                      CheckConnections(track);
                  }
             }
+            else if (sender is SwitchViewModel sw)
+            {
+                if (e.PropertyName == nameof(SwitchViewModel.X) || e.PropertyName == nameof(SwitchViewModel.Y))
+                {
+                    UpdateTrackNodesToSwitch(sw);
+                }
+            }
         }
 
         private void CheckConnections(TrackViewModel source)
@@ -1291,29 +1298,45 @@ namespace RailmlEditor.ViewModels
                   }
              }
 
+             // Also check Switches
+             SwitchViewModel? nearestSwitch = null;
+             foreach (var sw in Elements.OfType<SwitchViewModel>())
+             {
+                 double dist = Math.Sqrt(Math.Pow(sw.X - x, 2) + Math.Pow(sw.Y - y, 2));
+                 if (dist < minDist && dist < tolerance)
+                 {
+                     minDist = dist;
+                     nearestSwitch = sw;
+                     nearestTrack = null;
+                     nearestNode = null;
+                 }
+             }
+
              if (nearestTrack != null && nearestNode != null)
              {
-                  // Connect
+                  // Connect to track
                   sourceNode.NodeType = TrackNodeType.Connection;
                   sourceNode.ConnectedTrackId = nearestTrack.Id;
-                  sourceNode.ConnectedNodeId = nearestNode.Id; // Ref to node ID or Role? Usually just Track Ref is enough, but user asked for Conn. ID and Ref.
-                  // Assuming Node ID is enough. 
+                  sourceNode.ConnectedNodeId = nearestNode.ConnectionId; // Ref to Connection ID (cb/ce)
                   
-                  // Bidirectional? User requirement implies automatic update.
-                  // If source connects to dest, dest should connect to source.
+                  // Bidirectional
                   nearestNode.NodeType = TrackNodeType.Connection;
                   nearestNode.ConnectedTrackId = sourceTrack.Id;
-                  nearestNode.ConnectedNodeId = sourceNode.Id;
+                  nearestNode.ConnectedNodeId = sourceNode.ConnectionId;
+             }
+             else if (nearestSwitch != null)
+             {
+                 // Connect to switch
+                 sourceNode.NodeType = TrackNodeType.Connection;
+                 sourceNode.ConnectedTrackId = nearestSwitch.Id;
+                 
+                 // For switches, the ref depends on whether it's principle/entering or diverging.
+                 // This is complex for live UI, so we set it to the switch ID for now, 
+                 // and RailmlService.Save will refine it to the internal connection ID (c1-cbX).
+                 sourceNode.ConnectedNodeId = nearestSwitch.Id;
              }
              else
              {
-                  // Disconnect if it WAS a connection (and now no overlap)
-                  // User said: "if disconnected... auto change to None"
-                  // But only if it WAS a Connection to avoid overwriting BufferStop/OpenEnd manually set?
-                  // Logic: If it IS a Connection, and no overlap -> revert to None.
-                  // If it is NOT a Connection (e.g. BufferStop), and no overlap -> do nothing.
-                  // Wait, if I move a BufferStop into overlap, it should become Connection? Yes.
-                  
                   if (sourceNode.NodeType == TrackNodeType.Connection)
                   {
                       sourceNode.NodeType = TrackNodeType.None;
@@ -1504,18 +1527,27 @@ namespace RailmlEditor.ViewModels
 
 private void UpdateTrackNodesToSwitch(SwitchViewModel sw)
 {
+    string swNum = System.Text.RegularExpressions.Regex.Match(sw.Id, @"\d+").Value;
+
     // If Scenario 1: One End (Entering) -> Multiple Begins (Principle/Diverging)
     // If Scenario 2: One Begin (Entering) -> Multiple Ends (Principle/Diverging)
     
-    UpdateTrackNode(sw.EnteringTrackId, !sw.IsScenario1, sw.X, sw.Y);
-    UpdateTrackNode(sw.PrincipleTrackId, sw.IsScenario1, sw.X, sw.Y);
+    UpdateTrackNode(sw.EnteringTrackId, !sw.IsScenario1, sw.X, sw.Y, sw.Id, sw.Id);
+    UpdateTrackNode(sw.PrincipleTrackId, sw.IsScenario1, sw.X, sw.Y, sw.Id, sw.Id);
     foreach (var divId in sw.DivergingTrackIds)
     {
-        UpdateTrackNode(divId, sw.IsScenario1, sw.X, sw.Y);
+        var divTrack = Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == divId);
+        string? connId = null;
+        if (divTrack != null)
+        {
+            var node = sw.IsScenario1 ? divTrack.BeginNode : divTrack.EndNode;
+            connId = $"c{swNum}-{node.ConnectionId}";
+        }
+        UpdateTrackNode(divId, sw.IsScenario1, sw.X, sw.Y, sw.Id, connId ?? sw.Id);
     }
 }
 
-private void UpdateTrackNode(string? trackId, bool isBegin, double x, double y)
+private void UpdateTrackNode(string? trackId, bool isBegin, double x, double y, string targetId, string? targetConnId)
 {
     if (string.IsNullOrEmpty(trackId)) return;
     var track = Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == trackId);
@@ -1523,16 +1555,25 @@ private void UpdateTrackNode(string? trackId, bool isBegin, double x, double y)
 
     if (isBegin)
     {
-        // Don't trigger if already at the same position to avoid circular updates if we add back-sync later
-        if (Math.Abs(track.X - x) < 0.001 && Math.Abs(track.Y - y) < 0.001) return;
-        track.X = x;
-        track.Y = y;
+        if (Math.Abs(track.X - x) > 0.001 || Math.Abs(track.Y - y) > 0.001)
+        {
+            track.X = x;
+            track.Y = y;
+        }
+        track.BeginNode.NodeType = TrackNodeType.Connection;
+        track.BeginNode.ConnectedTrackId = targetId;
+        track.BeginNode.ConnectedNodeId = targetConnId;
     }
     else
     {
-        if (Math.Abs(track.X2 - x) < 0.001 && Math.Abs(track.Y2 - y) < 0.001) return;
-        track.X2 = x;
-        track.Y2 = y;
+        if (Math.Abs(track.X2 - x) > 0.001 || Math.Abs(track.Y2 - y) > 0.001)
+        {
+            track.X2 = x;
+            track.Y2 = y;
+        }
+        track.EndNode.NodeType = TrackNodeType.Connection;
+        track.EndNode.ConnectedTrackId = targetId;
+        track.EndNode.ConnectedNodeId = targetConnId;
     }
 }
 
