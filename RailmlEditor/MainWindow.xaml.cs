@@ -16,12 +16,14 @@ namespace RailmlEditor
             InitializeComponent();
             _viewModel = new MainViewModel();
             _viewModel.PrincipleTrackSelectionRequested += OnPrincipleTrackSelectionRequested;
+            _viewModel.PropertyChanged += ViewModel_PropertyChanged;
             this.DataContext = _viewModel;
         }
 
         private Point _toolboxDragStart;
         private Point _startPoint;
         private bool _isDragging;
+        private bool _isInternalSelectionChange = false;
         private FrameworkElement? _draggedControl;
         private System.Collections.Generic.Dictionary<BaseElementViewModel, Point> _originalPositions = new System.Collections.Generic.Dictionary<BaseElementViewModel, Point>();
         private System.Collections.Generic.List<BaseElementViewModel>? _beforeDragSnapshot;
@@ -236,6 +238,8 @@ namespace RailmlEditor
 
         private void ElementTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
+            if (_isInternalSelectionChange) return;
+
             if (e.NewValue is BaseElementViewModel vm)
             {
                 _viewModel.SelectedElement = vm;
@@ -1207,6 +1211,67 @@ namespace RailmlEditor
             dist = Math.Sqrt(Math.Pow(p.X - nearest.X, 2) + Math.Pow(p.Y - nearest.Y, 2));
 
             angle = Math.Atan2(dy, dx) * 180 / Math.PI;
+        }
+
+        private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(MainViewModel.SelectedElement))
+            {
+                if (_viewModel.SelectedElement != null)
+                {
+                    SelectItemInTree(_viewModel.SelectedElement);
+                }
+            }
+        }
+
+        private void SelectItemInTree(object item)
+        {
+            if (ElementTree == null) return;
+
+            Dispatcher.BeginInvoke(new Action(() => {
+                _isInternalSelectionChange = true;
+                try
+                {
+                    var container = GetTreeViewItem(ElementTree, item);
+                    if (container != null)
+                    {
+                        container.IsSelected = true;
+                        container.BringIntoView();
+                    }
+                }
+                finally
+                {
+                    _isInternalSelectionChange = false;
+                }
+            }), System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        private TreeViewItem? GetTreeViewItem(ItemsControl parent, object item)
+        {
+            if (parent == null) return null;
+
+            if (parent.DataContext == item) return parent as TreeViewItem;
+            
+            if (parent.Items.Contains(item))
+            {
+                return parent.ItemContainerGenerator.ContainerFromItem(item) as TreeViewItem;
+            }
+
+            for (int i = 0; i < parent.Items.Count; i++)
+            {
+                var childItem = parent.Items[i];
+                var container = parent.ItemContainerGenerator.ContainerFromIndex(i) as ItemsControl;
+                
+                if (container != null)
+                {
+                    if (container.DataContext == item) return container as TreeViewItem;
+
+                    var found = GetTreeViewItem(container, item);
+                    if (found != null) return found;
+                }
+            }
+
+            return null;
         }
     }
 }

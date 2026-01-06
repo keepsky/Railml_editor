@@ -2,37 +2,39 @@
 <railml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:sehwa="http://www.sehwa.co.kr/railml" version="2.5" xmlns="http://www.railml.org/schemas/2013">
   <infrastructure id="inf001" name="Default Infrastructure">
     <tracks>
-      <track id="T001" mainDir="up" code="plain">
+      <track id="tr1" mainDir="up" code="plain">
         <trackTopology>
-          <trackBegin pos="0" id="T001_begin">
-            <openEnd id="T001_begin" />
+          <trackBegin pos="0" id="tb1">
+            <openEnd id="tb1" />
           </trackBegin>
-          <trackEnd pos="10" id="T001_end">
-            <connection id="conn_T001_end_to_T002_begin" ref="T002_begin" />
+          <trackEnd pos="20" id="te1">
+            <connection id="ce1" ref="cb2" />
           </trackEnd>
         </trackTopology>
       </track>
-      <track id="T002" mainDir="up" code="plain">
+      <track id="tr2" mainDir="up" code="plain">
         <trackTopology>
-          <trackBegin pos="0" id="T002_begin">
-            <connection id="conn_T002_begin_to_T001_end" ref="T001_end" />
+          <trackBegin pos="0" id="tb2">
+            <connection id="cb2" ref="ce1" />
           </trackBegin>
-          <trackEnd pos="30" id="T002_end">
-            <openEnd id="T002_end" />
+          <trackEnd pos="30" id="te2">
+            <openEnd id="te2" />
           </trackEnd>
           <connections>
-            <switch id="P001" pos="0" trackContinueCourse="straight" normalPosition="straight">
-              <additionalName name="P001" />
-              <connection id="conn_P001_to_T003_begin" ref="T003_begin" orientation="outgoing" course="left" />
+            <switch id="sw1" pos="0" trackContinueCourse="straight" normalPosition="straight">
+              <additionalName name="sw1" />
+              <connection id="c1-cb3" ref="cb3" orientation="outgoing" course="left" />
             </switch>
           </connections>
         </trackTopology>
       </track>
-      <track id="T003" mainDir="up" code="corner">
+      <track id="tr3" mainDir="up" code="corner">
         <trackTopology>
-          <trackBegin pos="0" id="T003_begin" />
-          <trackEnd pos="54" id="T003_end">
-            <openEnd id="T003_end" />
+          <trackBegin pos="0" id="tb3">
+            <connection id="cb3" ref="c1-cb3" />
+          </trackBegin>
+          <trackEnd pos="54" id="te3">
+            <openEnd id="te3" />
           </trackEnd>
         </trackTopology>
       </track>
@@ -41,36 +43,36 @@
   <infrastructureVisualizations>
     <visualization id="vis1" infrastructureRef="inf001">
       <lineVis>
-        <trackVis ref="T001">
-          <trackElementVis ref="T001_begin">
-            <position x="40" y="70" />
+        <trackVis ref="tr1">
+          <trackElementVis ref="tb1">
+            <position x="110" y="150" />
           </trackElementVis>
-          <trackElementVis ref="T001_end">
-            <position x="50" y="70" />
-          </trackElementVis>
-        </trackVis>
-        <trackVis ref="T002">
-          <trackElementVis ref="T002_begin">
-            <position x="50" y="70" />
-          </trackElementVis>
-          <trackElementVis ref="T002_end">
-            <position x="80" y="70" />
+          <trackElementVis ref="te1">
+            <position x="130" y="150" />
           </trackElementVis>
         </trackVis>
-        <trackVis ref="T003">
-          <trackElementVis ref="T003_begin">
-            <position x="50" y="70" />
+        <trackVis ref="tr2">
+          <trackElementVis ref="tb2">
+            <position x="130" y="150" />
           </trackElementVis>
-          <trackElementVis ref="T003_end">
-            <position x="80" y="30" />
+          <trackElementVis ref="te2">
+            <position x="160" y="150" />
           </trackElementVis>
-          <trackElementVis ref="T003_mid">
-            <position x="70" y="30" />
+        </trackVis>
+        <trackVis ref="tr3">
+          <trackElementVis ref="tb3">
+            <position x="130" y="150" />
+          </trackElementVis>
+          <trackElementVis ref="te3">
+            <position x="160" y="110" />
+          </trackElementVis>
+          <trackElementVis ref="tr3_mid">
+            <position x="150" y="110" />
           </trackElementVis>
         </trackVis>
       </lineVis>
-      <objectVis ref="P001">
-        <position x="50" y="70" />
+      <objectVis ref="sw1">
+        <position x="130" y="150" />
       </objectVis>
     </visualization>
   </infrastructureVisualizations>
