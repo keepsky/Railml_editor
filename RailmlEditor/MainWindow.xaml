@@ -1296,14 +1296,40 @@
                                             <ItemsControl ItemsSource="{Binding DivergingConnections}" Grid.Row="4" Grid.Column="1">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Grid Margin="0,0,0,5">
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="*"/>
-                                                                <ColumnDefinition Width="Auto"/>
-                                                            </Grid.ColumnDefinitions>
-                                                            <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="10"/>
-                                                            <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableCourses}" SelectedItem="{Binding Course, UpdateSourceTrigger=PropertyChanged}" Width="70" FontSize="10"/>
-                                                        </Grid>
+                                                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Margin="0,0,0,10" Padding="0,0,0,8">
+                                                            <StackPanel>
+                                                                <Grid Margin="0,0,0,5">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" Foreground="#333" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="11"/>
+                                                                    <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableCourses}" SelectedItem="{Binding Course, UpdateSourceTrigger=PropertyChanged}" Width="90" Height="22" FontSize="10"/>
+                                                                </Grid>
+
+                                                                <!-- Connection Details (Read-only, Aligned with Outer Grid) -->
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <Grid.RowDefinitions>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                    </Grid.RowDefinitions>
+
+                                                                    <TextBlock Text="Conn. ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}" FontSize="10" VerticalAlignment="Center" Margin="5,0,5,2"/>
+                                                                    <TextBox Text="{Binding Id, Mode=OneWay}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" FontSize="10" Foreground="Gray" BorderThickness="0" Background="Transparent" VerticalAlignment="Center"/>
+
+                                                                    <TextBlock Text="Conn. Ref" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}" FontSize="10" VerticalAlignment="Center" Margin="5,0,5,2"/>
+                                                                    <TextBox Text="{Binding Ref, Mode=OneWay}" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}" FontSize="10" Foreground="Gray" BorderThickness="0" Background="Transparent" VerticalAlignment="Center"/>
+
+                                                                    <TextBlock Text="Orientation" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}" FontSize="10" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                                                                    <TextBox Text="{Binding Orientation, Mode=OneWay}" IsReadOnly="True" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}" FontSize="10" Foreground="Gray" BorderThickness="0" Background="Transparent" VerticalAlignment="Center"/>
+                                                                </Grid>
+                                                            </StackPanel>
+                                                        </Border>
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>

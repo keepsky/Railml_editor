@@ -793,7 +793,10 @@ namespace RailmlEditor.Services
                                     {
                                         TrackId = newDivId,
                                         DisplayName = newDivId,
-                                        Course = c.Course ?? "straight"
+                                        Course = c.Course ?? "straight",
+                                        Id = c.Id,
+                                        Ref = c.Ref,
+                                        Orientation = c.Orientation ?? (switchVm.IsScenario1 ? "outgoing" : "incoming")
                                     });
                                 }
                             }
@@ -1143,7 +1146,10 @@ namespace RailmlEditor.Services
                                         {
                                             TrackId = divId,
                                             DisplayName = divId, // Re-load name later if needed
-                                            Course = c.Course ?? "straight"
+                                            Course = c.Course ?? "straight",
+                                            Id = c.Id,
+                                            Ref = c.Ref,
+                                            Orientation = c.Orientation ?? (switchVm.IsScenario1 ? "outgoing" : "incoming")
                                         });
                                     }
                                 }

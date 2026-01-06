@@ -459,6 +459,15 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _displayName, value);
         }
 
+        private string _id;
+        public string Id { get => _id; set => SetProperty(ref _id, value); }
+
+        private string _ref;
+        public string Ref { get => _ref; set => SetProperty(ref _ref, value); }
+
+        private string _orientation = "outgoing";
+        public string Orientation { get => _orientation; set => SetProperty(ref _orientation, value); }
+
         private TrackViewModel? _targetTrack;
         public TrackViewModel? TargetTrack
         {
@@ -1538,12 +1547,23 @@ private void UpdateTrackNodesToSwitch(SwitchViewModel sw)
     {
         var divTrack = Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == divId);
         string? connId = null;
+        string? targetRef = null;
         if (divTrack != null)
         {
             var node = sw.IsScenario1 ? divTrack.BeginNode : divTrack.EndNode;
             connId = $"c{swNum}-{node.ConnectionId}";
+            targetRef = node.ConnectionId;
         }
         UpdateTrackNode(divId, sw.IsScenario1, sw.X, sw.Y, sw.Id, connId ?? sw.Id);
+        
+        // Update DivergingConnectionViewModel details
+        var connVm = sw.DivergingConnections.FirstOrDefault(dc => dc.TrackId == divId);
+        if (connVm != null)
+        {
+            connVm.Id = connId ?? "";
+            connVm.Ref = targetRef ?? "";
+            connVm.Orientation = sw.IsScenario1 ? "outgoing" : "incoming";
+        }
     }
 }
 
