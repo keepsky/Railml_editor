@@ -29,12 +29,20 @@
         <!-- Fix: Set Viewbox="0,0,10,10" Absolute to prevent stretching the 1px rect to fill the tile -->
         <DrawingBrush x:Key="GridBackgroundBrush" Viewbox="0,0,10,10" ViewboxUnits="Absolute" Viewport="0,0,10,10" ViewportUnits="Absolute" TileMode="Tile">
             <DrawingBrush.Drawing>
-                <GeometryDrawing Brush="#D3D3D3">
-                    <GeometryDrawing.Geometry>
-                        <!-- Smallest size: 1x1 pixel square -->
-                        <RectangleGeometry Rect="0,0,1,1"/>
-                    </GeometryDrawing.Geometry>
-                </GeometryDrawing>
+                <DrawingGroup>
+                    <!-- Transparent background for hit testing (CRITICAL) -->
+                    <GeometryDrawing Brush="Transparent">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="0,0,10,10"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#D3D3D3">
+                        <GeometryDrawing.Geometry>
+                            <!-- Smallest size: 1x1 pixel square -->
+                            <RectangleGeometry Rect="0,0,1,1"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                </DrawingGroup>
             </DrawingBrush.Drawing>
         </DrawingBrush>
 
@@ -145,7 +153,7 @@
                 <!-- Scaled to Height 12px (Original 82px). Scale 0.146. -->
                 <!-- Width 35.4px (Original 242px). -->
                 <!-- User requested X = -15. Y = 7. -->
-                <Grid Width="35" Height="12" Canvas.Left="-15" Canvas.Top="7" MouseLeftButtonDown="Tag_MouseLeftButtonDown" MouseMove="Tag_MouseMove" MouseLeftButtonUp="Tag_MouseLeftButtonUp">
+                <Grid Width="35" Height="12" Canvas.Left="-15" Canvas.Top="7" Background="Transparent" MouseLeftButtonDown="Tag_MouseLeftButtonDown" MouseMove="Tag_MouseMove" MouseLeftButtonUp="Tag_MouseLeftButtonUp">
                     <!-- Replaced SVG Image with XAML Vector Graphics due to lack of native SVG support -->
                     <Viewbox Stretch="Uniform">
                         <Canvas Width="242" Height="82">
@@ -352,7 +360,7 @@
         <DataTemplate DataType="{x:Type local:ViewModels.SignalViewModel}">
             <!-- Fixed Layout Grid: Matches Icon Size (20x10) -->
             <!-- ClipToBounds="False" is CRITICAL because text is positioned outside (negative coordinates) -->
-            <Grid Width="20" Height="10" ClipToBounds="False">
+            <Grid Width="20" Height="10" ClipToBounds="False" Background="Transparent">
 
                 <!-- Icon (Centered in Grid) -->
                 <!-- Note: Flipped Icon translates to X=-20, occupying -20..0 visual space -->
@@ -715,7 +723,7 @@
         <!-- Custom TreeViewItem Style for connecting lines -->
         <Style x:Key="RailmlTreeViewItemStyle" TargetType="{x:Type TreeViewItem}">
             <Setter Property="IsExpanded" Value="True"/>
-            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=OneWay}"/>
             <Setter Property="Padding" Value="1,0,0,0"/>
             <EventSetter Event="PreviewMouseLeftButtonDown" Handler="TreeViewItem_PreviewMouseLeftButtonDown"/>
             <Setter Property="Template">
@@ -1678,7 +1686,7 @@
                         </ItemsControl.LayoutTransform>
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <Canvas/>
+                                <Canvas Background="Transparent"/>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemContainerStyle>

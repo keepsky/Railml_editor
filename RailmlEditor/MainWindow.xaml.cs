@@ -293,10 +293,7 @@ namespace RailmlEditor
                 bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
                 if (!isMulti)
                 {
-                    foreach (var element in _viewModel.Elements)
-                    {
-                        element.IsSelected = false;
-                    }
+                    _viewModel.ClearAllSelections();
                     _viewModel.SelectedElement = null;
                 }
                 
@@ -501,40 +498,40 @@ namespace RailmlEditor
                 bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
                 if (!isMulti)
                 {
-                    foreach (var el in _viewModel.Elements) el.IsSelected = false;
+                    _viewModel.ClearAllSelections();
                 }
 
                 foreach (var element in _viewModel.Elements)
                 {
                     bool hit = false;
-                    // Check intersection with a small bounding box around primary anchor point (X, Y)
+                    
+                    // 1. Generic Anchor Check (10x10 centered at X, Y for general hit)
                     Rect anchorBounds = new Rect(element.X - 5, element.Y - 5, 10, 10);
                     if (selectionRect.IntersectsWith(anchorBounds))
                     {
                         hit = true;
                     }
-                    else if (element is TrackViewModel track)
+
+                    // 2. Type-specific accurate bounds
+                    if (!hit && element is TrackViewModel track)
                     {
-                        // Check end point for tracks
+                        // Check end point
                         Rect endBounds = new Rect(track.X2 - 5, track.Y2 - 5, 10, 10);
                         if (selectionRect.IntersectsWith(endBounds))
                         {
                             hit = true;
                         }
                         
-                        // Check intersection with the line segment
+                        // Check line segment
                         if (!hit) hit = IntersectsLine(selectionRect, new Point(track.X, track.Y), new Point(track.X2, track.Y2));
 
                         if (track is CurvedTrackViewModel curved)
                         {
-                            // Check midpoint for curved tracks
+                            // Check midpoint
                             Rect midBounds = new Rect(curved.MX - 5, curved.MY - 5, 10, 10);
-                            if (selectionRect.IntersectsWith(midBounds))
-                            {
-                                hit = true;
-                            }
+                            if (selectionRect.IntersectsWith(midBounds)) hit = true;
                             
-                            // Check both segments of curved track
+                            // Check both segments
                             if (!hit)
                             {
                                 hit = IntersectsLine(selectionRect, new Point(curved.X, curved.Y), new Point(curved.MX, curved.MY)) ||
@@ -542,19 +539,25 @@ namespace RailmlEditor
                             }
                         }
                     }
-                    else if (element is SwitchViewModel sw)
+                    else if (!hit && element is SwitchViewModel sw)
                     {
-                        // Also check for the "Point Tag" if it has specific coordinates or default offset
-                        double tagX = sw.X - 15.0;
-                        double tagY = sw.Y + 7.0;
-                        Rect tagBounds = new Rect(tagX, tagY, 35, 12);
+                        // Tag bounds: (-15, 7) offset, Size 35x12
+                        Rect tagBounds = new Rect(sw.X - 15.0, sw.Y + 7.0, 35, 12);
                         if (selectionRect.IntersectsWith(tagBounds)) hit = true;
                     }
-                    else if (element is SignalViewModel)
+                    else if (!hit && element is SignalViewModel signal)
                     {
-                        // Signal icon is roughly 20x10.
-                        Rect signalBounds = new Rect(element.X - 10, element.Y - 5, 20, 10);
-                        if (selectionRect.IntersectsWith(signalBounds)) hit = true;
+                        // Signal grid is (0, 0, 20, 10) or (-20, 0, 20, 10) if flipped
+                        Rect sigBounds = signal.IsFlipped 
+                            ? new Rect(signal.X - 20, signal.Y, 20, 10) 
+                            : new Rect(signal.X, signal.Y, 20, 10);
+                        if (selectionRect.IntersectsWith(sigBounds)) hit = true;
+                    }
+                    else if (!hit && element is TrackCircuitBorderViewModel border)
+                    {
+                        // Border is 20x10 centered: (-10, -5, 20, 10)
+                        Rect borderBounds = new Rect(border.X - 10, border.Y - 5, 20, 10);
+                        if (selectionRect.IntersectsWith(borderBounds)) hit = true;
                     }
 
                     if (hit) element.IsSelected = true;
@@ -629,7 +632,7 @@ namespace RailmlEditor
                     // If not already selected and multi-select modifier not pressed, select only this.
                     if (!viewModel.IsSelected && !isMulti)
                     {
-                        foreach (var el in _viewModel.Elements) el.IsSelected = false;
+                        _viewModel.ClearAllSelections();
                         viewModel.IsSelected = true;
                     }
                     else if (isMulti)
