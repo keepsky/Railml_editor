@@ -1,0 +1,10 @@
+﻿C:\WORK\SRC\Railml_editor\RailmlEditor\ViewModels\GraphViewModel.cs(84,67): error CS1061: 'SwitchViewModel' does not contain a definition for 'TrackId' and no accessible extension method 'TrackId' accepting a first argument of type 'SwitchViewModel' could be found (are you missing a using directive or an assembly reference?) [C:\WORK\SRC\Railml_editor\RailmlEditor\RailmlEditor_hw55e2sp_wpftmp.csproj]
+C:\WORK\SRC\Railml_editor\RailmlEditor\ViewModels\GraphViewModel.cs(84,92): error CS1061: 'SwitchViewModel' does not contain a definition for 'Pos' and no accessible extension method 'Pos' accepting a first argument of type 'SwitchViewModel' could be found (are you missing a using directive or an assembly reference?) [C:\WORK\SRC\Railml_editor\RailmlEditor\RailmlEditor_hw55e2sp_wpftmp.csproj]
+C:\WORK\SRC\Railml_editor\RailmlEditor\ViewModels\GraphViewModel.cs(85,67): error CS1061: 'SwitchViewModel' does not contain a definition for 'TrackId' and no accessible extension method 'TrackId' accepting a first argument of type 'SwitchViewModel' could be found (are you missing a using directive or an assembly reference?) [C:\WORK\SRC\Railml_editor\RailmlEditor\RailmlEditor_hw55e2sp_wpftmp.csproj]
+C:\WORK\SRC\Railml_editor\RailmlEditor\ViewModels\GraphViewModel.cs(85,92): error CS1061: 'SwitchViewModel' does not contain a definition for 'Pos' and no accessible extension method 'Pos' accepting a first argument of type 'SwitchViewModel' could be found (are you missing a using directive or an assembly reference?) [C:\WORK\SRC\Railml_editor\RailmlEditor\RailmlEditor_hw55e2sp_wpftmp.csproj]
+
+Build FAILED.
+    11 Warning(s)
+    4 Error(s)
+
+Time Elapsed 00:00:01.45

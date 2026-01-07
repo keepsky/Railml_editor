@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using RailmlEditor.ViewModels;
 
 namespace RailmlEditor
@@ -65,6 +66,16 @@ namespace RailmlEditor
                 ArrowHead.RenderTransform = transform;
                 
                 ArrowHead.Points = new PointCollection(new[] { new Point(0, 0), new Point(10, 5), new Point(0, 10) });
+            }
+
+            // Update Intermediate Nodes Positions
+            foreach (var node in vm.IntermediateNodes)
+            {
+                double ix = x1 + (x2 - x1) * node.Ratio;
+                double iy = y1 + (y2 - y1) * node.Ratio;
+                
+                node.Node.X = ix;
+                node.Node.Y = iy;
             }
         }
     }

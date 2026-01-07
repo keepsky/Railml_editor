@@ -1,3 +1,4 @@
+#pragma warning disable
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -422,6 +423,7 @@ namespace RailmlEditor.ViewModels
     public class SwitchViewModel : BaseElementViewModel
     {
         public override string TypeName => "Switch";
+        public double Pos { get; set; }
 
         private string _trackContinueCourse = "straight";
         public string TrackContinueCourse

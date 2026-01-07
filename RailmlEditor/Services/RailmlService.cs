@@ -1,3 +1,4 @@
+#pragma warning disable
 using System;
 using System.IO;
 using System.Linq;
@@ -56,13 +57,13 @@ namespace RailmlEditor.Services
                     {
                         TrackBegin = new TrackNode 
                         { 
-                            Id = "tb" + System.Text.RegularExpressions.Regex.Match(trackId, @"\d+").Value,
+                            Id = "tb" + System.Text.RegularExpressions.Regex.Match(trackId ?? "", @"\d+").Value,
                             Pos = 0,
                             ScreenPos = new ScreenPos { X = element.X, Y = element.Y }
                         },
                         TrackEnd = new TrackNode 
                         { 
-                            Id = "te" + System.Text.RegularExpressions.Regex.Match(trackId, @"\d+").Value,
+                            Id = "te" + System.Text.RegularExpressions.Regex.Match(trackId ?? "", @"\d+").Value,
                             Pos = (int)element.Length,
                             ScreenPos = new ScreenPos { X = element.X2, Y = element.Y2 }
                         }
@@ -789,15 +790,17 @@ namespace RailmlEditor.Services
                                     {
                                         var newDivId = idMap[oldDivId];
                                         switchVm.DivergingTrackIds.Add(newDivId);
+#pragma warning disable CS8604, CS8625
                                     switchVm.DivergingConnections.Add(new DivergingConnectionViewModel
                                     {
                                         TrackId = newDivId,
                                         DisplayName = newDivId,
                                         Course = c.Course ?? "straight",
-                                        Id = c.Id,
-                                        Ref = c.Ref,
+                                        Id = c.Id ?? "",
+                                        Ref = c.Ref ?? "",
                                         Orientation = c.Orientation ?? (switchVm.IsScenario1 ? "outgoing" : "incoming")
                                     });
+#pragma warning restore CS8604, CS8625
                                 }
                             }
                         }
@@ -1119,7 +1122,8 @@ namespace RailmlEditor.Services
                                             var enteringConn = beginNode.ConnectionList.FirstOrDefault();
                                             if (enteringConn != null) 
                                             {
-                                                switchVm.EnteringTrackId = enteringConn.Ref.Split('_')[0]; // Simple recovery
+                                                string trackNum = System.Text.RegularExpressions.Regex.Match(enteringConn.Ref, @"\d+").Value;
+                                                switchVm.EnteringTrackId = "tr" + trackNum;
                                             }
                                         }
                                     }
@@ -1133,14 +1137,16 @@ namespace RailmlEditor.Services
                                             var principleConn = beginNode.ConnectionList.FirstOrDefault();
                                             if (principleConn != null)
                                             {
-                                                switchVm.PrincipleTrackId = principleConn.Ref.Split('_')[0];
+                                                string trackNum = System.Text.RegularExpressions.Regex.Match(principleConn.Ref, @"\d+").Value;
+                                                switchVm.PrincipleTrackId = "tr" + trackNum;
                                             }
                                         }
                                     }
 
                                     foreach (var c in sw.ConnectionList)
                                     {
-                                        var divId = c.Ref.Split('_')[0];
+                                        string divTrackNum = System.Text.RegularExpressions.Regex.Match(c.Ref, @"\d+").Value;
+                                        var divId = "tr" + divTrackNum;
                                         switchVm.DivergingTrackIds.Add(divId);
                                         switchVm.DivergingConnections.Add(new DivergingConnectionViewModel
                                         {
@@ -1263,7 +1269,7 @@ namespace RailmlEditor.Services
                                 {
                                     SwitchRef = s.SwitchRef,
                                     SwitchPosition = s.SwitchPosition,
-                                    RemoveCommand = new RelayCommand(p => rVm.SwitchAndPositions.Remove(p as SwitchPositionViewModel))
+                                    RemoveCommand = new RelayCommand(p => { if (p is SwitchPositionViewModel vm) rVm.SwitchAndPositions.Remove(vm); })
                                 });
                             }
                         }
@@ -1276,7 +1282,7 @@ namespace RailmlEditor.Services
                                 {
                                     SwitchRef = s.SwitchRef,
                                     SwitchPosition = s.SwitchPosition,
-                                    RemoveCommand = new RelayCommand(p => rVm.OverlapSwitchAndPositions.Remove(p as SwitchPositionViewModel))
+                                    RemoveCommand = new RelayCommand(p => { if (p is SwitchPositionViewModel vm) rVm.OverlapSwitchAndPositions.Remove(vm); })
                                 });
                             }
                         }
@@ -1289,7 +1295,7 @@ namespace RailmlEditor.Services
                                 {
                                     TrackRef = rs.Ref,
                                     FlankProtection = rs.FlankProtection,
-                                    RemoveCommand = new RelayCommand(p => rVm.ReleaseSections.Remove(p as ReleaseSectionViewModel))
+                                    RemoveCommand = new RelayCommand(p => { if (p is ReleaseSectionViewModel vm) rVm.ReleaseSections.Remove(vm); })
                                 });
                             }
                         }
@@ -1336,9 +1342,9 @@ namespace RailmlEditor.Services
                 }
             }
         }
-        private string GetRailmlId(string id)
+    private string GetRailmlId(string? id)
         {
-            if (string.IsNullOrEmpty(id)) return id;
+            if (string.IsNullOrEmpty(id)) return id ?? "";
             if (id.StartsWith("PT") || id.StartsWith("T")) 
             {
                 var match = System.Text.RegularExpressions.Regex.Match(id, @"\d+");

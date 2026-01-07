@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+
 namespace RailmlEditor.ViewModels
 {
     public class GraphEdgeViewModel : ObservableObject
@@ -23,11 +25,19 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _direction, value);
         }
 
+        public ObservableCollection<IntermediateNode> IntermediateNodes { get; } = new ObservableCollection<IntermediateNode>();
+
         public GraphEdgeViewModel(GraphNodeViewModel from, GraphNodeViewModel to, string direction = "none")
         {
             FromNode = from;
             ToNode = to;
             Direction = direction;
         }
+    }
+
+    public class IntermediateNode
+    {
+        public GraphNodeViewModel Node { get; set; }
+        public double Ratio { get; set; } // 0.0 to 1.0
     }
 }

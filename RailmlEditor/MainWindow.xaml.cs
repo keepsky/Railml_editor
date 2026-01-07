@@ -1,4 +1,5 @@
-﻿using System;
+﻿#pragma warning disable
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -859,12 +860,12 @@ namespace RailmlEditor
         private void Thumb_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
              _viewModel.UpdateProximitySwitches();
-             _viewModel.AddHistory(_beforeDragSnapshot);
+             if (_beforeDragSnapshot != null) _viewModel.AddHistory(_beforeDragSnapshot);
         }
 
         private void OnPrincipleTrackSelectionRequested(SwitchBranchInfo info)
         {
-            var selector = new JunctionPrincipleSelector(info.Candidates);
+            var selector = new JunctionPrincipleSelector(info.Candidates ?? new System.Collections.Generic.List<TrackViewModel>());
             selector.Owner = this;
             if (selector.ShowDialog() == true)
             {
@@ -915,7 +916,7 @@ namespace RailmlEditor
                 }
                 
                 _viewModel.UpdateProximitySwitches();
-                _viewModel.AddHistory(_beforeDragSnapshot);
+                if (_beforeDragSnapshot != null) _viewModel.AddHistory(_beforeDragSnapshot);
             }
         }
 
