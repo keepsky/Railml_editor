@@ -319,7 +319,7 @@ namespace RailmlEditor.Services
                                          {
                                              Id = swConnId,
                                              Ref = divRefId,
-                                             Orientation = swVm.IsScenario1 ? "outgoing" : "incoming",
+                                             Orientation = !string.IsNullOrEmpty(connVm?.Orientation) ? connVm.Orientation : (swVm.IsScenario1 ? "outgoing" : "incoming"),
                                              Course = connVm?.Course ?? "straight"
                                          });
 

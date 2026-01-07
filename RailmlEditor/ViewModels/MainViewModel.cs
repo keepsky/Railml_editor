@@ -1680,20 +1680,20 @@ private void UpdateTrackNode(string? trackId, bool isBegin, double x, double y, 
             }
 
             var existingSwitches = Elements.OfType<SwitchViewModel>().ToList();
-            var switchesToRemove = existingSwitches.Where(sw => !clusters.Any(c => Math.Sqrt(Math.Pow(sw.X - c.X, 2) + Math.Pow(sw.Y - c.Y, 2)) < 500.0)).ToList();
+            var switchesToRemove = existingSwitches.Where(sw => !clusters.Any(c => Math.Sqrt(Math.Pow(sw.X - c.X, 2) + Math.Pow(sw.Y - c.Y, 2)) < 10.0)).ToList();
 
             foreach (var sw in switchesToRemove) Elements.Remove(sw);
 
             int maxId = 0;
             foreach (var sw in Elements.OfType<SwitchViewModel>())
             {
-                if (sw.Id.StartsWith("P") && int.TryParse(sw.Id.Substring(1), out int num))
+                if (sw.Id.StartsWith("sw") && int.TryParse(sw.Id.Substring(2), out int num))
                     if (num > maxId) maxId = num;
             }
 
             foreach (var c in clusters)
             {
-                var sw = Elements.OfType<SwitchViewModel>().FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - c.X, 2) + Math.Pow(s.Y - c.Y, 2)) < 500.0);
+                var sw = Elements.OfType<SwitchViewModel>().FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - c.X, 2) + Math.Pow(s.Y - c.Y, 2)) < 10.0);
                 if (sw == null)
                 {
                     maxId++;
