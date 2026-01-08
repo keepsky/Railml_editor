@@ -87,9 +87,43 @@ namespace RailmlEditor.ViewModels
                 else if (node.Type == "Switch")
                 {
                     var sw = switches.FirstOrDefault(s => s.Id == node.Id);
-                    if (sw != null && !string.IsNullOrEmpty(sw.PrincipleTrackId)) 
+                    if (sw != null)
                     {
-                        AddToTrackMap(onTrackNodes, sw.PrincipleTrackId, sw.Pos, node);
+                        var connectedTracks = new List<string>();
+                        if (!string.IsNullOrEmpty(sw.PrincipleTrackId)) connectedTracks.Add(sw.PrincipleTrackId);
+                        if (!string.IsNullOrEmpty(sw.EnteringTrackId) && sw.EnteringTrackId != sw.PrincipleTrackId) connectedTracks.Add(sw.EnteringTrackId);
+                        if (sw.DivergingTrackIds != null) connectedTracks.AddRange(sw.DivergingTrackIds);
+
+                        foreach (var rangeTrackId in connectedTracks)
+                        {
+                            if (trackLookup.TryGetValue(rangeTrackId, out var trk))
+                            {
+                                // Determine Pos on this track
+                                double pos = 0;
+                                double dBegin = Math.Sqrt(Math.Pow(trk.X - sw.X, 2) + Math.Pow(trk.Y - sw.Y, 2));
+                                double dEnd = Math.Sqrt(Math.Pow(trk.X2 - sw.X, 2) + Math.Pow(trk.Y2 - sw.Y, 2));
+
+                                if (dBegin < 5.0) pos = 0;
+                                else if (dEnd < 5.0) pos = trk.Length;
+                                else 
+                                {
+                                    // Mid-track or use sw.Pos if applicable (only if Principle?)
+                                    // For robustness, calculate projection or use sw.Pos if track matches
+                                    if (rangeTrackId == sw.PrincipleTrackId || rangeTrackId == sw.EnteringTrackId)
+                                    {
+                                        pos = sw.Pos; // Fallback to assigned Pos (likely correct for single-track switch)
+                                    }
+                                    else
+                                    {
+                                        // Simple projection for curved track support might be needed but assuming line segment for now
+                                        // If far from ends, maybe use linear interpolation ratio?
+                                        // For now, assume sw.Pos is valid if ID matches, else 0/Length close match.
+                                        pos = (dBegin < dEnd) ? 0 : trk.Length; // Best guess fallback
+                                    }
+                                }
+                                AddToTrackMap(onTrackNodes, rangeTrackId, pos, node);
+                            }
+                        }
                     }
                 }
                 else if (node.Type == "Border")
