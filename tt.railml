@@ -14,7 +14,7 @@
         <ocsElements>
           <signals>
             <signal id="sig1" dir="up" pos="15">
-              <additionalName />
+              <additionalName name="1A" />
             </signal>
           </signals>
           <trainDetectionElements>
@@ -32,15 +32,15 @@
           </trackEnd>
           <connections>
             <switch id="sw1" pos="0" trackContinueCourse="straight" normalPosition="straight">
-              <additionalName name="sw1" />
-              <connection id="c1-cb3" ref="cb3" orientation="outgoing" course="straight" />
+              <additionalName name="21" />
+              <connection id="c1-cb3" ref="cb3" orientation="outgoing" course="left" />
             </switch>
           </connections>
         </trackTopology>
         <ocsElements>
           <trainDetectionElements>
-            <trackCircuitBorder id="td3" name="Border" pos="26" />
-            <trackCircuitBorder id="td4" name="Border" pos="163" />
+            <trackCircuitBorder id="td4" name="Border" pos="153" />
+            <trackCircuitBorder id="td7" name="Border" pos="38" />
           </trainDetectionElements>
         </ocsElements>
       </track>
@@ -80,8 +80,8 @@
           </trackEnd>
           <connections>
             <switch id="sw2" pos="0" trackContinueCourse="straight" normalPosition="straight">
-              <additionalName name="sw2" />
-              <connection id="c2-ce6" ref="ce6" orientation="incoming" course="straight" />
+              <additionalName name="51" />
+              <connection id="c2-ce6" ref="ce6" orientation="incoming" course="left" />
             </switch>
           </connections>
         </trackTopology>
@@ -100,6 +100,13 @@
             <connection id="ce6" ref="c2-ce6" />
           </trackEnd>
         </trackTopology>
+        <ocsElements>
+          <signals>
+            <signal id="sig2" dir="up" pos="15">
+              <additionalName />
+            </signal>
+          </signals>
+        </ocsElements>
       </track>
       <track id="tr7" mainDir="down" code="plain">
         <trackTopology>
@@ -137,11 +144,11 @@
           <trackElementVis ref="te2">
             <position x="360" y="160" />
           </trackElementVis>
-          <trackElementVis ref="td3">
-            <position x="196.42857142857133" y="160" />
-          </trackElementVis>
           <trackElementVis ref="td4">
-            <position x="332.8571428571428" y="160" />
+            <position x="322.8571428571428" y="160" />
+          </trackElementVis>
+          <trackElementVis ref="td7">
+            <position x="207.8571428571428" y="160" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr3">
@@ -189,6 +196,9 @@
           </trackElementVis>
           <trackElementVis ref="tr6_mid">
             <position x="340" y="120" />
+          </trackElementVis>
+          <trackElementVis ref="sig2">
+            <position x="330" y="105" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr7">

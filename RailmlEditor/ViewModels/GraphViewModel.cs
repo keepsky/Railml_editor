@@ -195,43 +195,35 @@ namespace RailmlEditor.ViewModels
             else if (node.Type == "Switch")
             {
                 var sw = switches.FirstOrDefault(s => s.Id == node.Id);
-                if (sw != null && !string.IsNullOrEmpty(sw.PrincipleTrackId))
+                if (sw != null)
                 {
-                    string pId = sw.PrincipleTrackId;
-                    probes.Add(new TraversalCursor { TrackId = pId, CurrentPos = sw.Pos, IsSearchUp = true });
-                    probes.Add(new TraversalCursor { TrackId = pId, CurrentPos = sw.Pos, IsSearchUp = false });
-                
-                    foreach (var div in sw.DivergingConnections)
+                    var connectedTracks = new List<string>();
+                    // Determine connected tracks logic matching BuildGraph
+                    if (!string.IsNullOrEmpty(sw.PrincipleTrackId)) connectedTracks.Add(sw.PrincipleTrackId);
+                    if (!string.IsNullOrEmpty(sw.EnteringTrackId) && sw.EnteringTrackId != sw.PrincipleTrackId) connectedTracks.Add(sw.EnteringTrackId);
+                    if (sw.DivergingTrackIds != null) connectedTracks.AddRange(sw.DivergingTrackIds);
+
+                    foreach (var tid in connectedTracks)
                     {
-                        var divTrack = tracks.FirstOrDefault(t => t.Id == div.TrackId);
-                        if (divTrack != null)
+                        var trk = tracks.FirstOrDefault(t => t.Id == tid);
+                        if (trk != null)
                         {
-                            bool added = false;
-                            if (!string.IsNullOrEmpty(div.Ref))
+                            // Calculate Pos on this track (same logic as BuildGraph)
+                            double pos = 0;
+                            double dBegin = Math.Sqrt(Math.Pow(trk.X - sw.X, 2) + Math.Pow(trk.Y - sw.Y, 2));
+                            double dEnd = Math.Sqrt(Math.Pow(trk.X2 - sw.X, 2) + Math.Pow(trk.Y2 - sw.Y, 2));
+
+                            if (dBegin < 5.0) pos = 0;
+                            else if (dEnd < 5.0) pos = trk.Length;
+                            else 
                             {
-                                // Ref might be "cbX" or "ceX" or "tbX" or "teX"
-                                // Check if Ref matches BeginNode ConnectionId or Id
-                                if (div.Ref == divTrack.BeginNode.ConnectionId || div.Ref == divTrack.BeginNode.Id || div.Ref.EndsWith("_begin")) 
-                                {
-                                    probes.Add(new TraversalCursor { TrackId = div.TrackId, CurrentPos = 0, IsSearchUp = true });
-                                    added = true;
-                                }
-                                // Check if Ref matches EndNode ConnectionId or Id
-                                else if (div.Ref == divTrack.EndNode.ConnectionId || div.Ref == divTrack.EndNode.Id || div.Ref.EndsWith("_end"))
-                                {
-                                    probes.Add(new TraversalCursor { TrackId = div.TrackId, CurrentPos = divTrack.Length, IsSearchUp = false });
-                                    added = true;
-                                }
+                                if (tid == sw.PrincipleTrackId || tid == sw.EnteringTrackId) pos = sw.Pos;
+                                else pos = (dBegin < dEnd) ? 0 : trk.Length;
                             }
 
-                            if (!added)
-                            {
-                                double d1 = Math.Sqrt(Math.Pow(divTrack.X - sw.X, 2) + Math.Pow(divTrack.Y - sw.Y, 2));
-                                if (d1 < 5.0) probes.Add(new TraversalCursor { TrackId = div.TrackId, CurrentPos = 0, IsSearchUp = true });
-
-                                double d2 = Math.Sqrt(Math.Pow(divTrack.X2 - sw.X, 2) + Math.Pow(divTrack.Y2 - sw.Y, 2));
-                                if (d2 < 5.0) probes.Add(new TraversalCursor { TrackId = div.TrackId, CurrentPos = divTrack.Length, IsSearchUp = false });
-                            }
+                            // Add probes in BOTH directions
+                            probes.Add(new TraversalCursor { TrackId = tid, CurrentPos = pos, IsSearchUp = true });
+                            probes.Add(new TraversalCursor { TrackId = tid, CurrentPos = pos, IsSearchUp = false });
                         }
                     }
                 }
