@@ -7,7 +7,9 @@
           <trackBegin pos="0" id="tb1">
             <connection id="cb1" ref="ce7" />
           </trackBegin>
-          <trackEnd pos="80" id="te1" />
+          <trackEnd pos="80" id="te1">
+            <connection id="ce1" ref="cb2" />
+          </trackEnd>
         </trackTopology>
         <ocsElements>
           <signals>
@@ -23,11 +25,17 @@
       <track id="tr2" mainDir="down" code="plain">
         <trackTopology>
           <trackBegin pos="0" id="tb2">
-            <connection id="cb2" ref="cb5" />
+            <connection id="cb2" ref="ce1" />
           </trackBegin>
           <trackEnd pos="190" id="te2">
             <connection id="ce2" ref="cb5" />
           </trackEnd>
+          <connections>
+            <switch id="sw1" pos="0" trackContinueCourse="straight" normalPosition="straight">
+              <additionalName name="sw1" />
+              <connection id="c1-cb3" ref="cb3" orientation="outgoing" course="straight" />
+            </switch>
+          </connections>
         </trackTopology>
         <ocsElements>
           <trainDetectionElements>
@@ -38,7 +46,9 @@
       </track>
       <track id="tr3" mainDir="down" code="corner">
         <trackTopology>
-          <trackBegin pos="0" id="tb3" />
+          <trackBegin pos="0" id="tb3">
+            <connection id="cb3" ref="c1-cb3" />
+          </trackBegin>
           <trackEnd pos="54" id="te3">
             <connection id="ce3" ref="cb4" />
           </trackEnd>
@@ -71,7 +81,7 @@
           <connections>
             <switch id="sw2" pos="0" trackContinueCourse="straight" normalPosition="straight">
               <additionalName name="sw2" />
-              <connection id="c2-ce6" ref="ce6" orientation="incoming" course="left" />
+              <connection id="c2-ce6" ref="ce6" orientation="incoming" course="straight" />
             </switch>
           </connections>
         </trackTopology>
@@ -108,93 +118,93 @@
       <lineVis>
         <trackVis ref="tr1">
           <trackElementVis ref="tb1">
-            <position x="40" y="150" />
+            <position x="90" y="160" />
           </trackElementVis>
           <trackElementVis ref="te1">
-            <position x="120" y="150" />
+            <position x="170" y="160" />
           </trackElementVis>
           <trackElementVis ref="sig1">
-            <position x="40" y="135" />
+            <position x="90" y="145" />
           </trackElementVis>
           <trackElementVis ref="td5">
-            <position x="93.57142857142853" y="150" />
+            <position x="143.57142857142853" y="160" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr2">
           <trackElementVis ref="tb2">
-            <position x="120" y="150" />
+            <position x="170" y="160" />
           </trackElementVis>
           <trackElementVis ref="te2">
-            <position x="310" y="150" />
+            <position x="360" y="160" />
           </trackElementVis>
           <trackElementVis ref="td3">
-            <position x="146.42857142857133" y="150" />
+            <position x="196.42857142857133" y="160" />
           </trackElementVis>
           <trackElementVis ref="td4">
-            <position x="282.8571428571428" y="150" />
+            <position x="332.8571428571428" y="160" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr3">
           <trackElementVis ref="tb3">
-            <position x="120" y="150" />
+            <position x="170" y="160" />
           </trackElementVis>
           <trackElementVis ref="te3">
-            <position x="150" y="110" />
+            <position x="200" y="120" />
           </trackElementVis>
           <trackElementVis ref="tr3_mid">
-            <position x="140" y="110" />
+            <position x="190" y="120" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr4">
           <trackElementVis ref="tb4">
-            <position x="150" y="110" />
+            <position x="200" y="120" />
           </trackElementVis>
           <trackElementVis ref="te4">
-            <position x="280" y="110" />
+            <position x="330" y="120" />
           </trackElementVis>
           <trackElementVis ref="td1">
-            <position x="169.28571428571422" y="110" />
+            <position x="219.28571428571422" y="120" />
           </trackElementVis>
           <trackElementVis ref="td2">
-            <position x="257.1428571428571" y="110" />
+            <position x="307.1428571428571" y="120" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr5">
           <trackElementVis ref="tb5">
-            <position x="310" y="150" />
+            <position x="360" y="160" />
           </trackElementVis>
           <trackElementVis ref="te5">
-            <position x="390" y="150" />
+            <position x="440" y="160" />
           </trackElementVis>
           <trackElementVis ref="td6">
-            <position x="339.2857142857141" y="150" />
+            <position x="389.2857142857141" y="160" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr6">
           <trackElementVis ref="tb6">
-            <position x="280" y="110" />
+            <position x="330" y="120" />
           </trackElementVis>
           <trackElementVis ref="te6">
-            <position x="310" y="150" />
+            <position x="360" y="160" />
           </trackElementVis>
           <trackElementVis ref="tr6_mid">
-            <position x="290" y="110" />
+            <position x="340" y="120" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr7">
           <trackElementVis ref="tb7">
-            <position x="-20" y="150" />
+            <position x="30" y="160" />
           </trackElementVis>
           <trackElementVis ref="te7">
-            <position x="40" y="150" />
+            <position x="90" y="160" />
           </trackElementVis>
         </trackVis>
       </lineVis>
-      <objectVis ref="sw2">
-        <position x="310" y="150" />
+      <objectVis ref="sw1">
+        <position x="170" y="160" />
       </objectVis>
-      <objectVis ref="sw3">
-        <position x="120" y="150" />
+      <objectVis ref="sw2">
+        <position x="360" y="160" />
       </objectVis>
     </visualization>
   </infrastructureVisualizations>

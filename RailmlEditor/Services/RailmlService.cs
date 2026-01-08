@@ -254,7 +254,7 @@ namespace RailmlEditor.Services
                          var nodeCoordX = nodeA.ScreenPos?.X ?? 0;
                          var nodeCoordY = nodeA.ScreenPos?.Y ?? 0;
                          var swVm = viewModel.Elements.OfType<SwitchViewModel>()
-                                 .FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - nodeCoordX, 2) + Math.Pow(s.Y - nodeCoordY, 2)) < 500.0);
+                                 .FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - nodeCoordX, 2) + Math.Pow(s.Y - nodeCoordY, 2)) < 10.0);
                          
                          if (swVm != null)
                          {
