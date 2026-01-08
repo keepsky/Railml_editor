@@ -237,27 +237,7 @@ namespace RailmlEditor
             return _viewModel.GetNextId(prefix);
         }
 
-        private void ElementTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            if (_isInternalSelectionChange) return;
 
-            if (e.NewValue is BaseElementViewModel vm)
-            {
-                _viewModel.SelectedElement = vm;
-                
-                // Ensure it's selected on canvas too
-                bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
-                if (!isMulti && !vm.IsSelected)
-                {
-                    _viewModel.ClearAllSelections();
-                    vm.IsSelected = true;
-                }
-                else if (isMulti)
-                {
-                    vm.IsSelected = true;
-                }
-            }
-        }
 
 
         // Selection & Panning State
@@ -1090,30 +1070,32 @@ namespace RailmlEditor
         }
 
 
-        private void TreeViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+
+
+        private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (sender is TreeViewItem item && item.DataContext is BaseElementViewModel viewModel)
+            if (e.PropertyName == nameof(MainViewModel.SelectedElement))
             {
-                bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
-                if (!isMulti)
+                if (_viewModel.SelectedElement != null)
                 {
-                    if (!viewModel.IsSelected)
-                    {
-                        _viewModel.ClearAllSelections();
-                        viewModel.IsSelected = true;
-                    }
+                    ExplorerPane?.SelectElement(_viewModel.SelectedElement);
                 }
-                else
-                {
-                    viewModel.IsSelected = !viewModel.IsSelected;
-                }
-                _viewModel.SelectedElement = viewModel;
-                
-                // Ensure visual focus/highlight
-                item.IsSelected = true; 
-                item.Focus();
             }
         }
+
+
+
+        private void MainScrollViewer_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
+        {
+            // Stop BringIntoView bubbles from reaching the Window level ScrollViewer (if any)
+            // or causing the MainScrollViewer to jump unexpectedly when child elements get focus.
+            e.Handled = true;
+        }
+
+
+
+
+
 
         private bool IsOrInsideThumb(DependencyObject? obj)
         {
@@ -1151,6 +1133,7 @@ namespace RailmlEditor
         {
             // KeyBindings handle Delete, Ctrl+C, Ctrl+V now.
         }
+
         private void FileNew_Click(object sender, RoutedEventArgs e)
         {
             if (_viewModel.Elements.Count > 0)
@@ -1160,7 +1143,7 @@ namespace RailmlEditor
                 if (result == MessageBoxResult.Yes) FileSave_Click(sender, e);
             }
             _viewModel.Elements.Clear();
-            _currentFilePath = null; // Need to track current file
+            _currentFilePath = null; 
         }
 
         private void FileSaveAs_Click(object sender, RoutedEventArgs e)
@@ -1185,6 +1168,7 @@ namespace RailmlEditor
                 }
             }
         }
+
         private void CreateArea_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.CreateAreaFromSelectedBorders();
@@ -1221,94 +1205,6 @@ namespace RailmlEditor
             dist = Math.Sqrt(Math.Pow(p.X - nearest.X, 2) + Math.Pow(p.Y - nearest.Y, 2));
 
             angle = Math.Atan2(dy, dx) * 180 / Math.PI;
-        }
-
-        private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(MainViewModel.SelectedElement))
-            {
-                if (_viewModel.SelectedElement != null)
-                {
-                    SelectItemInTree(_viewModel.SelectedElement);
-                }
-            }
-        }
-
-        private void SelectItemInTree(object item)
-        {
-            if (ElementTree == null) return;
-
-            Dispatcher.BeginInvoke(new Action(() => {
-                _isInternalSelectionChange = true;
-                try
-                {
-                    var container = GetTreeViewItem(ElementTree, item);
-                    if (container != null)
-                    {
-                        container.IsSelected = true;
-                        
-                        // Only bring into view if the tree itself doesn't have focus.
-                        // If it has focus, it means the user is already interacting with it,
-                        // and an explicit BringIntoView can cause unwanted "jumps" or double-scrolling.
-                        if (!ElementTree.IsKeyboardFocusWithin)
-                        {
-                            container.BringIntoView();
-                        }
-                    }
-                }
-                finally
-                {
-                    _isInternalSelectionChange = false;
-                }
-            }), System.Windows.Threading.DispatcherPriority.Background);
-        }
-
-        private void TreeView_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
-        {
-            // Prevent TreeViewItem.BringIntoView from bubbling up to parent ScrollViewers
-            // this fixes the issue where selecting an item in the tree causes the whole window/designer to jump.
-            e.Handled = true;
-        }
-
-        private void MainScrollViewer_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
-        {
-            // Stop BringIntoView bubbles from reaching the Window level ScrollViewer (if any)
-            // or causing the MainScrollViewer to jump unexpectedly when child elements get focus.
-            e.Handled = true;
-        }
-
-        private void Properties_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
-        {
-            // Stop BringIntoView bubbles from the properties panel.
-            e.Handled = true;
-        }
-
-        private TreeViewItem? GetTreeViewItem(ItemsControl parent, object item)
-        {
-            if (parent == null) return null;
-
-            if (parent.DataContext == item) return parent as TreeViewItem;
-            
-            if (parent.Items.Contains(item))
-            {
-                return parent.ItemContainerGenerator.ContainerFromItem(item) as TreeViewItem;
-            }
-
-            for (int i = 0; i < parent.Items.Count; i++)
-            {
-                var childItem = parent.Items[i];
-                var container = parent.ItemContainerGenerator.ContainerFromIndex(i) as ItemsControl;
-                
-                if (container != null)
-                {
-                    if (container.DataContext == item) return container as TreeViewItem;
-
-                    var found = GetTreeViewItem(container, item);
-                    if (found != null) return found;
-                }
-            }
-
-            return null;
         }
     }
 }

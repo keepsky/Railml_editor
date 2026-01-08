@@ -3,9 +3,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:xcad="https://github.com/Dirkster99/AvalonDock"
     xmlns:viewmodels="clr-namespace:RailmlEditor.ViewModels"
+    xmlns:views="clr-namespace:RailmlEditor.Views"
     xmlns:utils="clr-namespace:RailmlEditor.Utils"
-    xmlns:local="clr-namespace:RailmlEditor" mc:Ignorable="d" Title="MainWindow" Height="900" Width="1300" KeyDown="Window_KeyDown" Icon="images/london.png">
+    xmlns:local="clr-namespace:RailmlEditor" mc:Ignorable="d" Title="RailML Editor" Height="900" Width="1300" KeyDown="Window_KeyDown" Icon="images/london.png">
+
     <Window.InputBindings>
         <KeyBinding Key="Delete" Command="{Binding DeleteCommand}"/>
         <KeyBinding Key="C" Modifiers="Control" Command="{Binding CopyCommand}"/>
@@ -13,24 +16,12 @@
         <KeyBinding Key="Z" Modifiers="Control" Command="{Binding UndoCommand}"/>
         <KeyBinding Key="Y" Modifiers="Control" Command="{Binding RedoCommand}"/>
     </Window.InputBindings>
-    <Window.Resources>
-        <utils:DiffConverter x:Key="DiffConverter"/>
-        <utils:AngleConverter x:Key="AngleConverter"/>
-        <utils:AddConverter x:Key="AddConverter"/>
-        <!-- <utils:BezierConverter x:Key="BezierConverter"/> -->
-        <utils:SegmentLengthConverter x:Key="SegmentLengthConverter"/>
-        <utils:TagPositionConverter x:Key="TagPos"/>
-        <utils:MidPointConverter x:Key="MidPoint"/>
-        <utils:ReadableAngleConverter x:Key="ReadableAngle"/>
-        <utils:ConnectionToVisibilityConverter x:Key="ConnectionToVis"/>
-        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
-        <!-- Grid Background Brush (10px dots) -->
-        <!-- Fix: Set Viewbox="0,0,10,10" Absolute to prevent stretching the 1px rect to fill the tile -->
+    <Window.Resources>
+        <!-- Grid Background Brush -->
         <DrawingBrush x:Key="GridBackgroundBrush" Viewbox="0,0,10,10" ViewboxUnits="Absolute" Viewport="0,0,10,10" ViewportUnits="Absolute" TileMode="Tile">
             <DrawingBrush.Drawing>
                 <DrawingGroup>
-                    <!-- Transparent background for hit testing (CRITICAL) -->
                     <GeometryDrawing Brush="Transparent">
                         <GeometryDrawing.Geometry>
                             <RectangleGeometry Rect="0,0,10,10"/>
@@ -38,7 +29,6 @@
                     </GeometryDrawing>
                     <GeometryDrawing Brush="#D3D3D3">
                         <GeometryDrawing.Geometry>
-                            <!-- Smallest size: 1x1 pixel square -->
                             <RectangleGeometry Rect="0,0,1,1"/>
                         </GeometryDrawing.Geometry>
                     </GeometryDrawing>
@@ -46,11 +36,9 @@
             </DrawingBrush.Drawing>
         </DrawingBrush>
 
-        <!-- Data Templates for Visual Elements -->
+        <!-- Data Templates for Visual Elements (Canvas) -->
         <DataTemplate DataType="{x:Type local:ViewModels.TrackViewModel}">
             <Canvas>
-                <!-- Track Visual (Rotated Rectangle) -->
-                <!-- Use native RadiusX/Y to prevent distortion. Width = Length + 10 (5px each side). Offset X=-5. -->
                 <Rectangle Height="10" Fill="White" Stroke="Black" StrokeThickness="1" RadiusX="5" RadiusY="5">
                     <Rectangle.ContextMenu>
                         <ContextMenu>
@@ -110,7 +98,6 @@
                     </Thumb.Template>
                 </Thumb>
 
-                <!-- Track Name Display (6px, perfectly centered horizontally) -->
                 <Grid IsHitTestVisible="False">
                     <Canvas.Left>
                         <MultiBinding Converter="{StaticResource MidPoint}">
@@ -143,58 +130,34 @@
                 </Grid>
             </Canvas>
         </DataTemplate>
+
         <DataTemplate DataType="{x:Type local:ViewModels.SwitchViewModel}">
             <Canvas>
-                <!-- Point Tag Image (ptag.svg) -->
-                <!-- Scaled to 0.5x (130x40). Circle center at (20,20). -->
-                <!-- Position: Top=5px, Left aligned such that circle center is at switch X (0). -->
-                <!-- So Left = -20. -->
-                <!-- Scaled to Height 12px (Original 80px). Scale 0.15. -->
-                <!-- Scaled to Height 12px (Original 82px). Scale 0.146. -->
-                <!-- Width 35.4px (Original 242px). -->
-                <!-- User requested X = -15. Y = 7. -->
                 <Grid Width="35" Height="12" Canvas.Left="-15" Canvas.Top="7" Background="Transparent" MouseLeftButtonDown="Tag_MouseLeftButtonDown" MouseMove="Tag_MouseMove" MouseLeftButtonUp="Tag_MouseLeftButtonUp">
-                    <!-- Replaced SVG Image with XAML Vector Graphics due to lack of native SVG support -->
                     <Viewbox Stretch="Uniform">
                         <Canvas Width="242" Height="82">
-                            <!-- Right Rounded Rectangle (x=81, y=1, w=160, h=80) -->
                             <Rectangle Canvas.Left="81" Canvas.Top="1" Width="160" Height="80" RadiusX="32" RadiusY="32" Fill="White" Stroke="Black" StrokeThickness="5"/>
-                            <!-- Left Circle (cx=31, cy=41, r=30 -> x=1, y=11, w=60, h=60) -->
                             <Ellipse Canvas.Left="1" Canvas.Top="11" Width="60" Height="60" Fill="White" Stroke="Black" StrokeThickness="5"/>
                         </Canvas>
                     </Viewbox>
-
-                    <!-- Text Name in Right Round Box -->
-                    <!-- Box starts at 81 * 0.146 = 11.8px. Width 160 * 0.146 = 23.4px. -->
                     <TextBlock Text="{Binding Name}" Margin="12,0,0,0" Width="23" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Foreground="Black" FontWeight="Bold" FontSize="6"/>
                 </Grid>
-
-                <!-- Selecting Logic Aid (Transparent Hit Box around center?) -->
-                <!-- Switch logic uses 5px radius. Let's add a small transparent circle for hitting if needed? -->
-                <!-- User didn't ask for hit test visual, but dragging requires hitting. -->
-                <!-- If I add this large tag, hitting the tag will select the switch. -->
-                <!-- That is good. -->
             </Canvas>
         </DataTemplate>
 
         <ControlTemplate x:Key="BorderIcon">
             <Viewbox Stretch="Uniform">
                 <Canvas Width="90" Height="160">
-                    <!-- Rect 1 (Top Left Horizontal) -->
                     <Rectangle Canvas.Left="0" Canvas.Top="0" Width="40" Height="20" Fill="#B3B3B3"/>
-                    <!-- Rect 2 (Right Vertical) -->
                     <Rectangle Canvas.Left="50" Canvas.Top="0" Width="20" Height="160" Fill="#B3B3B3"/>
-                    <!-- Rect 3 (Left Vertical) -->
                     <Rectangle Canvas.Left="20" Canvas.Top="0" Width="20" Height="160" Fill="#B3B3B3"/>
-                    <!-- Rect 4 (Top Right Horizontal) -->
                     <Rectangle Canvas.Left="50" Canvas.Top="0" Width="40" Height="20" Fill="#B3B3B3"/>
-                    <!-- Rect 5 (Bottom Left Horizontal) -->
                     <Rectangle Canvas.Left="0" Canvas.Top="140" Width="40" Height="20" Fill="#B3B3B3"/>
-                    <!-- Rect 6 (Bottom Right Horizontal) -->
                     <Rectangle Canvas.Left="50" Canvas.Top="140" Width="40" Height="20" Fill="#B3B3B3"/>
                 </Canvas>
             </Viewbox>
         </ControlTemplate>
+
         <DataTemplate DataType="{x:Type viewmodels:TrackCircuitBorderViewModel}">
             <Grid Width="20" Height="10" RenderTransformOrigin="0.5,0.5" Background="Transparent">
                 <Grid.ContextMenu>
@@ -211,31 +174,23 @@
                 <Control Template="{StaticResource BorderIcon}" Width="20" Height="10"/>
             </Grid>
         </DataTemplate>
-        <!-- Signal Icon Template -->
+
         <ControlTemplate x:Key="SignalIcon">
             <Viewbox Stretch="Uniform">
                 <Canvas Width="110" Height="53">
-                    <!-- Red Head -->
                     <Ellipse Canvas.Left="58" Canvas.Top="1" Width="50" Height="50" Fill="#FF0000" Stroke="Black" StrokeThickness="3"/>
-                    <!-- Horizontal Line -->
                     <Path Data="M 3 26 L 58 26" Stroke="Black" StrokeThickness="6"/>
-                    <!-- Vertical Line (Base) -->
                     <Path Data="M 3 7.25 L 3 44.75" Stroke="Black" StrokeThickness="6"/>
-                    <!-- White Circle -->
                     <Ellipse Canvas.Left="13" Canvas.Top="11" Width="30" Height="30" Fill="White" Stroke="Black" StrokeThickness="3"/>
                 </Canvas>
             </Viewbox>
         </ControlTemplate>
 
-        <!-- Point Icon Template (from point.svg) -->
         <ControlTemplate x:Key="PointIcon">
             <Viewbox Stretch="Uniform">
                 <Canvas Width="320" Height="177">
-                    <!-- Rect 2 (Bottom) -->
                     <Rectangle Canvas.Left="0" Canvas.Top="129" Width="320" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
-                    <!-- Rect 3 (Top Right) -->
                     <Rectangle Canvas.Left="166" Canvas.Top="8" Width="154" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
-                    <!-- Rect 1 (Diagonal) -->
                     <Rectangle Canvas.Left="20" Canvas.Top="68.32" Width="210" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
                         <Rectangle.RenderTransform>
                             <RotateTransform Angle="-45"/>
@@ -245,31 +200,24 @@
             </Viewbox>
         </ControlTemplate>
 
-        <!-- CornerIcon Template (from corner.svg) -->
         <ControlTemplate x:Key="CornerIcon">
             <Viewbox Stretch="Uniform">
                 <Canvas Width="284" Height="177">
-                    <!-- Rect (Diagonal) x=-17, y=68.32, rotate=-45 -->
                     <Rectangle Canvas.Left="-17" Canvas.Top="68.32" Width="210" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
                         <Rectangle.RenderTransform>
                             <RotateTransform Angle="-45"/>
                         </Rectangle.RenderTransform>
                     </Rectangle>
-                    <!-- Rect (Top Right) x=129, y=8, w=154 -->
                     <Rectangle Canvas.Left="129" Canvas.Top="8" Width="154" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
                 </Canvas>
             </Viewbox>
         </ControlTemplate>
 
-        <!-- CornerRIcon Template (mirrored version of Corner/Point icon) -->
         <ControlTemplate x:Key="CornerRIcon">
             <Viewbox Stretch="Uniform">
                 <Canvas Width="320" Height="177">
-                    <!-- Rect (Bottom) x=0, y=129, w=320 -->
                     <Rectangle Canvas.Left="0" Canvas.Top="129" Width="320" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
-                    <!-- Rect (Top Left) x=0, y=8, w=154 -->
                     <Rectangle Canvas.Left="0" Canvas.Top="8" Width="154" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
-                    <!-- Rect (Diagonal) x=95, y=68.32, w=210, rotate=45 -->
                     <Rectangle Canvas.Left="95" Canvas.Top="68.32" Width="210" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
                         <Rectangle.RenderTransform>
                             <RotateTransform Angle="45"/>
@@ -282,17 +230,13 @@
         <ControlTemplate x:Key="CrossIcon">
             <Viewbox Stretch="Uniform">
                 <Canvas Width="320" Height="200">
-                    <!-- Rect 2 (horizontal bottom) -->
                     <Rectangle Canvas.Left="0" Canvas.Top="160" Width="320" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
-                    <!-- Rect 3 (horizontal top) -->
                     <Rectangle Canvas.Left="0" Canvas.Top="0" Width="320" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
-                    <!-- Rect 1 (diagonal -45) -->
                     <Rectangle Canvas.Left="41.47" Canvas.Top="79.58" Width="237.07" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
                         <Rectangle.RenderTransform>
                             <RotateTransform Angle="-45"/>
                         </Rectangle.RenderTransform>
                     </Rectangle>
-                    <!-- Rect 4 (diagonal 45) -->
                     <Rectangle Canvas.Left="41.46" Canvas.Top="79.58" Width="237.07" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
                         <Rectangle.RenderTransform>
                             <RotateTransform Angle="45"/>
@@ -302,32 +246,27 @@
             </Viewbox>
         </ControlTemplate>
 
-
-        <!-- Route Icon Template -->
         <ControlTemplate x:Key="RouteIcon">
             <Viewbox Stretch="Uniform">
                 <Canvas Width="235" Height="86">
-                    <!-- Background Tracks (Gray) -->
                     <Path Data="M 9 72 L 229 72" Stroke="#b3b3b3" StrokeThickness="9" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
                     <Path Data="M 30 72 L 50 42" Stroke="#b3b3b3" StrokeThickness="9" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
                     <Path Data="M 49 42 L 189 42" Stroke="#b3b3b3" StrokeThickness="9" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
                     <Path Data="M 210 72 L 190 42" Stroke="#b3b3b3" StrokeThickness="9" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
                     <Path Data="M 80 42 L 100 12" Stroke="#b3b3b3" StrokeThickness="9" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
                     <Path Data="M 99 12 L 179 12" Stroke="#b3b3b3" StrokeThickness="9" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                    <!-- Node Markers -->
                     <Ellipse Canvas.Left="26" Canvas.Top="69" Width="6" Height="6" Fill="#b3b3b3"/>
                     <Ellipse Canvas.Left="46" Canvas.Top="39" Width="6" Height="6" Fill="#b3b3b3"/>
                     <Ellipse Canvas.Left="76" Canvas.Top="39" Width="6" Height="6" Fill="#b3b3b3"/>
                     <Ellipse Canvas.Left="96" Canvas.Top="9" Width="6" Height="6" Fill="#b3b3b3"/>
                     <Ellipse Canvas.Left="176" Canvas.Top="9" Width="6" Height="6" Fill="#b3b3b3"/>
-                    <!-- Foreground Route (Red) -->
                     <Path Data="M 9 72 L 30 72 L 50 42 L 80 42 L 100 12 L 180 12" Stroke="#ff0000" StrokeThickness="5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Opacity="0.8"/>
                     <Ellipse Canvas.Left="27.5" Canvas.Top="70.5" Width="3" Height="3" Fill="#ff0000"/>
                     <Ellipse Canvas.Left="48.5" Canvas.Top="40.5" Width="3" Height="3" Fill="#ff0000"/>
                 </Canvas>
             </Viewbox>
         </ControlTemplate>
-        <!-- Double Icon Template (from double.svg) -->
+
         <ControlTemplate x:Key="DoubleIcon" TargetType="Control">
             <Viewbox Stretch="Uniform">
                 <Canvas Width="320" Height="200">
@@ -342,7 +281,6 @@
             </Viewbox>
         </ControlTemplate>
 
-        <!-- DoubleRIcon Template (mirrored version of double.svg) -->
         <ControlTemplate x:Key="DoubleRIcon" TargetType="Control">
             <Viewbox Stretch="Uniform">
                 <Canvas Width="320" Height="200">
@@ -358,12 +296,7 @@
         </ControlTemplate>
 
         <DataTemplate DataType="{x:Type local:ViewModels.SignalViewModel}">
-            <!-- Fixed Layout Grid: Matches Icon Size (20x10) -->
-            <!-- ClipToBounds="False" is CRITICAL because text is positioned outside (negative coordinates) -->
             <Grid Width="20" Height="10" ClipToBounds="False" Background="Transparent">
-
-                <!-- Icon (Centered in Grid) -->
-                <!-- Note: Flipped Icon translates to X=-20, occupying -20..0 visual space -->
                 <Control Template="{StaticResource SignalIcon}" Width="20" Height="10" RenderTransformOrigin="0.5,0.5">
                     <Control.Style>
                         <Style TargetType="Control">
@@ -382,11 +315,6 @@
                         </Style>
                     </Control.Style>
                 </Control>
-
-                <!-- Left Text: Direction Up -->
-                <!-- Aligns Right Edge to Grid Left (0) with 2px gap -->
-                <!-- Use RenderTransform instead of Margin to avoid layout collapse (20px width - 22px margin < 0) -->
-                <!-- Align Right (at 20). Translate -22 -> Right Edge at -2. -->
                 <TextBlock Text="{Binding Name}" FontSize="6" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="Bold">
                     <TextBlock.RenderTransform>
                         <TranslateTransform X="-22"/>
@@ -402,12 +330,6 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-
-                <!-- Right Text: Direction Down -->
-                <!-- Aligns Left Edge to Grid Left (0) -->
-                <!-- Flipped Icon is at -20..0. Text starts at 0. -->
-                <!-- HorizontalAlignment="Left" -> Left Edge at 0. -->
-                <!-- Margin Left="0" -> X=0. -->
                 <TextBlock Text="{Binding Name}" FontSize="6" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,0,0" FontWeight="Bold">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
@@ -422,10 +344,9 @@
                 </TextBlock>
             </Grid>
         </DataTemplate>
+
         <DataTemplate DataType="{x:Type local:ViewModels.CurvedTrackViewModel}">
             <Canvas>
-                <!-- Segment 1: Start to Mid -->
-                <!-- Width = Dist(X,Y, MX,MY) + 10. Rotate = Angle(X,Y, MX,MY). Translate -5,-5. -->
                 <Rectangle Height="10" Fill="White" Stroke="Black" StrokeThickness="1" RadiusX="5" RadiusY="5">
                     <Rectangle.ContextMenu>
                         <ContextMenu>
@@ -458,8 +379,6 @@
                     </Rectangle.RenderTransform>
                 </Rectangle>
 
-                <!-- Segment 2: Mid to End -->
-                <!-- Positioned at relative (MX - X, MY - Y). -->
                 <Rectangle Height="10" Fill="White" Stroke="Black" StrokeThickness="1" RadiusX="5" RadiusY="5">
                     <Rectangle.ContextMenu>
                         <ContextMenu>
@@ -504,7 +423,6 @@
                     </Rectangle.RenderTransform>
                 </Rectangle>
 
-                <!-- Start Thumb -->
                 <Thumb Panel.ZIndex="100" Width="12" Height="12" DragDelta="StartThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted" Canvas.Left="-6" Canvas.Top="-6" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
                     <Thumb.Template>
                         <ControlTemplate>
@@ -513,9 +431,7 @@
                     </Thumb.Template>
                 </Thumb>
 
-                <!-- Mid Thumb (Relative Position) -->
                 <Thumb Panel.ZIndex="100" Width="12" Height="12" DragDelta="MidThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted" Canvas.Left="-6" Canvas.Top="-6" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
-                    <!-- Translate by MX - X, MY - Y -->
                     <Thumb.RenderTransform>
                         <TranslateTransform>
                             <TranslateTransform.X>
@@ -539,7 +455,6 @@
                     </Thumb.Template>
                 </Thumb>
 
-                <!-- End Thumb -->
                 <Thumb Panel.ZIndex="100" Width="12" Height="12" DragDelta="EndThumb_DragDelta" DragStarted="Thumb_DragStarted" DragCompleted="Thumb_DragCompleted" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}">
                     <Canvas.Left>
                         <MultiBinding Converter="{StaticResource DiffConverter}">
@@ -563,7 +478,6 @@
                     </Thumb.Template>
                 </Thumb>
 
-                <!-- Track Name Display for 1st segment (X,Y to MX,MY) -->
                 <Grid IsHitTestVisible="False">
                     <Grid.Style>
                         <Style TargetType="Grid">
@@ -609,7 +523,6 @@
                     </TextBlock>
                 </Grid>
 
-                <!-- Track Name Display for 2nd segment (MX,MY to X2,Y2) -->
                 <Grid IsHitTestVisible="False">
                     <Grid.Style>
                         <Style TargetType="Grid">
@@ -656,6 +569,7 @@
                 </Grid>
             </Canvas>
         </DataTemplate>
+
         <Style x:Key="ToolBarButtonStyle" TargetType="Button">
             <Setter Property="Width" Value="36"/>
             <Setter Property="Height" Value="36"/>
@@ -697,78 +611,6 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <!-- TreeView Expansion Toggle Style (+/- Box) -->
-        <Style x:Key="ExpandCollapseToggleStyle" TargetType="{x:Type ToggleButton}">
-            <Setter Property="Focusable" Value="False"/>
-            <Setter Property="Width" Value="19"/>
-            <Setter Property="Height" Value="13"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ToggleButton}">
-                        <Border Width="19" Height="13" Background="Transparent">
-                            <Border Width="9" Height="9" BorderBrush="Gray" BorderThickness="1" Background="White" SnapsToDevicePixels="true">
-                                <Path x:Name="ExpandPath" Data="M2,4 L7,4 M4.5,1.5 L4.5,6.5" Stroke="#333" StrokeThickness="1"/>
-                            </Border>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="ExpandPath" Property="Data" Value="M2,4 L7,4"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Custom TreeViewItem Style for connecting lines -->
-        <Style x:Key="RailmlTreeViewItemStyle" TargetType="{x:Type TreeViewItem}">
-            <Setter Property="IsExpanded" Value="True"/>
-            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=OneWay}"/>
-            <Setter Property="Padding" Value="1,0,0,0"/>
-            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="TreeViewItem_PreviewMouseLeftButtonDown"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type TreeViewItem}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="19"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-
-                            <!-- Vertical Line (to siblings) -->
-                            <Line x:Name="VerticalLine" Grid.Column="0" Grid.RowSpan="2" X1="9.5" Y1="0" X2="9.5" Y2="1" Stretch="Fill" Stroke="#A0A0A0" StrokeThickness="1" StrokeDashArray="1,2" SnapsToDevicePixels="True"/>
-
-                            <!-- Horizontal Line (to header) -->
-                            <Line x:Name="HorizontalLine" Grid.Column="0" X1="9.5" Y1="12" X2="19" Y2="12" Stroke="#A0A0A0" StrokeThickness="1" StrokeDashArray="1,2" SnapsToDevicePixels="True"/>
-
-                            <ToggleButton x:Name="Expander" Style="{StaticResource ExpandCollapseToggleStyle}" IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" ClickMode="Press" VerticalAlignment="Center"/>
-
-                            <Border x:Name="Bd" Grid.Column="1" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true" VerticalAlignment="Center" MinHeight="22">
-                                <ContentPresenter x:Name="PART_Header" ContentSource="Header" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                            </Border>
-
-                            <ItemsPresenter x:Name="ItemsHost" Grid.Row="1" Grid.Column="1" Margin="0"/>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="HasItems" Value="false">
-                                <Setter TargetName="Expander" Property="Visibility" Value="Hidden"/>
-                            </Trigger>
-                            <Trigger Property="IsExpanded" Value="false">
-                                <Setter TargetName="ItemsHost" Property="Visibility" Value="Collapsed"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="true">
-                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </Window.Resources>
 
     <DockPanel>
@@ -797,17 +639,14 @@
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar>
                 <Button Click="Toolbox_Click" ToolTip="Route" Style="{StaticResource ToolBarButtonStyle}">
-                    <!-- Route Icon from route.svg -->
                     <Control Template="{StaticResource RouteIcon}" Width="28" Height="16"/>
                     <Button.Tag>Route</Button.Tag>
                 </Button>
                 <Button Click="Toolbox_Click" ToolTip="Signal" Style="{StaticResource ToolBarButtonStyle}">
-                    <!-- Signal Icon using ControlTemplate -->
                     <Control Template="{StaticResource SignalIcon}" Width="28" Height="14"/>
                     <Button.Tag>Signal</Button.Tag>
                 </Button>
                 <Button Click="Toolbox_Click" ToolTip="Track" Style="{StaticResource ToolBarButtonStyle}">
-                    <!-- Track Icon using Rectangle -->
                     <Rectangle Width="24" Height="4" Fill="White" Stroke="Black" StrokeThickness="1" RadiusX="2" RadiusY="2"/>
                     <Button.Tag>Track</Button.Tag>
                 </Button>
@@ -816,7 +655,6 @@
                     <Button.Tag>Corner</Button.Tag>
                 </Button>
                 <Button Click="Toolbox_Click" ToolTip="Single" Style="{StaticResource ToolBarButtonStyle}">
-                    <!-- Point Icon from point.svg -->
                     <Control Template="{StaticResource PointIcon}" Width="28" Height="16"/>
                     <Button.Tag>Single</Button.Tag>
                 </Button>
@@ -847,871 +685,63 @@
             <StatusBarItem Content="Ready"/>
         </StatusBar>
 
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250" MinWidth="150"/>
-                <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Properties Panel (Moved to Left) -->
-            <!-- Left Pane: Tree View and Properties -->
-            <Grid Grid.Column="0" Background="#F0F0F0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <!-- Tree View -->
-                <Border Grid.Row="0" BorderBrush="Gray" BorderThickness="0,0,1,1" Margin="0,0,0,5">
-                    <DockPanel>
-                        <TextBlock Text="Explorer" DockPanel.Dock="Top" FontWeight="Bold" Margin="5"/>
-                        <TreeView ItemsSource="{Binding TreeRoots}" BorderThickness="0" Background="Transparent" Name="ElementTree" SelectedItemChanged="ElementTree_SelectedItemChanged" RequestBringIntoView="TreeView_RequestBringIntoView">
-                            <TreeView.Resources>
-                                <!-- Level 1: Infrastructure -->
-                                <HierarchicalDataTemplate DataType="{x:Type viewmodels:InfrastructureViewModel}" ItemsSource="{Binding Categories}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Id}" FontWeight="Bold"/>
-                                        <TextBlock Text=" - " Foreground="Gray"/>
-                                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
-                                    </StackPanel>
-                                </HierarchicalDataTemplate>
-
-                                <!-- Level 2: Category -->
-                                <HierarchicalDataTemplate DataType="{x:Type viewmodels:CategoryViewModel}" ItemsSource="{Binding Items}">
-                                    <TextBlock Text="{Binding Title}" FontWeight="Bold"/>
-                                </HierarchicalDataTemplate>
-
-                                <!-- Level 3: Elements (restoring text-only display) -->
-                                <HierarchicalDataTemplate DataType="{x:Type viewmodels:TrackViewModel}" ItemsSource="{Binding Children}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Id}"/>
-                                        <TextBlock Text=" - " Foreground="Gray"/>
-                                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
-                                    </StackPanel>
-                                </HierarchicalDataTemplate>
-                                <HierarchicalDataTemplate DataType="{x:Type viewmodels:CurvedTrackViewModel}" ItemsSource="{Binding Children}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Id}"/>
-                                        <TextBlock Text=" - " Foreground="Gray"/>
-                                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
-                                    </StackPanel>
-                                </HierarchicalDataTemplate>
-                                <DataTemplate DataType="{x:Type viewmodels:TrackNodeViewModel}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Role}" FontWeight="Bold" Foreground="DarkMagenta"/>
-                                        <TextBlock Text="(" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding TypeName}" Foreground="Purple"/>
-                                        <TextBlock Text=") - " Foreground="Gray"/>
-                                        <TextBlock Text="{Binding Id}"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                                <DataTemplate DataType="{x:Type viewmodels:TrackCircuitBorderViewModel}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Id}" Foreground="Navy"/>
-                                        <TextBlock Text="-" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding Name}" Foreground="Navy" FontStyle="Italic"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                                <DataTemplate DataType="{x:Type viewmodels:SignalViewModel}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Id}"/>
-                                        <TextBlock Text="(" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding Type}" Foreground="Gray"/>
-                                        <TextBlock Text=") - " Foreground="Gray"/>
-                                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                                <DataTemplate DataType="{x:Type viewmodels:SwitchViewModel}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Id}"/>
-                                        <TextBlock Text=" - " Foreground="Gray"/>
-                                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                                <DataTemplate DataType="{x:Type viewmodels:RouteViewModel}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Id}"/>
-                                        <TextBlock Text=" - " Foreground="Gray"/>
-                                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                                <HierarchicalDataTemplate DataType="{x:Type viewmodels:AreaViewModel}" ItemsSource="{Binding Borders}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Id}" FontWeight="Bold" Foreground="DarkGreen"/>
-                                        <TextBlock Text=" - " Foreground="Gray"/>
-                                        <TextBlock Text="{Binding Name}" Foreground="DarkGreen" FontStyle="Italic"/>
-                                    </StackPanel>
-                                </HierarchicalDataTemplate>
-                            </TreeView.Resources>
-                            <TreeView.ItemContainerStyle>
-                                <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource RailmlTreeViewItemStyle}"/>
-                            </TreeView.ItemContainerStyle>
-                        </TreeView>
-                    </DockPanel>
-                </Border>
-
-                <!-- Splitter -->
-                <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" Background="LightGray"/>
-
-                <!-- Properties Panel -->
-                <Border Grid.Row="2" BorderBrush="Gray" BorderThickness="0,1,1,0" Padding="5">
-                    <DockPanel>
-                        <TextBlock Text="Properties" DockPanel.Dock="Top" FontWeight="Bold" Margin="0,0,0,10"/>
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" RequestBringIntoView="Properties_RequestBringIntoView">
-                            <ContentControl Grid.IsSharedSizeScope="True">
-                                <ContentControl.Style>
-                                    <Style TargetType="ContentControl">
-                                        <Setter Property="Content" Value="{Binding SelectedElement}"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedElement}" Value="{x:Null}">
-                                                <Setter Property="Content" Value="{Binding BulkEdit}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ContentControl.Style>
-                                <ContentControl.Resources>
-                                    <Style TargetType="TextBlock" x:Key="PropLabel">
-                                        <Setter Property="FontWeight" Value="SemiBold"/>
-                                        <Setter Property="VerticalAlignment" Value="Center"/>
-                                        <Setter Property="Margin" Value="0,0,10,5"/>
-                                    </Style>
-                                    <Style TargetType="TextBox" x:Key="PropValue">
-                                        <Setter Property="VerticalAlignment" Value="Center"/>
-                                        <Setter Property="Margin" Value="0,0,0,5"/>
-                                    </Style>
-
-                                    <Style TargetType="ComboBox" x:Key="PropCombo">
-                                        <Setter Property="VerticalAlignment" Value="Center"/>
-                                        <Setter Property="Margin" Value="0,0,0,5"/>
-                                    </Style>
-
-                                    <!-- Bulk Edit Properties -->
-                                    <DataTemplate DataType="{x:Type local:ViewModels.BulkEditViewModel}">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                            </Grid.RowDefinitions>
-
-                                            <TextBlock Text="Selection" Style="{StaticResource PropLabel}" Grid.Row="0" Grid.Column="0"/>
-                                            <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Margin="0,0,0,5"/>
-
-                                            <TextBlock Text="Name" Style="{StaticResource PropLabel}" Grid.Row="1" Grid.Column="0"/>
-                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PropValue}" Grid.Row="1" Grid.Column="1"/>
-
-                                            <!-- Track specific bulk edits -->
-                                            <TextBlock Text="Description" Style="{StaticResource PropLabel}" Grid.Row="2" Grid.Column="0" Visibility="{Binding HasTracks, Converter={StaticResource BoolToVis}}"/>
-                                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PropValue}" Grid.Row="2" Grid.Column="1" Visibility="{Binding HasTracks, Converter={StaticResource BoolToVis}}"/>
-
-                                            <TextBlock Text="Type" Style="{StaticResource PropLabel}" Grid.Row="3" Grid.Column="0" Visibility="{Binding HasTracks, Converter={StaticResource BoolToVis}}"/>
-                                            <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding Type}" Style="{StaticResource PropCombo}" Grid.Row="3" Grid.Column="1" Visibility="{Binding HasTracks, Converter={StaticResource BoolToVis}}"/>
-
-                                            <TextBlock Text="MainDir" Style="{StaticResource PropLabel}" Grid.Row="4" Grid.Column="0" Visibility="{Binding HasTracks, Converter={StaticResource BoolToVis}}"/>
-                                            <ComboBox ItemsSource="{Binding AvailableMainDirs}" SelectedItem="{Binding MainDir}" Style="{StaticResource PropCombo}" Grid.Row="4" Grid.Column="1" Visibility="{Binding HasTracks, Converter={StaticResource BoolToVis}}"/>
-
-                                            <!-- Signal specific bulk edits -->
-                                            <TextBlock Text="Signal Type" Style="{StaticResource PropLabel}" Grid.Row="5" Grid.Column="0" Visibility="{Binding HasSignals, Converter={StaticResource BoolToVis}}"/>
-                                            <ComboBox ItemsSource="{Binding SignalTypes}" SelectedItem="{Binding SignalType}" Style="{StaticResource PropCombo}" Grid.Row="5" Grid.Column="1" Visibility="{Binding HasSignals, Converter={StaticResource BoolToVis}}"/>
-
-                                            <TextBlock Text="Function" Style="{StaticResource PropLabel}" Grid.Row="6" Grid.Column="0" Visibility="{Binding HasSignals, Converter={StaticResource BoolToVis}}"/>
-                                            <ComboBox ItemsSource="{Binding SignalFunctions}" SelectedItem="{Binding SignalFunction}" Style="{StaticResource PropCombo}" Grid.Row="6" Grid.Column="1" Visibility="{Binding HasSignals, Converter={StaticResource BoolToVis}}"/>
-
-                                            <TextBlock Text="Direction" Style="{StaticResource PropLabel}" Grid.Row="7" Grid.Column="0" Visibility="{Binding HasSignals, Converter={StaticResource BoolToVis}}"/>
-                                            <ComboBox ItemsSource="{Binding Directions}" SelectedItem="{Binding Direction}" Style="{StaticResource PropCombo}" Grid.Row="7" Grid.Column="1" Visibility="{Binding HasSignals, Converter={StaticResource BoolToVis}}"/>
-                                        </Grid>
-                                    </DataTemplate>
-
-                                    <!-- TrackNode Properties -->
-                                    <DataTemplate DataType="{x:Type viewmodels:TrackNodeViewModel}">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                            </Grid.RowDefinitions>
-
-                                            <TextBlock Text="Type" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <!-- Make Type ReadOnly for Connection -->
-                                            <ContentControl Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch">
-                                                <ContentControl.Style>
-                                                    <Style TargetType="ContentControl">
-                                                        <Setter Property="Content">
-                                                            <Setter.Value>
-                                                                <ComboBox ItemsSource="{Binding AvailableNodeTypes}" SelectedItem="{Binding NodeType, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,5" VerticalAlignment="Center" Style="{StaticResource PropCombo}"/>
-                                                            </Setter.Value>
-                                                        </Setter>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding NodeType}" Value="Connection">
-                                                                <Setter Property="Content">
-                                                                    <Setter.Value>
-                                                                        <TextBox Text="Connection" IsReadOnly="True" Background="LightGray" Margin="0,0,0,5" Style="{StaticResource PropValue}"/>
-                                                                    </Setter.Value>
-                                                                </Setter>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </ContentControl.Style>
-                                            </ContentControl>
-
-                                            <!-- Regular Fields -->
-                                            <TextBlock Text="Node ID" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Id}" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
-
-                                            <TextBlock Text="Name" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                            <TextBlock Text="Code" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Code, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                            <TextBlock Text="Pos" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Pos, StringFormat=F0}" IsReadOnly="True" Grid.Row="4" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
-
-                                            <!-- Connection Info Fields -->
-                                            <TextBlock Text="Connection ID" Grid.Row="5" Grid.Column="0" Style="{StaticResource PropLabel}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Connection}"/>
-                                            <TextBox Text="{Binding ConnectionId}" IsReadOnly="True" Grid.Row="5" Grid.Column="1" Style="{StaticResource PropValue}" Background="LightYellow" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Connection}"/>
-
-                                            <TextBlock Text="Connection Ref" Grid.Row="6" Grid.Column="0" Style="{StaticResource PropLabel}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Connection}"/>
-                                            <TextBox Text="{Binding ConnectionRef}" IsReadOnly="True" Grid.Row="6" Grid.Column="1" Style="{StaticResource PropValue}" Background="LightYellow" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Connection}"/>
-                                        </Grid>
-                                    </DataTemplate>
-
-                                    <!-- Track Properties -->
-                                    <DataTemplate DataType="{x:Type local:ViewModels.TrackViewModel}">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                            </Grid.RowDefinitions>
-
-                                            <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Id, Mode=OneWay}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
-
-                                            <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                            <TextBlock Text="Description" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                            <TextBlock Text="Type" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding Type, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
-
-                                            <TextBlock Text="MainDir" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <ComboBox ItemsSource="{Binding AvailableMainDirs}" SelectedItem="{Binding MainDir, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
-
-                                            <Separator Grid.Row="5" Grid.ColumnSpan="2" Margin="0,5"/>
-                                            <TextBlock Text="Begin Node" Grid.Row="6" Grid.ColumnSpan="2" FontWeight="Bold" Margin="0,5"/>
-                                            <ContentControl Content="{Binding BeginNode}" Grid.Row="7" Grid.ColumnSpan="2"/>
-
-                                            <TextBlock Text="End Node" Grid.Row="8" Grid.ColumnSpan="2" FontWeight="Bold" Margin="0,5"/>
-                                            <ContentControl Content="{Binding EndNode}" Grid.Row="9" Grid.ColumnSpan="2"/>
-
-
-                                            <Separator Grid.Row="11" Grid.ColumnSpan="2" Margin="0,5"/>
-
-
-                                            <TextBlock Text="Length" Grid.Row="12" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Length, Mode=OneWay, StringFormat=N2}" IsReadOnly="True" Grid.Row="12" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
-
-                                            <CheckBox Content="Show Coordinates" IsChecked="{Binding ShowCoordinates}" Grid.Row="13" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="0,10,0,5"/>
-
-                                            <StackPanel Grid.Row="14" Grid.ColumnSpan="2" Visibility="{Binding ShowCoordinates, Converter={StaticResource BoolToVis}}">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="Auto"/>
-                                                        <RowDefinition Height="Auto"/>
-                                                        <RowDefinition Height="Auto"/>
-                                                        <RowDefinition Height="Auto"/>
-                                                    </Grid.RowDefinitions>
-                                                    <TextBlock Text="Begin X" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                    <TextBlock Text="Begin Y" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                    <TextBlock Text="End X" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding X2, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                    <TextBlock Text="End Y" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding Y2, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
-                                                </Grid>
-                                            </StackPanel>
-                                        </Grid>
-                                    </DataTemplate>
-
-                                    <!-- Curved Track Properties -->
-                                    <DataTemplate DataType="{x:Type local:ViewModels.CurvedTrackViewModel}">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                            </Grid.RowDefinitions>
-
-                                            <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Id, Mode=OneWay}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
-
-                                            <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                            <TextBlock Text="Description" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                            <TextBlock Text="Type" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding Type, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
-
-
-                                            <Separator Grid.Row="11" Grid.ColumnSpan="2" Margin="0,5"/>
-
-                                            <TextBlock Text="MainDir" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <ComboBox ItemsSource="{Binding AvailableMainDirs}" SelectedItem="{Binding MainDir, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
-
-                                            <Separator Grid.Row="5" Grid.ColumnSpan="2" Margin="0,5"/>
-                                            <TextBlock Text="Begin Node" Grid.Row="6" Grid.ColumnSpan="2" FontWeight="Bold" Margin="0,5"/>
-                                            <ContentControl Content="{Binding BeginNode}" Grid.Row="7" Grid.ColumnSpan="2"/>
-
-                                            <TextBlock Text="End Node" Grid.Row="8" Grid.ColumnSpan="2" FontWeight="Bold" Margin="0,5"/>
-                                            <ContentControl Content="{Binding EndNode}" Grid.Row="9" Grid.ColumnSpan="2"/>
-
-
-                                            <TextBlock Text="Length" Grid.Row="12" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Length, Mode=OneWay, StringFormat=N2}" IsReadOnly="True" Grid.Row="12" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
-
-                                            <CheckBox Content="Show Coordinates" IsChecked="{Binding ShowCoordinates}" Grid.Row="13" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="0,10,0,5"/>
-
-                                            <StackPanel Grid.Row="14" Grid.ColumnSpan="2" Visibility="{Binding ShowCoordinates, Converter={StaticResource BoolToVis}}">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="Auto"/>
-                                                        <RowDefinition Height="Auto"/>
-                                                        <RowDefinition Height="Auto"/>
-                                                        <RowDefinition Height="Auto"/>
-                                                        <RowDefinition Height="Auto"/>
-                                                        <RowDefinition Height="Auto"/>
-                                                    </Grid.RowDefinitions>
-                                                    <TextBlock Text="Begin X" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                    <TextBlock Text="Begin Y" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                    <TextBlock Text="Mid X" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <!-- <TextBox Text="{Binding MX, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/> -->
-                                                    <!-- <TextBox Text="{Binding MY, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/> -->
-
-                                                    <TextBlock Text="End X" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding X2, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="4" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                    <TextBlock Text="End Y" Grid.Row="5" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding Y2, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Foreground="Gray" Grid.Row="5" Grid.Column="1" Style="{StaticResource PropValue}"/>
-                                                </Grid>
-                                            </StackPanel>
-                                        </Grid>
-                                    </DataTemplate>
-
-                                    <!-- Switch Properties -->
-                                    <DataTemplate DataType="{x:Type local:ViewModels.SwitchViewModel}">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                            </Grid.RowDefinitions>
-
-                                            <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Id, Mode=OneWay}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
-
-                                            <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                            <TextBlock Text="Course" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <ComboBox ItemsSource="{Binding AvailableCourses}" SelectedItem="{Binding TrackContinueCourse, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
-
-                                            <TextBlock Text="NormalPos" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <ComboBox ItemsSource="{Binding AvailableCourses}" SelectedItem="{Binding NormalPosition, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
-
-                                            <TextBlock Text="Diverging" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}" VerticalAlignment="Top" Margin="0,5,0,0"/>
-                                            <ItemsControl ItemsSource="{Binding DivergingConnections}" Grid.Row="4" Grid.Column="1">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Margin="0,0,0,10" Padding="0,0,0,8">
-                                                            <StackPanel>
-                                                                <Grid Margin="0,0,0,5">
-                                                                    <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="*"/>
-                                                                        <ColumnDefinition Width="Auto"/>
-                                                                    </Grid.ColumnDefinitions>
-                                                                    <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" Foreground="#333" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="11"/>
-                                                                    <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableCourses}" SelectedItem="{Binding Course, UpdateSourceTrigger=PropertyChanged}" Width="90" Height="22" FontSize="10"/>
-                                                                </Grid>
-
-                                                                <!-- Connection Details (Read-only, Aligned with Outer Grid) -->
-                                                                <Grid>
-                                                                    <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
-                                                                        <ColumnDefinition Width="*"/>
-                                                                    </Grid.ColumnDefinitions>
-                                                                    <Grid.RowDefinitions>
-                                                                        <RowDefinition Height="Auto"/>
-                                                                        <RowDefinition Height="Auto"/>
-                                                                        <RowDefinition Height="Auto"/>
-                                                                    </Grid.RowDefinitions>
-
-                                                                    <TextBlock Text="Conn. ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}" FontSize="10" VerticalAlignment="Center" Margin="5,0,5,2"/>
-                                                                    <TextBox Text="{Binding Id, Mode=OneWay}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" FontSize="10" Foreground="Gray" BorderThickness="0" Background="Transparent" VerticalAlignment="Center"/>
-
-                                                                    <TextBlock Text="Conn. Ref" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}" FontSize="10" VerticalAlignment="Center" Margin="5,0,5,2"/>
-                                                                    <TextBox Text="{Binding Ref, Mode=OneWay}" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}" FontSize="10" Foreground="Gray" BorderThickness="0" Background="Transparent" VerticalAlignment="Center"/>
-
-                                                                    <TextBlock Text="Orientation" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}" FontSize="10" VerticalAlignment="Center" Margin="5,0,5,0"/>
-                                                                    <TextBox Text="{Binding Orientation, Mode=OneWay}" IsReadOnly="True" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}" FontSize="10" Foreground="Gray" BorderThickness="0" Background="Transparent" VerticalAlignment="Center"/>
-                                                                </Grid>
-                                                            </StackPanel>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-
-                                            <CheckBox Content="Show Coordinates" IsChecked="{Binding ShowCoordinates}" Grid.Row="5" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="0,10,0,5"/>
-
-                                            <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Visibility="{Binding ShowCoordinates, Converter={StaticResource BoolToVis}}">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="Auto"/>
-                                                        <RowDefinition Height="Auto"/>
-                                                    </Grid.RowDefinitions>
-                                                    <TextBlock Text="X" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                    <TextBlock Text="Y" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
-                                                </Grid>
-                                            </StackPanel>
-                                        </Grid>
-                                    </DataTemplate>
-
-                                    <!-- Signal Properties -->
-                                    <DataTemplate DataType="{x:Type local:ViewModels.SignalViewModel}">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                            </Grid.RowDefinitions>
-
-                                            <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Id}" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" IsReadOnly="True"/>
-
-                                            <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                            <TextBlock Text="Type" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding Type, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
-
-                                            <TextBlock Text="Function" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <ComboBox ItemsSource="{Binding AvailableFunctions}" SelectedItem="{Binding Function, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
-
-                                            <TextBlock Text="Direction" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <ComboBox ItemsSource="{Binding AvailableDirections}" SelectedItem="{Binding Direction, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
-
-                                            <TextBlock Text="Track Ref" Grid.Row="5" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding RelatedTrackId}" Grid.Row="5" Grid.Column="1" Style="{StaticResource PropValue}" IsReadOnly="True"/>
-
-                                            <TextBlock Text="Pos" Grid.Row="6" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Pos, StringFormat=F0, UpdateSourceTrigger=PropertyChanged}" Grid.Row="6" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                            <CheckBox Content="Show Coordinates" IsChecked="{Binding ShowCoordinates}" Grid.Row="7" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="0,10,0,5"/>
-
-                                            <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Visibility="{Binding ShowCoordinates, Converter={StaticResource BoolToVis}}">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="Auto"/>
-                                                        <RowDefinition Height="Auto"/>
-                                                    </Grid.RowDefinitions>
-                                                    <TextBlock Text="X" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding X}" IsReadOnly="True" Foreground="Gray" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                    <TextBlock Text="Y" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding Y}" IsReadOnly="True" Foreground="Gray" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
-                                                </Grid>
-                                            </StackPanel>
-                                        </Grid>
-                                    </DataTemplate>
-
-                                    <!-- Route Properties -->
-                                    <DataTemplate DataType="{x:Type local:ViewModels.RouteViewModel}">
-                                        <StackPanel>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                </Grid.RowDefinitions>
-
-                                                <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                <TextBox Text="{Binding Id}" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" IsReadOnly="True" Foreground="Gray"/>
-
-                                                <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                <TextBlock Text="Code" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                <TextBox Text="{Binding Code, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                <TextBlock Text="Description" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                <TextBlock Text="ApproachP" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                <TextBox Text="{Binding ApproachPointRef, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                <TextBlock Text="EntrySignal" Grid.Row="5" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                <TextBox Text="{Binding EntryRef, UpdateSourceTrigger=PropertyChanged}" Grid.Row="5" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                <TextBlock Text="ExitSignal" Grid.Row="6" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                <TextBox Text="{Binding ExitRef, UpdateSourceTrigger=PropertyChanged}" Grid.Row="6" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                <TextBlock Text="OverlapEnd" Grid.Row="7" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                <TextBox Text="{Binding OverlapEndRef, UpdateSourceTrigger=PropertyChanged}" Grid.Row="7" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                <TextBlock Text="Speed" Grid.Row="8" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                <ComboBox ItemsSource="{Binding AvailableProceedSpeeds}" SelectedItem="{Binding ProceedSpeed, UpdateSourceTrigger=PropertyChanged}" Grid.Row="8" Grid.Column="1" Margin="0,0,0,5" VerticalAlignment="Center"/>
-
-                                                <TextBlock Text="RelTriggerH" Grid.Row="9" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                <CheckBox IsChecked="{Binding ReleaseTriggerHead, UpdateSourceTrigger=PropertyChanged}" Grid.Row="9" Grid.Column="1" VerticalAlignment="Center" Margin="0,0,0,5"/>
-
-                                                <TextBlock Text="RelTriggerRef" Grid.Row="10" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                <TextBox Text="{Binding ReleaseTriggerRef, UpdateSourceTrigger=PropertyChanged}" Grid.Row="10" Grid.Column="1" Style="{StaticResource PropValue}"/>
-                                            </Grid>
-
-                                            <Separator Margin="0,5"/>
-
-                                            <StackPanel Margin="0,5">
-                                                <Grid Margin="0,0,0,5">
-                                                    <TextBlock Text="Switches" FontWeight="Bold" VerticalAlignment="Center"/>
-                                                    <Button Content="+" Command="{Binding AddSwitchPositionCommand}" HorizontalAlignment="Right" Width="20" Height="20"/>
-                                                </Grid>
-                                                <ItemsControl ItemsSource="{Binding SwitchAndPositions}">
-                                                    <ItemsControl.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <Grid Margin="0,2">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
-                                                                <TextBox Text="{Binding SwitchRef, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,5,0" Tag="SwitchRef"/>
-                                                                <ComboBox Grid.Column="1" ItemsSource="{Binding AvailablePositions}" SelectedItem="{Binding SwitchPosition, UpdateSourceTrigger=PropertyChanged}" Width="70" Margin="0,0,5,0"/>
-                                                                <Button Grid.Column="2" Content="-" Command="{Binding RemoveCommand}" CommandParameter="{Binding}" Width="20" Height="20"/>
-                                                            </Grid>
-                                                        </DataTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
-                                            </StackPanel>
-
-                                            <Separator Margin="0,5"/>
-
-                                            <StackPanel Margin="0,5">
-                                                <Grid Margin="0,0,0,5">
-                                                    <TextBlock Text="OverlapSw" FontWeight="Bold" VerticalAlignment="Center"/>
-                                                    <Button Content="+" Command="{Binding AddOverlapSwitchPositionCommand}" HorizontalAlignment="Right" Width="20" Height="20"/>
-                                                </Grid>
-                                                <ItemsControl ItemsSource="{Binding OverlapSwitchAndPositions}">
-                                                    <ItemsControl.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <Grid Margin="0,2">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
-                                                                <TextBox Text="{Binding SwitchRef, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,5,0"/>
-                                                                <ComboBox Grid.Column="1" ItemsSource="{Binding AvailablePositions}" SelectedItem="{Binding SwitchPosition, UpdateSourceTrigger=PropertyChanged}" Width="70" Margin="0,0,5,0"/>
-                                                                <Button Grid.Column="2" Content="-" Command="{Binding RemoveCommand}" CommandParameter="{Binding}" Width="20" Height="20"/>
-                                                            </Grid>
-                                                        </DataTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
-                                            </StackPanel>
-
-                                            <Separator Margin="0,5"/>
-
-                                            <StackPanel Margin="0,5">
-                                                <Grid Margin="0,0,0,5">
-                                                    <TextBlock Text="Release Sections" FontWeight="Bold" VerticalAlignment="Center"/>
-                                                    <Button Content="+" Command="{Binding AddReleaseSectionCommand}" HorizontalAlignment="Right" Width="20" Height="20"/>
-                                                </Grid>
-                                                <ItemsControl ItemsSource="{Binding ReleaseSections}">
-                                                    <ItemsControl.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <Grid Margin="0,2">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
-                                                                <TextBox Text="{Binding TrackRef, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,5,0" ToolTip="Track Reference"/>
-                                                                <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableProtections}" SelectedItem="{Binding FlankProtection, UpdateSourceTrigger=PropertyChanged}" Width="70" Margin="0,0,5,0" ToolTip="Flank Protection"/>
-                                                                <Button Grid.Column="2" Content="-" Command="{Binding RemoveCommand}" CommandParameter="{Binding}" Width="20" Height="20"/>
-                                                            </Grid>
-                                                        </DataTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </DataTemplate>
-
-                                    <DataTemplate DataType="{x:Type viewmodels:TrackCircuitBorderViewModel}">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                            </Grid.RowDefinitions>
-
-                                            <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Id}" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" IsReadOnly="True" Foreground="Gray"/>
-
-                                            <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                            <TextBlock Text="Code" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Code, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                            <TextBlock Text="Description" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                            <TextBlock Text="Pos" Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Pos, StringFormat=F0, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                            <TextBlock Text="Track Ref" Grid.Row="5" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding RelatedTrackId}" Grid.Row="5" Grid.Column="1" Style="{StaticResource PropValue}" IsReadOnly="True" Foreground="Gray"/>
-
-                                            <CheckBox Content="Show Coordinates" IsChecked="{Binding ShowCoordinates}" Grid.Row="6" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="0,10,0,5"/>
-
-                                            <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Visibility="{Binding ShowCoordinates, Converter={StaticResource BoolToVis}}">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="Auto"/>
-                                                        <RowDefinition Height="Auto"/>
-                                                    </Grid.RowDefinitions>
-                                                    <TextBlock Text="X" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding X}" IsReadOnly="True" Foreground="Gray" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                    <TextBlock Text="Y" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                    <TextBox Text="{Binding Y}" IsReadOnly="True" Foreground="Gray" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
-                                                </Grid>
-                                            </StackPanel>
-                                        </Grid>
-                                    </DataTemplate>
-
-                                    <!-- Area Properties -->
-                                    <DataTemplate DataType="{x:Type viewmodels:AreaViewModel}">
-                                        <StackPanel>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                </Grid.RowDefinitions>
-
-                                                <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                <TextBox Text="{Binding Id}" IsReadOnly="True" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}" Foreground="Gray"/>
-
-                                                <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                                <TextBlock Text="Type" Grid.Row="2" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding Type, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource PropCombo}"/>
-
-                                                <TextBlock Text="Description" Grid.Row="3" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Style="{StaticResource PropValue}"/>
-                                            </Grid>
-                                        </StackPanel>
-                                    </DataTemplate>
-
-                                    <!-- Infrastructure Properties -->
-                                    <DataTemplate DataType="{x:Type viewmodels:InfrastructureViewModel}">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="PropLabel"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                            </Grid.RowDefinitions>
-
-                                            <TextBlock Text="ID" Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Id}" Grid.Row="0" Grid.Column="1" Style="{StaticResource PropValue}"/>
-
-                                            <TextBlock Text="Name" Grid.Row="1" Grid.Column="0" Style="{StaticResource PropLabel}"/>
-                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource PropValue}"/>
-                                        </Grid>
-                                    </DataTemplate>
-
-                                </ContentControl.Resources>
-                            </ContentControl>
-                        </ScrollViewer>
-                    </DockPanel>
-                </Border>
-            </Grid>
-
-            <!-- Grid Splitter -->
-            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="LightGray"/>
-
-            <!-- Main Canvas Area -->
-            <Grid Grid.Column="2" x:Name="MainGrid" Background="Transparent" Focusable="False">
-                <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" PreviewMouseWheel="MainScrollViewer_PreviewMouseWheel" RequestBringIntoView="MainScrollViewer_RequestBringIntoView">
-                    <ItemsControl x:Name="MainDesigner" ItemsSource="{Binding Elements}" Background="{StaticResource GridBackgroundBrush}" Width="2000" Height="2000" AllowDrop="True" Drop="MainDesigner_Drop" MouseDown="MainGrid_MouseDown" MouseMove="MainGrid_MouseMove" MouseUp="MainGrid_MouseUp" Focusable="True" KeyDown="MainGrid_KeyDown">
-                        <ItemsControl.LayoutTransform>
-                            <ScaleTransform x:Name="MainScaleTransform" ScaleX="1" ScaleY="1"/>
-                        </ItemsControl.LayoutTransform>
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <Canvas Background="Transparent"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemContainerStyle>
-                            <Style TargetType="ContentPresenter">
-                                <Setter Property="Canvas.Left" Value="{Binding X}"/>
-                                <Setter Property="Canvas.Top" Value="{Binding Y}"/>
-                                <Setter Property="Opacity" Value="{Binding IsSelected, Converter={utils:BoolToOpacityConverter}}"/>
-                                <EventSetter Event="MouseDown" Handler="Item_MouseDown"/>
-                                <EventSetter Event="MouseMove" Handler="Item_MouseMove"/>
-                                <EventSetter Event="MouseUp" Handler="Item_MouseUp"/>
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <ContentPresenter Content="{Binding}"/>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-                <Canvas x:Name="OverlayCanvas" IsHitTestVisible="False">
-                    <Rectangle x:Name="SelectionBox" Stroke="#007ACC" StrokeDashArray="2 2" StrokeThickness="1" Fill="#33007ACC" Visibility="Collapsed"/>
-                </Canvas>
-            </Grid>
-
-
-        </Grid>
+        <!-- Docking Manager -->
+        <xcad:DockingManager x:Name="dockManager">
+            <xcad:LayoutRoot>
+                <xcad:LayoutPanel Orientation="Horizontal">
+                    <!-- Explorer Pane (Left) -->
+                    <xcad:LayoutAnchorablePane DockWidth="250">
+                        <xcad:LayoutAnchorable Title="Explorer" ContentId="Explorer">
+                            <views:ExplorerView x:Name="ExplorerPane"/>
+                        </xcad:LayoutAnchorable>
+                    </xcad:LayoutAnchorablePane>
+
+                    <!-- Main Document Pane (Center - Editor) -->
+                    <xcad:LayoutDocumentPane>
+                        <xcad:LayoutDocument Title="Editor" ContentId="Editor" CanClose="False">
+                            <Grid x:Name="MainGrid" Background="Transparent" Focusable="False">
+                                <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" PreviewMouseWheel="MainScrollViewer_PreviewMouseWheel" RequestBringIntoView="MainScrollViewer_RequestBringIntoView">
+                                    <ItemsControl x:Name="MainDesigner" ItemsSource="{Binding Elements}" Background="{StaticResource GridBackgroundBrush}" Width="2000" Height="2000" AllowDrop="True" Drop="MainDesigner_Drop" MouseDown="MainGrid_MouseDown" MouseMove="MainGrid_MouseMove" MouseUp="MainGrid_MouseUp" Focusable="True" KeyDown="MainGrid_KeyDown">
+                                        <ItemsControl.LayoutTransform>
+                                            <ScaleTransform x:Name="MainScaleTransform" ScaleX="1" ScaleY="1"/>
+                                        </ItemsControl.LayoutTransform>
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <Canvas Background="Transparent"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemContainerStyle>
+                                            <Style TargetType="ContentPresenter">
+                                                <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                                                <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                                                <Setter Property="Opacity" Value="{Binding IsSelected, Converter={utils:BoolToOpacityConverter}}"/>
+                                                <EventSetter Event="MouseDown" Handler="Item_MouseDown"/>
+                                                <EventSetter Event="MouseMove" Handler="Item_MouseMove"/>
+                                                <EventSetter Event="MouseUp" Handler="Item_MouseUp"/>
+                                            </Style>
+                                        </ItemsControl.ItemContainerStyle>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <ContentPresenter Content="{Binding}"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                                <Canvas x:Name="OverlayCanvas" IsHitTestVisible="False">
+                                    <Rectangle x:Name="SelectionBox" Stroke="#007ACC" StrokeDashArray="2 2" StrokeThickness="1" Fill="#33007ACC" Visibility="Collapsed"/>
+                                </Canvas>
+                            </Grid>
+                        </xcad:LayoutDocument>
+                    </xcad:LayoutDocumentPane>
+
+                    <!-- Properties Pane (Right) -->
+                    <xcad:LayoutAnchorablePane DockWidth="300">
+                        <xcad:LayoutAnchorable Title="Properties" ContentId="Properties">
+                            <views:PropertiesView x:Name="PropertiesPane"/>
+                        </xcad:LayoutAnchorable>
+                    </xcad:LayoutAnchorablePane>
+                </xcad:LayoutPanel>
+            </xcad:LayoutRoot>
+        </xcad:DockingManager>
     </DockPanel>
 </Window>

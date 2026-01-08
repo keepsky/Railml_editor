@@ -1,9 +1,41 @@
 ﻿<Application x:Class="RailmlEditor.App"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:RailmlEditor"
-             StartupUri="MainWindow.xaml">
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:RailmlEditor"
+    xmlns:utils="clr-namespace:RailmlEditor.Utils" StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <!-- TreeView Expansion Toggle Style (+/- Box) -->
+        <Style x:Key="ExpandCollapseToggleStyle" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Width" Value="19"/>
+            <Setter Property="Height" Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border Width="19" Height="13" Background="Transparent">
+                            <Border Width="9" Height="9" BorderBrush="Gray" BorderThickness="1" Background="White" SnapsToDevicePixels="true">
+                                <Path x:Name="ExpandPath" Data="M2,4 L7,4 M4.5,1.5 L4.5,6.5" Stroke="#333" StrokeThickness="1"/>
+                            </Border>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="ExpandPath" Property="Data" Value="M2,4 L7,4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <utils:DiffConverter x:Key="DiffConverter"/>
+        <utils:AngleConverter x:Key="AngleConverter"/>
+        <utils:AddConverter x:Key="AddConverter"/>
+        <!-- <utils:BezierConverter x:Key="BezierConverter"/> -->
+        <utils:SegmentLengthConverter x:Key="SegmentLengthConverter"/>
+        <utils:TagPositionConverter x:Key="TagPos"/>
+        <utils:MidPointConverter x:Key="MidPoint"/>
+        <utils:ReadableAngleConverter x:Key="ReadableAngle"/>
+        <utils:ConnectionToVisibilityConverter x:Key="ConnectionToVis"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </Application.Resources>
 </Application>
