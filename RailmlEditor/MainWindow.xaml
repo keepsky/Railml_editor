@@ -867,7 +867,7 @@
                 <Border Grid.Row="0" BorderBrush="Gray" BorderThickness="0,0,1,1" Margin="0,0,0,5">
                     <DockPanel>
                         <TextBlock Text="Explorer" DockPanel.Dock="Top" FontWeight="Bold" Margin="5"/>
-                        <TreeView ItemsSource="{Binding TreeRoots}" BorderThickness="0" Background="Transparent" Name="ElementTree" SelectedItemChanged="ElementTree_SelectedItemChanged">
+                        <TreeView ItemsSource="{Binding TreeRoots}" BorderThickness="0" Background="Transparent" Name="ElementTree" SelectedItemChanged="ElementTree_SelectedItemChanged" RequestBringIntoView="TreeView_RequestBringIntoView">
                             <TreeView.Resources>
                                 <!-- Level 1: Infrastructure -->
                                 <HierarchicalDataTemplate DataType="{x:Type viewmodels:InfrastructureViewModel}" ItemsSource="{Binding Categories}">
@@ -959,7 +959,7 @@
                 <Border Grid.Row="2" BorderBrush="Gray" BorderThickness="0,1,1,0" Padding="5">
                     <DockPanel>
                         <TextBlock Text="Properties" DockPanel.Dock="Top" FontWeight="Bold" Margin="0,0,0,10"/>
-                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" RequestBringIntoView="Properties_RequestBringIntoView">
                             <ContentControl Grid.IsSharedSizeScope="True">
                                 <ContentControl.Style>
                                     <Style TargetType="ContentControl">
@@ -1679,7 +1679,7 @@
 
             <!-- Main Canvas Area -->
             <Grid Grid.Column="2" x:Name="MainGrid" Background="Transparent" Focusable="False">
-                <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" PreviewMouseWheel="MainScrollViewer_PreviewMouseWheel">
+                <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" PreviewMouseWheel="MainScrollViewer_PreviewMouseWheel" RequestBringIntoView="MainScrollViewer_RequestBringIntoView">
                     <ItemsControl x:Name="MainDesigner" ItemsSource="{Binding Elements}" Background="{StaticResource GridBackgroundBrush}" Width="2000" Height="2000" AllowDrop="True" Drop="MainDesigner_Drop" MouseDown="MainGrid_MouseDown" MouseMove="MainGrid_MouseMove" MouseUp="MainGrid_MouseUp" Focusable="True" KeyDown="MainGrid_KeyDown">
                         <ItemsControl.LayoutTransform>
                             <ScaleTransform x:Name="MainScaleTransform" ScaleX="1" ScaleY="1"/>

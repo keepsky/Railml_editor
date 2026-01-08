@@ -1237,7 +1237,14 @@ namespace RailmlEditor
                     if (container != null)
                     {
                         container.IsSelected = true;
-                        container.BringIntoView();
+                        
+                        // Only bring into view if the tree itself doesn't have focus.
+                        // If it has focus, it means the user is already interacting with it,
+                        // and an explicit BringIntoView can cause unwanted "jumps" or double-scrolling.
+                        if (!ElementTree.IsKeyboardFocusWithin)
+                        {
+                            container.BringIntoView();
+                        }
                     }
                 }
                 finally
@@ -1245,6 +1252,26 @@ namespace RailmlEditor
                     _isInternalSelectionChange = false;
                 }
             }), System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        private void TreeView_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
+        {
+            // Prevent TreeViewItem.BringIntoView from bubbling up to parent ScrollViewers
+            // this fixes the issue where selecting an item in the tree causes the whole window/designer to jump.
+            e.Handled = true;
+        }
+
+        private void MainScrollViewer_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
+        {
+            // Stop BringIntoView bubbles from reaching the Window level ScrollViewer (if any)
+            // or causing the MainScrollViewer to jump unexpectedly when child elements get focus.
+            e.Handled = true;
+        }
+
+        private void Properties_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
+        {
+            // Stop BringIntoView bubbles from the properties panel.
+            e.Handled = true;
         }
 
         private TreeViewItem? GetTreeViewItem(ItemsControl parent, object item)
