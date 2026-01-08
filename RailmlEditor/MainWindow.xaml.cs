@@ -19,6 +19,21 @@ namespace RailmlEditor
             _viewModel.PrincipleTrackSelectionRequested += OnPrincipleTrackSelectionRequested;
             _viewModel.PropertyChanged += ViewModel_PropertyChanged;
             this.DataContext = _viewModel;
+            
+            // Set Initial Theme
+            SetTheme("Dark");
+        }
+
+        public void SetTheme(string theme)
+        {
+             if (theme == "Light")
+             {
+                 dockManager.Theme = new AvalonDock.Themes.Vs2013LightTheme();
+             }
+             else
+             {
+                 dockManager.Theme = new AvalonDock.Themes.Vs2013DarkTheme();
+             }
         }
 
         private Point _toolboxDragStart;
@@ -145,6 +160,13 @@ namespace RailmlEditor
                     _viewModel.AddHistory(oldState);
                 }
             }
+        }
+
+        private void FileSettings_Click(object sender, RoutedEventArgs e)
+        {
+            var settingsView = new Views.SettingsView();
+            settingsView.Owner = this;
+            settingsView.ShowDialog();
         }
 
         private void MainDesigner_Drop(object sender, DragEventArgs e)

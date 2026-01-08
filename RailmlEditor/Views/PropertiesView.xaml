@@ -9,16 +9,16 @@
     <UserControl.Resources>
         <!-- Property Styles for Table Grid -->
         <Style TargetType="Border" x:Key="PropLabelBorder">
-            <Setter Property="Background" Value="#F0F0F0"/>
-            <Setter Property="BorderBrush" Value="#C0C0C0"/>
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
             <Setter Property="Padding" Value="5,3"/>
             <Setter Property="VerticalAlignment" Value="Stretch"/>
         </Style>
 
         <Style TargetType="Border" x:Key="PropValueBorder">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#C0C0C0"/>
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="VerticalAlignment" Value="Stretch"/>
@@ -31,7 +31,7 @@
         <Style TargetType="TextBlock" x:Key="PropLabelText">
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="#333"/>
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
         </Style>
 
         <Style TargetType="TextBox" x:Key="PropInput">
@@ -39,6 +39,8 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="5,3"/>
             <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource MaterialDesignBody}"/>
         </Style>
 
         <Style TargetType="ComboBox" x:Key="PropComboInput">
@@ -1041,7 +1043,7 @@
     </UserControl.Resources>
 
     <DockPanel>
-        <TextBlock Text="Properties" DockPanel.Dock="Top" Background="#F0F0F0" Padding="5" FontWeight="Bold"/>
+        <TextBlock Text="Properties" DockPanel.Dock="Top" Background="{DynamicResource MaterialDesignPaper}" Padding="5" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}"/>
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" RequestBringIntoView="Properties_RequestBringIntoView">
             <ContentControl Content="{Binding SelectedElement}" IsTabStop="False"/>
         </ScrollViewer>

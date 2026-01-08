@@ -25,8 +25,8 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <Line x:Name="VerticalLine" Grid.Column="0" Grid.RowSpan="2" X1="9.5" Y1="0" X2="9.5" Y2="1" Stretch="Fill" Stroke="#A0A0A0" StrokeThickness="1" StrokeDashArray="1,2" SnapsToDevicePixels="True"/>
-                            <Line x:Name="HorizontalLine" Grid.Column="0" X1="9.5" Y1="12" X2="19" Y2="12" Stroke="#A0A0A0" StrokeThickness="1" StrokeDashArray="1,2" SnapsToDevicePixels="True"/>
+                            <Line x:Name="VerticalLine" Grid.Column="0" Grid.RowSpan="2" X1="9.5" Y1="0" X2="9.5" Y2="1" Stretch="Fill" Stroke="{DynamicResource MaterialDesignDivider}" StrokeThickness="1" StrokeDashArray="1,2" SnapsToDevicePixels="True"/>
+                            <Line x:Name="HorizontalLine" Grid.Column="0" X1="9.5" Y1="12" X2="19" Y2="12" Stroke="{DynamicResource MaterialDesignDivider}" StrokeThickness="1" StrokeDashArray="1,2" SnapsToDevicePixels="True"/>
 
                             <ToggleButton x:Name="Expander" Style="{StaticResource ExpandCollapseToggleStyle}" IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" ClickMode="Press" VerticalAlignment="Center"/>
 
@@ -44,8 +44,8 @@
                                 <Setter TargetName="ItemsHost" Property="Visibility" Value="Collapsed"/>
                             </Trigger>
                             <Trigger Property="IsSelected" Value="true">
-                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MaterialDesignSelection}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -55,8 +55,8 @@
     </UserControl.Resources>
 
     <DockPanel>
-        <TextBlock Text="Explorer" DockPanel.Dock="Top" Background="#F0F0F0" Padding="5" FontWeight="Bold"/>
-        <TreeView x:Name="ElementTree" ItemsSource="{Binding TreeRoots}" BorderThickness="0" RequestBringIntoView="TreeView_RequestBringIntoView">
+        <TextBlock Text="Explorer" DockPanel.Dock="Top" Background="{DynamicResource MaterialDesignPaper}" Padding="5" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}"/>
+        <TreeView x:Name="ElementTree" ItemsSource="{Binding TreeRoots}" BorderThickness="0" RequestBringIntoView="TreeView_RequestBringIntoView" Background="{DynamicResource MaterialDesignPaper}">
             <TreeView.Resources>
                 <!-- Level 1: File -->
                 <!-- Level 1: Infrastructure -->
@@ -76,61 +76,61 @@
                 <HierarchicalDataTemplate DataType="{x:Type viewmodels:TrackViewModel}" ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Id}"/>
-                        <TextBlock Text=" - " Foreground="Gray"/>
-                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
+                        <TextBlock Text=" - " Opacity="0.5"/>
+                        <TextBlock Text="{Binding Name}" Opacity="0.5" FontStyle="Italic"/>
                     </StackPanel>
                 </HierarchicalDataTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type viewmodels:CurvedTrackViewModel}" ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Id}"/>
-                        <TextBlock Text=" - " Foreground="Gray"/>
-                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
+                        <TextBlock Text=" - " Opacity="0.5"/>
+                        <TextBlock Text="{Binding Name}" Opacity="0.5" FontStyle="Italic"/>
                     </StackPanel>
                 </HierarchicalDataTemplate>
                 <DataTemplate DataType="{x:Type viewmodels:TrackNodeViewModel}">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Role}" FontWeight="Bold" Foreground="DarkMagenta"/>
-                        <TextBlock Text="(" Foreground="Gray"/>
-                        <TextBlock Text="{Binding TypeName}" Foreground="Purple"/>
-                        <TextBlock Text=") - " Foreground="Gray"/>
+                        <TextBlock Text="{Binding Role}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                        <TextBlock Text="(" Opacity="0.5"/>
+                        <TextBlock Text="{Binding TypeName}" Foreground="{DynamicResource PrimaryHueLightBrush}"/>
+                        <TextBlock Text=") - " Opacity="0.5"/>
                         <TextBlock Text="{Binding Id}"/>
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type viewmodels:TrackCircuitBorderViewModel}">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Id}" Foreground="Navy"/>
-                        <TextBlock Text="-" Foreground="Gray"/>
-                        <TextBlock Text="{Binding Name}" Foreground="Navy" FontStyle="Italic"/>
+                        <TextBlock Text="{Binding Id}" Foreground="{DynamicResource SecondaryHueMidBrush}"/>
+                        <TextBlock Text="-" Opacity="0.5"/>
+                        <TextBlock Text="{Binding Name}" Foreground="{DynamicResource SecondaryHueMidBrush}" FontStyle="Italic"/>
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type viewmodels:SignalViewModel}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Id}"/>
-                        <TextBlock Text="(" Foreground="Gray"/>
-                        <TextBlock Text="{Binding Type}" Foreground="Gray"/>
-                        <TextBlock Text=") - " Foreground="Gray"/>
-                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
+                        <TextBlock Text="(" Opacity="0.5"/>
+                        <TextBlock Text="{Binding Type}" Opacity="0.5"/>
+                        <TextBlock Text=") - " Opacity="0.5"/>
+                        <TextBlock Text="{Binding Name}" Opacity="0.5" FontStyle="Italic"/>
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type viewmodels:SwitchViewModel}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Id}"/>
-                        <TextBlock Text=" - " Foreground="Gray"/>
-                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
+                        <TextBlock Text=" - " Opacity="0.5"/>
+                        <TextBlock Text="{Binding Name}" Opacity="0.5" FontStyle="Italic"/>
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type viewmodels:RouteViewModel}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Id}"/>
-                        <TextBlock Text=" - " Foreground="Gray"/>
-                        <TextBlock Text="{Binding Name}" Foreground="Gray" FontStyle="Italic"/>
+                        <TextBlock Text=" - " Opacity="0.5"/>
+                        <TextBlock Text="{Binding Name}" Opacity="0.5" FontStyle="Italic"/>
                     </StackPanel>
                 </DataTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type viewmodels:AreaViewModel}" ItemsSource="{Binding Borders}">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Id}" FontWeight="Bold" Foreground="DarkGreen"/>
-                        <TextBlock Text=" - " Foreground="Gray"/>
-                        <TextBlock Text="{Binding Name}" Foreground="DarkGreen" FontStyle="Italic"/>
+                        <TextBlock Text="{Binding Id}" FontWeight="Bold" Foreground="{DynamicResource SecondaryHueMidBrush}"/>
+                        <TextBlock Text=" - " Opacity="0.5"/>
+                        <TextBlock Text="{Binding Name}" Foreground="{DynamicResource SecondaryHueMidBrush}" FontStyle="Italic"/>
                     </StackPanel>
                 </HierarchicalDataTemplate>
             </TreeView.Resources>
