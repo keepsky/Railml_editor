@@ -706,6 +706,8 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _bulkEdit, value);
         }
 
+        public bool SuppressTopologyUpdates { get; set; } = false;
+
         public event Action<SwitchBranchInfo>? PrincipleTrackSelectionRequested;
 
         public ICommand SelectCommand { get; }
@@ -1267,10 +1269,9 @@ namespace RailmlEditor.ViewModels
             }
             else if (sender is SwitchViewModel sw)
             {
-                if (e.PropertyName == nameof(SwitchViewModel.X) || e.PropertyName == nameof(SwitchViewModel.Y))
-                {
-                    UpdateTrackNodesToSwitch(sw);
-                }
+                // We no longer snap tracks to the switch ptag position in real-time.
+                // The ptag (X,Y) can move independently.
+                // Topology is maintained via track IDs and proximity clustering.
             }
         }
 

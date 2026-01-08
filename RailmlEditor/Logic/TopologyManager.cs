@@ -145,13 +145,24 @@ namespace RailmlEditor.Logic
             }
 
             var existingSwitches = elements.OfType<SwitchViewModel>().ToList();
-            var switchesToRemove = existingSwitches.Where(sw => !clusters.Any(c => Math.Sqrt(Math.Pow(sw.X - c.X, 2) + Math.Pow(sw.Y - c.Y, 2)) < 10.0)).ToList();
+            
+            // Define a local function for topological matching
+            bool MatchesTopology(SwitchViewModel sw, List<(string TrackId, bool isEnd)> members)
+            {
+                var swTracks = new HashSet<string>();
+                if (!string.IsNullOrEmpty(sw.EnteringTrackId)) swTracks.Add(sw.EnteringTrackId);
+                if (!string.IsNullOrEmpty(sw.PrincipleTrackId)) swTracks.Add(sw.PrincipleTrackId);
+                foreach (var id in sw.DivergingTrackIds) if (!string.IsNullOrEmpty(id)) swTracks.Add(id);
 
+                var clusterTracks = new HashSet<string>(members.Select(m => m.TrackId));
+                return swTracks.Count > 0 && swTracks.SetEquals(clusterTracks);
+            }
+
+            // Remove switches that no longer correspond to any cluster topology
+            var switchesToRemove = existingSwitches.Where(sw => !clusters.Any(c => MatchesTopology(sw, c.Members))).ToList();
             foreach (var sw in switchesToRemove) elements.Remove(sw);
 
-            // Find Max ID using IdGenerator logic locally or passing generator? 
-            // Better to implement simple max logic here or inject IdGenerator.
-            // For now, inline logic similar to before but correct.
+            // Find Max ID for new switches
             int maxId = 0;
             foreach (var sw in elements.OfType<SwitchViewModel>())
             {
@@ -161,7 +172,17 @@ namespace RailmlEditor.Logic
 
             foreach (var c in clusters)
             {
-                var sw = elements.OfType<SwitchViewModel>().FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - c.X, 2) + Math.Pow(s.Y - c.Y, 2)) < 10.0);
+                // Find existing switch for this cluster by topology first, then distance (for new clusters)
+                var sw = elements.OfType<SwitchViewModel>().FirstOrDefault(s => MatchesTopology(s, c.Members));
+                
+                // If no topological match, try distance (only for switches not already matched?)
+                // Actually, if it's a new cluster, we shouldn't have an existing switch yet.
+                if (sw == null)
+                {
+                    // Fallback to distance for newly created switches that might have been in the middle of being placed
+                    sw = elements.OfType<SwitchViewModel>().FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - c.X, 2) + Math.Pow(s.Y - c.Y, 2)) < 10.0);
+                }
+
                 if (sw == null)
                 {
                     maxId++;
@@ -206,7 +227,10 @@ namespace RailmlEditor.Logic
                                         });
                                     }
                                 }
+                                sw.X = c.X; // Ensure it starts at cluster center
+                                sw.Y = c.Y;
                                 elements.Add(sw);
+                                UpdateTrackNodesToSwitch(sw, elements);
                             }
                         }
                     });

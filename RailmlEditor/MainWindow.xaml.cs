@@ -632,6 +632,7 @@ namespace RailmlEditor
                     _isDragging = true;
                     _draggedControl = element;
                     _startPoint = e.GetPosition(MainDesigner);
+                    _viewModel.SuppressTopologyUpdates = true; // Added line
                     
                     bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
                     // If not already selected and multi-select modifier not pressed, select only this.
@@ -915,6 +916,7 @@ namespace RailmlEditor
                     _draggedControl = null;
                 }
                 
+                _viewModel.SuppressTopologyUpdates = false;
                 _viewModel.UpdateProximitySwitches();
                 if (_beforeDragSnapshot != null) _viewModel.AddHistory(_beforeDragSnapshot);
             }
@@ -1023,6 +1025,7 @@ namespace RailmlEditor
                 double currentY = swVm.Y;
 
                 _tagDragOriginalAbsPoint = new Point(currentX, currentY);
+                _viewModel.SuppressTopologyUpdates = true;
 
                 el.CaptureMouse();
                 e.Handled = true; 
@@ -1076,6 +1079,12 @@ namespace RailmlEditor
                 _isTagDragging = false;
                 _draggedTagSwitch = null;
                 el.ReleaseMouseCapture();
+
+                _viewModel.SuppressTopologyUpdates = false;
+                _viewModel.UpdateProximitySwitches();
+                
+                // Add history snapshot for the drag operation
+                if (_beforeDragSnapshot != null) _viewModel.AddHistory(_beforeDragSnapshot);
                 e.Handled = true;
             }
         }

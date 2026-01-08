@@ -250,11 +250,18 @@ namespace RailmlEditor.Services
                     }
                     else
                     {
-                         // Switch Connection
-                         var nodeCoordX = nodeA.ScreenPos?.X ?? 0;
-                         var nodeCoordY = nodeA.ScreenPos?.Y ?? 0;
                          var swVm = viewModel.Elements.OfType<SwitchViewModel>()
-                                 .FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - nodeCoordX, 2) + Math.Pow(s.Y - nodeCoordY, 2)) < 10.0);
+                                 .FirstOrDefault(s => {
+                                     var swTracks = new System.Collections.Generic.HashSet<string>();
+                                     if (!string.IsNullOrEmpty(s.EnteringTrackId)) swTracks.Add(GetRailmlId(s.EnteringTrackId));
+                                     if (!string.IsNullOrEmpty(s.PrincipleTrackId)) swTracks.Add(GetRailmlId(s.PrincipleTrackId));
+                                     foreach (var id in s.DivergingTrackIds) if (!string.IsNullOrEmpty(id)) swTracks.Add(GetRailmlId(id));
+
+                                     var clusterTracks = new System.Collections.Generic.HashSet<string>(overlappingNodes.Select(n => nodeToTrack[n].Id));
+                                     clusterTracks.Add(parentTrack.Id);
+                                     
+                                     return swTracks.Count > 0 && swTracks.SetEquals(clusterTracks);
+                                 });
                          
                          if (swVm != null)
                          {
