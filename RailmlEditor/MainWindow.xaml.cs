@@ -20,8 +20,13 @@ namespace RailmlEditor
             _viewModel.PropertyChanged += ViewModel_PropertyChanged;
             this.DataContext = _viewModel;
             
-            // Set Initial Theme
-            SetTheme("Dark");
+            
+            // Set Initial Theme based on Config
+            // ConfigService.Load() is called in App.OnStartup, but MainWindow might be created before that if StartupUri is used?
+            // Let's ensure Load() is called or just access Current which defaults to Light.
+            // Actually, safe to just read Current.Theme
+            Services.ConfigService.Load(); // Ensure it's loaded
+            SetTheme(Services.ConfigService.Current.Theme);
         }
 
         public void SetTheme(string theme)

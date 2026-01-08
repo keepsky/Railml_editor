@@ -2,11 +2,16 @@
 <railml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:sehwa="http://www.sehwa.co.kr/railml" version="2.5" xmlns="http://www.railml.org/schemas/2013">
   <infrastructure id="inf001" name="Default Infrastructure">
     <routes>
-      <route id="R1" name="A1_1DN" approachPointRef="B3049T" entryRef="1A" exitRef="54L" overlapEndRef="55T" proceedSpeed="YY" releaseTriggerHead="false">
+      <route id="R1" name="1A_1DN" approachPointRef="B3049T" entryRef="1A" exitRef="54L" overlapEndRef="55T" proceedSpeed="YY" releaseTriggerHead="false">
         <switchAndPosition switchRef="21" switchPosition="normal" />
         <switchAndPosition switchRef="23" switchPosition="reverse" />
         <switchAndPosition switchRef="25" switchPosition="reverse" />
         <overlapSwitchAndPosition switchRef="55" switchPosition="reverse" />
+      </route>
+      <route id="R2" name="2A_6UP" approachPointRef="B3054T2" entryRef="2A" exitRef="26R" proceedSpeed="R" releaseTriggerHead="false">
+        <switchAndPosition switchRef="52" switchPosition="reverse" />
+        <switchAndPosition switchRef="53" switchPosition="reverse" />
+        <overlapSwitchAndPosition switchRef="24" switchPosition="reverse" />
       </route>
     </routes>
     <tracks>
@@ -1244,6 +1249,9 @@
           </trackElementVis>
         </trackVis>
       </lineVis>
+      <objectVis ref="sw13">
+        <position x="210" y="120" />
+      </objectVis>
       <objectVis ref="sw2">
         <position x="260" y="150" />
       </objectVis>
@@ -1268,17 +1276,14 @@
       <objectVis ref="sw8">
         <position x="280" y="230" />
       </objectVis>
+      <objectVis ref="sw14">
+        <position x="620" y="190" />
+      </objectVis>
       <objectVis ref="sw11">
         <position x="700" y="190" />
       </objectVis>
       <objectVis ref="sw12">
         <position x="660" y="230" />
-      </objectVis>
-      <objectVis ref="sw13">
-        <position x="210" y="120" />
-      </objectVis>
-      <objectVis ref="sw14">
-        <position x="620" y="190" />
       </objectVis>
     </visualization>
   </infrastructureVisualizations>
