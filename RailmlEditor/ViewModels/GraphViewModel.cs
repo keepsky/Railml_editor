@@ -393,7 +393,7 @@ namespace RailmlEditor.ViewModels
         {
             if (_nodeMap.TryGetValue(id, out var existing)) return existing;
             
-            var node = new GraphNodeViewModel(id, label, type, x, y);
+            var node = new GraphNodeViewModel(id, label, type, x * 2.0, y);
             Nodes.Add(node);
             _nodeMap[id] = node;
             return node;

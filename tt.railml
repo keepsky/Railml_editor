@@ -103,7 +103,7 @@
         <ocsElements>
           <signals>
             <signal id="sig2" dir="up" pos="15">
-              <additionalName />
+              <additionalName name="4A" />
             </signal>
           </signals>
         </ocsElements>
