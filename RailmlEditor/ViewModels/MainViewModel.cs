@@ -720,6 +720,22 @@ namespace RailmlEditor.ViewModels
 
         private List<BaseElementViewModel> _clipboard = new List<BaseElementViewModel>();
 
+        private bool _isEditMode = false;
+        public bool IsEditMode
+        {
+            get => _isEditMode;
+            set
+            {
+                if (SetProperty(ref _isEditMode, value))
+                {
+                    (DeleteCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (PasteCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (UndoCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (RedoCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
+        }
+
         public UndoRedoManager History { get; } = new();
 
         private readonly RailmlEditor.Logic.TopologyManager _topologyManager = new RailmlEditor.Logic.TopologyManager();
@@ -735,8 +751,8 @@ namespace RailmlEditor.ViewModels
                 (RedoCommand as RelayCommand)?.RaiseCanExecuteChanged();
             };
 
-            UndoCommand = new RelayCommand(_ => History.Undo(), _ => History.CanUndo);
-            RedoCommand = new RelayCommand(_ => History.Redo(), _ => History.CanRedo);
+            UndoCommand = new RelayCommand(_ => History.Undo(), _ => History.CanUndo && IsEditMode);
+            RedoCommand = new RelayCommand(_ => History.Redo(), _ => History.CanRedo && IsEditMode);
 
             SelectCommand = new RelayCommand(param => 
             {
@@ -754,9 +770,9 @@ namespace RailmlEditor.ViewModels
                 }
             });
 
-            DeleteCommand = new RelayCommand(_ => DeleteSelected());
-            CopyCommand = new RelayCommand(_ => CopySelected());
-            PasteCommand = new RelayCommand(_ => PasteElements());
+            DeleteCommand = new RelayCommand(_ => DeleteSelected(), _ => IsEditMode);
+            CopyCommand = new RelayCommand(_ => CopySelected()); // Copy is allowed in read-only
+            PasteCommand = new RelayCommand(_ => PasteElements(), _ => IsEditMode);
 
             OpenTemplatesCommand = new RelayCommand(_ => 
             {
@@ -774,6 +790,7 @@ namespace RailmlEditor.ViewModels
 
         private void DeleteSelected()
         {
+            if (!IsEditMode) return;
             var oldState = TakeSnapshot();
             var toRemove = SelectedElements.ToList();
             if (!toRemove.Any()) return;
@@ -796,6 +813,7 @@ namespace RailmlEditor.ViewModels
 
         private void PasteElements()
         {
+            if (!IsEditMode) return;
             if (!_clipboard.Any()) return;
             var oldState = TakeSnapshot();
 

@@ -7,6 +7,8 @@
     xmlns:viewmodels="clr-namespace:RailmlEditor.ViewModels"
     xmlns:utils="clr-namespace:RailmlEditor.Utils" mc:Ignorable="d" d:DesignHeight="600" d:DesignWidth="300">
     <UserControl.Resources>
+
+
         <!-- Property Styles for Table Grid -->
         <Style TargetType="Border" x:Key="PropLabelBorder">
             <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
@@ -41,6 +43,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
             <Setter Property="CaretBrush" Value="{DynamicResource MaterialDesignBody}"/>
+            <Setter Property="IsReadOnly" Value="{Binding DataContext.IsEditMode, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolConverter}}"/>
         </Style>
 
         <Style TargetType="ComboBox" x:Key="PropComboInput">
@@ -49,6 +52,7 @@
             <Setter Property="Padding" Value="5,3"/>
             <Setter Property="Margin" Value="0"/>
             <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="IsEnabled" Value="{Binding DataContext.IsEditMode, RelativeSource={RelativeSource AncestorType=Window}}"/>
         </Style>
 
         <!-- Bulk Edit Properties -->

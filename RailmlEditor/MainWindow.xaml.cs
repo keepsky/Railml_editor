@@ -73,6 +73,7 @@ namespace RailmlEditor
 
         private void Toolbox_Click(object sender, RoutedEventArgs e)
         {
+            if (!_viewModel.IsEditMode) return;
             if (sender is Button button)
             {
                 var oldState = _viewModel.TakeSnapshot();
@@ -176,6 +177,7 @@ namespace RailmlEditor
 
         private void MainDesigner_Drop(object sender, DragEventArgs e)
         {
+            if (!_viewModel.IsEditMode) return;
             if (e.Data.GetDataPresent(DataFormats.StringFormat))
             {
                 var oldState = _viewModel.TakeSnapshot();
@@ -610,7 +612,6 @@ namespace RailmlEditor
 
             if (sender is FrameworkElement element && element.DataContext is BaseElementViewModel viewModel)
             {
-                // Prevent Switch Dragging
                 if (viewModel is SwitchViewModel)
                 {
                     // Allow selection but prevent drag
@@ -635,6 +636,24 @@ namespace RailmlEditor
 
                 if (e.ChangedButton == MouseButton.Left)
                 {
+                    if (!_viewModel.IsEditMode)
+                    {
+                        // Allow selection only
+                        _viewModel.SelectedElement = viewModel;
+                         bool isMultiSelect = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
+                        if (!isMultiSelect)
+                        {
+                            _viewModel.ClearAllSelections();
+                            viewModel.IsSelected = true;
+                        }
+                        else
+                        {
+                            viewModel.IsSelected = !viewModel.IsSelected;
+                        }
+                        e.Handled = true;
+                        return;
+                    }
+
                     _beforeDragSnapshot = _viewModel.TakeSnapshot();
                     _isDragging = true;
                     _draggedControl = element;
@@ -1022,6 +1041,12 @@ namespace RailmlEditor
                     swVm.IsSelected = !swVm.IsSelected;
                 }
                 _viewModel.SelectedElement = swVm;
+                
+                if (!_viewModel.IsEditMode)
+                {
+                    e.Handled = true;
+                    return;
+                }
 
                 // Drag Init (Delayed)
                 _isTagDragging = false; 

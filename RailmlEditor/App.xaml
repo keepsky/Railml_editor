@@ -41,6 +41,7 @@
             <utils:MidPointConverter x:Key="MidPoint"/>
             <utils:ReadableAngleConverter x:Key="ReadableAngle"/>
             <utils:ConnectionToVisibilityConverter x:Key="ConnectionToVis"/>
+            <utils:InverseBoolConverter x:Key="InverseBoolConverter"/>
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         </ResourceDictionary>
     </Application.Resources>

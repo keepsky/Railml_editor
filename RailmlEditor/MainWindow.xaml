@@ -615,13 +615,15 @@
             <MenuItem Header="Edit">
                 <MenuItem Header="Undo" Command="{Binding UndoCommand}"/>
                 <MenuItem Header="Redo" Command="{Binding RedoCommand}"/>
+                <Separator/>
+                <MenuItem Header="Enable Editing" IsCheckable="True" IsChecked="{Binding IsEditMode}"/>
             </MenuItem>
             <MenuItem Header="View">
                 <MenuItem Header="Graph" Click="ViewGraph_Click"/>
             </MenuItem>
         </Menu>
 
-        <ToolBarTray DockPanel.Dock="Top" Background="{DynamicResource MaterialDesignPaper}">
+        <ToolBarTray DockPanel.Dock="Top" Background="{DynamicResource MaterialDesignPaper}" IsEnabled="{Binding IsEditMode}">
             <ToolBar Style="{DynamicResource MaterialDesignToolBar}" ClipToBounds="False" Background="{DynamicResource MaterialDesignPaper}">
                 <Button Click="Toolbox_Click" ToolTip="Route" Style="{StaticResource ToolBarButtonStyle}">
                     <Control Template="{StaticResource RouteIcon}" Width="28" Height="16"/>
