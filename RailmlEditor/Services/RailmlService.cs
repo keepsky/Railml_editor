@@ -229,7 +229,7 @@ namespace RailmlEditor.Services
                          foreach (var nodeB in overlappingNodes)
                          {
                              bool isBeginB = nodeB.Id.StartsWith("tb");
-                             if (isBeginA == isBeginB) continue; 
+                             // if (isBeginA == isBeginB) continue; // Allow Begin-Begin and End-End connections 
 
                              var targetTrack = nodeToTrack[nodeB];
                              string targetTrackPart = System.Text.RegularExpressions.Regex.Match(targetTrack.Id, @"\d+").Value;
