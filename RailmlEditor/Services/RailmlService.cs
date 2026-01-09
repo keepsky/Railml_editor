@@ -588,6 +588,30 @@ namespace RailmlEditor.Services
                 }
             }
 
+            // Build Connection/Node ID to Track ID Map
+            var connToTrackMap = new System.Collections.Generic.Dictionary<string, string>();
+            foreach (var track in railml.Infrastructure.Tracks.TrackList)
+            {
+                if (track.TrackTopology?.TrackBegin != null)
+                {
+                    connToTrackMap[track.TrackTopology.TrackBegin.Id] = track.Id;
+                    if (track.TrackTopology.TrackBegin.ConnectionList != null)
+                    {
+                        foreach (var conn in track.TrackTopology.TrackBegin.ConnectionList)
+                            connToTrackMap[conn.Id] = track.Id;
+                    }
+                }
+                if (track.TrackTopology?.TrackEnd != null)
+                {
+                    connToTrackMap[track.TrackTopology.TrackEnd.Id] = track.Id;
+                    if (track.TrackTopology.TrackEnd.ConnectionList != null)
+                    {
+                        foreach (var conn in track.TrackTopology.TrackEnd.ConnectionList)
+                            connToTrackMap[conn.Id] = track.Id;
+                    }
+                }
+            }
+
             // Second pass: Create ViewModels
             foreach (var track in railml.Infrastructure.Tracks.TrackList)
             {
@@ -772,8 +796,26 @@ namespace RailmlEditor.Services
                                 var enteringConn = beginNode?.ConnectionList?.FirstOrDefault();
                                 if (enteringConn != null)
                                 {
-                                    var oldRef = enteringConn.Ref.Split('_')[0];
-                                    if (idMap.ContainsKey(oldRef)) switchVm.EnteringTrackId = idMap[oldRef];
+                                    string oldRef = enteringConn.Ref;
+                                    string oldTrackId = null;
+                                    
+                                    // Try direct map first (trackId)
+                                    if (idMap.ContainsKey(oldRef)) oldTrackId = oldRef;
+                                    // Try looking up connection/node ID to Track ID
+                                    else if (connToTrackMap.ContainsKey(oldRef)) oldTrackId = connToTrackMap[oldRef];
+                                    // Try regex fallback (tr1 from ce1)
+                                    else 
+                                    {
+                                        var match = System.Text.RegularExpressions.Regex.Match(oldRef, @"\d+");
+                                        if (match.Success)
+                                        {
+                                            var num = match.Value;
+                                            oldTrackId = railml.Infrastructure.Tracks.TrackList.FirstOrDefault(t => t.Id.EndsWith(num))?.Id;
+                                        }
+                                    }
+
+                                    if (oldTrackId != null && idMap.ContainsKey(oldTrackId)) 
+                                        switchVm.EnteringTrackId = idMap[oldTrackId];
                                 }
                             }
                             else
@@ -783,19 +825,46 @@ namespace RailmlEditor.Services
                                 var principleConn = beginNode?.ConnectionList?.FirstOrDefault();
                                 if (principleConn != null)
                                 {
-                                    var oldRef = principleConn.Ref.Split('_')[0];
-                                    if (idMap.ContainsKey(oldRef)) switchVm.PrincipleTrackId = idMap[oldRef];
+                                    string oldRef = principleConn.Ref;
+                                    string oldTrackId = null;
+                                    
+                                    if (idMap.ContainsKey(oldRef)) oldTrackId = oldRef;
+                                    else if (connToTrackMap.ContainsKey(oldRef)) oldTrackId = connToTrackMap[oldRef];
+                                    else 
+                                    {
+                                        var match = System.Text.RegularExpressions.Regex.Match(oldRef, @"\d+");
+                                        if (match.Success)
+                                        {
+                                            var num = match.Value;
+                                            oldTrackId = railml.Infrastructure.Tracks.TrackList.FirstOrDefault(t => t.Id.EndsWith(num))?.Id;
+                                        }
+                                    }
+
+                                    if (oldTrackId != null && idMap.ContainsKey(oldTrackId)) 
+                                        switchVm.PrincipleTrackId = idMap[oldTrackId];
                                 }
                             }
 
                             foreach (var c in sw.ConnectionList)
                             {
-                                    string oldDivNum = System.Text.RegularExpressions.Regex.Match(c.Ref, @"\d+").Value;
-                                    string oldDivId = railml.Infrastructure.Tracks.TrackList.FirstOrDefault(t => System.Text.RegularExpressions.Regex.Match(t.Id, @"\d+").Value == oldDivNum)?.Id ?? c.Ref.Split('_')[0];
+                                    string oldRef = c.Ref;
+                                    string oldTrackId = null;
 
-                                    if (idMap.ContainsKey(oldDivId))
+                                    if (idMap.ContainsKey(oldRef)) oldTrackId = oldRef;
+                                    else if (connToTrackMap.ContainsKey(oldRef)) oldTrackId = connToTrackMap[oldRef];
+                                    else 
                                     {
-                                        var newDivId = idMap[oldDivId];
+                                        var match = System.Text.RegularExpressions.Regex.Match(oldRef, @"\d+");
+                                        if (match.Success)
+                                        {
+                                            var num = match.Value;
+                                            oldTrackId = railml.Infrastructure.Tracks.TrackList.FirstOrDefault(t => t.Id.EndsWith(num))?.Id;
+                                        }
+                                    }
+
+                                    if (oldTrackId != null && idMap.ContainsKey(oldTrackId))
+                                    {
+                                        var newDivId = idMap[oldTrackId];
                                         switchVm.DivergingTrackIds.Add(newDivId);
 #pragma warning disable CS8604, CS8625
                                     switchVm.DivergingConnections.Add(new DivergingConnectionViewModel

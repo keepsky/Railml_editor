@@ -280,6 +280,40 @@
             </Viewbox>
         </ControlTemplate>
 
+        <ControlTemplate x:Key="SingleUIcon" TargetType="Control">
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="320" Height="177">
+                    <Rectangle Canvas.Left="0" Canvas.Top="7.64" Width="320" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <Rectangle Canvas.Left="166" Canvas.Top="128.64" Width="154" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <Rectangle Canvas.Left="20" Canvas.Top="68.32" Width="210" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
+                        <Rectangle.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleY="-1"/>
+                                <RotateTransform Angle="-135"/>
+                            </TransformGroup>
+                        </Rectangle.RenderTransform>
+                    </Rectangle>
+                </Canvas>
+            </Viewbox>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="SingleRUIcon" TargetType="Control">
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="320" Height="177">
+                    <Rectangle Canvas.Left="0" Canvas.Top="7.64" Width="320" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <Rectangle Canvas.Left="0" Canvas.Top="128.64" Width="154" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3"/>
+                    <Rectangle Canvas.Left="90" Canvas.Top="68.32" Width="210" Height="40" RadiusX="20" RadiusY="20" Fill="#B3B3B3" RenderTransformOrigin="0.5,0.5">
+                        <Rectangle.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleY="-1"/>
+                                <RotateTransform Angle="-45"/>
+                            </TransformGroup>
+                        </Rectangle.RenderTransform>
+                    </Rectangle>
+                </Canvas>
+            </Viewbox>
+        </ControlTemplate>
+
         <DataTemplate DataType="{x:Type local:ViewModels.SignalViewModel}">
             <Grid Width="20" Height="10" ClipToBounds="False" Background="Transparent">
                 <Control Template="{StaticResource SignalIcon}" Width="20" Height="10" RenderTransformOrigin="0.5,0.5">
@@ -648,6 +682,14 @@
                 <Button Click="Toolbox_Click" ToolTip="SingleR" Style="{StaticResource ToolBarButtonStyle}">
                     <Control Template="{StaticResource CornerRIcon}" Width="28" Height="16"/>
                     <Button.Tag>SingleR</Button.Tag>
+                </Button>
+                <Button Click="Toolbox_Click" ToolTip="SingleU" Style="{StaticResource ToolBarButtonStyle}">
+                    <Control Template="{StaticResource SingleUIcon}" Width="28" Height="16"/>
+                    <Button.Tag>SingleU</Button.Tag>
+                </Button>
+                <Button Click="Toolbox_Click" ToolTip="SingleRU" Style="{StaticResource ToolBarButtonStyle}">
+                    <Control Template="{StaticResource SingleRUIcon}" Width="28" Height="16"/>
+                    <Button.Tag>SingleRU</Button.Tag>
                 </Button>
                 <Button Click="Toolbox_Click" ToolTip="Double" Style="{StaticResource ToolBarButtonStyle}">
                     <Control Template="{StaticResource DoubleIcon}" Width="28" Height="17"/>

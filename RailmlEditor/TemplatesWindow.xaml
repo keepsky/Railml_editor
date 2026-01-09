@@ -15,6 +15,12 @@
             <TabItem Header="SingleR" Tag="singleR">
                 <TextBox AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" FontFamily="Consolas"/>
             </TabItem>
+            <TabItem Header="SingleU" Tag="singleU">
+                <TextBox AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" FontFamily="Consolas"/>
+            </TabItem>
+            <TabItem Header="SingleRU" Tag="singleRU">
+                <TextBox AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" FontFamily="Consolas"/>
+            </TabItem>
             <TabItem Header="Double" Tag="double">
                 <TextBox AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" FontFamily="Consolas"/>
             </TabItem>

@@ -134,6 +134,14 @@ namespace RailmlEditor
                 {
                     _viewModel.AddDoubleTrack("singleR.railml", defaultPos);
                 }
+                else if (type == "SingleU")
+                {
+                    _viewModel.AddDoubleTrack("singleU.railml", defaultPos);
+                }
+                else if (type == "SingleRU")
+                {
+                    _viewModel.AddDoubleTrack("singleRU.railml", defaultPos);
+                }
                 else if (type == "Route")
                 {
                     newElement = new RouteViewModel

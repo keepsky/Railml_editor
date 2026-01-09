@@ -7,7 +7,7 @@
           <trackBegin pos="0" id="tb1">
             <openEnd id="tb1" />
           </trackBegin>
-          <trackEnd pos="30" id="te1">
+          <trackEnd pos="20" id="te1">
             <connection id="ce1" ref="cb2" />
           </trackEnd>
         </trackTopology>
@@ -17,22 +17,24 @@
           <trackBegin pos="0" id="tb2">
             <connection id="cb2" ref="ce1" />
           </trackBegin>
-          <trackEnd pos="20" id="te2">
+          <trackEnd pos="30" id="te2">
             <openEnd id="te2" />
           </trackEnd>
           <connections>
             <switch id="sw1" pos="0" trackContinueCourse="straight" normalPosition="straight">
               <additionalName name="sw1" />
-              <connection id="c1-ce3" ref="ce3" orientation="incoming" course="left" />
+              <connection id="c1-cb3" ref="cb3" orientation="outgoing" course="left" />
             </switch>
           </connections>
         </trackTopology>
       </track>
       <track id="tr3" mainDir="down" code="corner">
         <trackTopology>
-          <trackBegin pos="0" id="tb3" />
+          <trackBegin pos="0" id="tb3">
+            <connection id="cb3" ref="c1-cb3" />
+          </trackBegin>
           <trackEnd pos="54" id="te3">
-            <connection id="ce3" ref="c1-ce3" />
+            <openEnd id="te3" />
           </trackEnd>
         </trackTopology>
       </track>
@@ -43,7 +45,7 @@
       <lineVis>
         <trackVis ref="tr1">
           <trackElementVis ref="tb1">
-            <position x="100" y="150" />
+            <position x="110" y="150" />
           </trackElementVis>
           <trackElementVis ref="te1">
             <position x="130" y="150" />
@@ -54,18 +56,18 @@
             <position x="130" y="150" />
           </trackElementVis>
           <trackElementVis ref="te2">
-            <position x="150" y="150" />
+            <position x="160" y="150" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr3">
           <trackElementVis ref="tb3">
-            <position x="100" y="110" />
-          </trackElementVis>
-          <trackElementVis ref="te3">
             <position x="130" y="150" />
           </trackElementVis>
+          <trackElementVis ref="te3">
+            <position x="160" y="110" />
+          </trackElementVis>
           <trackElementVis ref="tr3_mid">
-            <position x="110" y="110" />
+            <position x="150" y="110" />
           </trackElementVis>
         </trackVis>
       </lineVis>
