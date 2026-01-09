@@ -32,7 +32,7 @@ namespace RailmlEditor.Models
         [XmlAttribute(AttributeName = "name")]
         public string Name { get; set; }
 
-        [XmlElement(ElementName = "routes")]
+        [XmlElement(ElementName = "routes", Namespace = "http://www.sehwa.co.kr/railml")]
         public Routes Routes { get; set; }
 
         [XmlElement(ElementName = "areas", Namespace = "http://www.sehwa.co.kr/railml")]
@@ -281,7 +281,7 @@ namespace RailmlEditor.Models
 
     public class Routes
     {
-        [XmlElement(ElementName = "route")]
+        [XmlElement(ElementName = "route", Namespace = "http://www.sehwa.co.kr/railml")]
         public List<Route> RouteList { get; set; } = new List<Route>();
     }
 
@@ -323,13 +323,13 @@ namespace RailmlEditor.Models
         [XmlAttribute(AttributeName = "releaseTriggerRef")]
         public string ReleaseTriggerRef { get; set; }
 
-        [XmlElement(ElementName = "switchAndPosition")]
+        [XmlElement(ElementName = "switchAndPosition", Namespace = "http://www.sehwa.co.kr/railml")]
         public List<SwitchAndPosition> SwitchAndPositionList { get; set; } = new List<SwitchAndPosition>();
 
         [XmlElement(ElementName = "overlapSwitchAndPosition")]
         public List<SwitchAndPosition> OverlapSwitchAndPositionList { get; set; } = new List<SwitchAndPosition>();
 
-        [XmlElement(ElementName = "releaseGroup")]
+        [XmlElement(ElementName = "releaseGroup", Namespace = "http://www.sehwa.co.kr/railml")]
         public ReleaseGroup ReleaseGroup { get; set; }
     }
 
