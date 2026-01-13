@@ -167,11 +167,28 @@ namespace RailmlEditor.ViewModels
                                 trackId = track.Id;
                             }
                             
-                            // Normalize Edge Direction: Ensure From -> To means LowerPos -> HigherPos
-                            // If IsSearchUp (True) -> Searching Increasing (Start < Target). From = Start.
-                            // If !IsSearchUp (False) -> Searching Decreasing (Start > Target). From = Target.
+                            // Normalize Edge Direction:
+                            // If nodes are on the SAME track, strictly sort by Position (From=Lower, To=Higher).
+                            // This guarantees consistency regardless of traversal direction.
+                            // If cross-track, rely on IsSearchUp (Initial).
+
+                            // Normalize Edge Direction:
+                            // Default: Fallback for cross-track connections (rely on IsSearchUp)
                             var fromNode = probe.IsSearchUp ? startNode : target;
                             var toNode = probe.IsSearchUp ? target : startNode;
+
+                            // Refinement: If nodes are on the SAME track, strictly sort by Position (From=Lower, To=Higher).
+                            if (onTrackNodes.TryGetValue(probe.TrackId, out var trackNodes))
+                            {
+                                var startEntry = trackNodes.FirstOrDefault(n => n.Node == startNode);
+                                var targetEntry = trackNodes.FirstOrDefault(n => n.Node == target);
+
+                                if (startEntry != null && targetEntry != null)
+                                {
+                                    fromNode = (startEntry.Pos <= targetEntry.Pos) ? startNode : target;
+                                    toNode = (startEntry.Pos <= targetEntry.Pos) ? target : startNode;
+                                }
+                            }
 
                             Edges.Add(new GraphEdgeViewModel(fromNode, toNode, direction, trackId)); 
                             createdEdges.Add(edgeKey);
