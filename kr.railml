@@ -242,6 +242,7 @@
         <ocsElements>
           <trainDetectionElements>
             <trackCircuitBorder id="td1" name="Border" pos="17" />
+            <trackCircuitBorder id="td12" name="Border" pos="111" />
           </trainDetectionElements>
         </ocsElements>
       </track>
@@ -540,7 +541,7 @@
         <ocsElements>
           <trainDetectionElements>
             <trackCircuitBorder id="td10" name="Border" pos="28" />
-            <trackCircuitBorder id="td11" name="Border" pos="295" />
+            <trackCircuitBorder id="td11" name="Border" pos="285" />
           </trainDetectionElements>
         </ocsElements>
       </track>
@@ -590,6 +591,7 @@
           <trainDetectionElements>
             <trackCircuitBorder id="td4" name="Border" pos="41" />
             <trackCircuitBorder id="td5" name="Border" pos="254" />
+            <trackCircuitBorder id="td13" name="Border" pos="188" />
           </trainDetectionElements>
         </ocsElements>
       </track>
@@ -971,6 +973,9 @@
           <trackElementVis ref="td1">
             <position x="406.9230769230769" y="70" />
           </trackElementVis>
+          <trackElementVis ref="td12">
+            <position x="501.031746031746" y="70" />
+          </trackElementVis>
         </trackVis>
         <trackVis ref="tr17">
           <trackElementVis ref="tb17">
@@ -1171,7 +1176,7 @@
             <position x="317.6923076923076" y="190" />
           </trackElementVis>
           <trackElementVis ref="td11">
-            <position x="584.6153846153845" y="190" />
+            <position x="574.6153846153845" y="190" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr37">
@@ -1205,6 +1210,9 @@
           </trackElementVis>
           <trackElementVis ref="td5">
             <position x="653.8461538461537" y="230" />
+          </trackElementVis>
+          <trackElementVis ref="td13">
+            <position x="588.1746031746031" y="230" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr40">
@@ -1362,7 +1370,7 @@
         </trackVis>
       </lineVis>
       <objectVis ref="sw13">
-        <position x="210" y="120" />
+        <position x="213" y="125" />
       </objectVis>
       <objectVis ref="sw2">
         <position x="250" y="150" />
@@ -1377,25 +1385,25 @@
         <position x="580" y="150" />
       </objectVis>
       <objectVis ref="sw5">
-        <position x="690" y="120" />
+        <position x="686" y="124" />
       </objectVis>
       <objectVis ref="sw6">
         <position x="180" y="190" />
       </objectVis>
       <objectVis ref="sw7">
-        <position x="240" y="170" />
+        <position x="243" y="166" />
       </objectVis>
       <objectVis ref="sw15">
-        <position x="360" y="200" />
+        <position x="356" y="206" />
       </objectVis>
       <objectVis ref="sw14">
         <position x="620" y="190" />
       </objectVis>
       <objectVis ref="sw11">
-        <position x="680" y="170" />
+        <position x="688" y="166" />
       </objectVis>
       <objectVis ref="sw12">
-        <position x="660" y="230" />
+        <position x="657" y="228" />
       </objectVis>
     </visualization>
   </infrastructureVisualizations>

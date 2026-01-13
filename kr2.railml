@@ -1362,7 +1362,7 @@
         </trackVis>
       </lineVis>
       <objectVis ref="sw13">
-        <position x="210" y="120" />
+        <position x="213" y="125" />
       </objectVis>
       <objectVis ref="sw2">
         <position x="250" y="150" />
@@ -1377,25 +1377,25 @@
         <position x="580" y="150" />
       </objectVis>
       <objectVis ref="sw5">
-        <position x="690" y="120" />
+        <position x="686" y="124" />
       </objectVis>
       <objectVis ref="sw6">
         <position x="180" y="190" />
       </objectVis>
       <objectVis ref="sw7">
-        <position x="240" y="170" />
+        <position x="243" y="166" />
       </objectVis>
       <objectVis ref="sw15">
-        <position x="360" y="200" />
+        <position x="356" y="206" />
       </objectVis>
       <objectVis ref="sw14">
         <position x="620" y="190" />
       </objectVis>
       <objectVis ref="sw11">
-        <position x="680" y="170" />
+        <position x="688" y="166" />
       </objectVis>
       <objectVis ref="sw12">
-        <position x="660" y="230" />
+        <position x="657" y="228" />
       </objectVis>
     </visualization>
   </infrastructureVisualizations>

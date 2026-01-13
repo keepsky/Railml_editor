@@ -1110,9 +1110,9 @@ namespace RailmlEditor
                     double newX = _tagDragOriginalAbsPoint.X + deltaX;
                     double newY = _tagDragOriginalAbsPoint.Y + deltaY;
 
-                    // Snap to 10px Grid (Matches tracks)
-                    newX = Math.Round(newX / 10.0) * 10.0;
-                    newY = Math.Round(newY / 10.0) * 10.0;
+                    // Snap to 1px Grid (Matches tracks)
+                    newX = Math.Round(newX);
+                    newY = Math.Round(newY);
 
                     _draggedTagSwitch.X = newX;
                     _draggedTagSwitch.Y = newY;
