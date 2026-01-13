@@ -66,7 +66,7 @@ namespace RailmlEditor.ViewModels
 
             foreach (var bor in borders)
             {
-                GetOrCreateNode(bor.Id, bor.Name ?? bor.Id, "Border", bor.X, bor.Y);
+                GetOrCreateNode(bor.Id, bor.Id, "Border", bor.X, bor.Y);
             }
 
             // 2. Map Nodes to Tracks
@@ -159,7 +159,21 @@ namespace RailmlEditor.ViewModels
                         string edgeKey = GetEdgeKey(startNode.Id, target.Id);
                         if (!createdEdges.Contains(edgeKey))
                         {
-                            Edges.Add(new GraphEdgeViewModel(startNode, target, "none")); 
+                            string direction = "none";
+                            string trackId = "";
+                            if (trackLookup.TryGetValue(probe.TrackId, out var track))
+                            {
+                                direction = track.MainDir ?? "none";
+                                trackId = track.Id;
+                            }
+                            
+                            // Normalize Edge Direction: Ensure From -> To means LowerPos -> HigherPos
+                            // If IsSearchUp (True) -> Searching Increasing (Start < Target). From = Start.
+                            // If !IsSearchUp (False) -> Searching Decreasing (Start > Target). From = Target.
+                            var fromNode = probe.IsSearchUp ? startNode : target;
+                            var toNode = probe.IsSearchUp ? target : startNode;
+
+                            Edges.Add(new GraphEdgeViewModel(fromNode, toNode, direction, trackId)); 
                             createdEdges.Add(edgeKey);
                         }
                     }

@@ -242,6 +242,7 @@
         <ocsElements>
           <trainDetectionElements>
             <trackCircuitBorder id="td1" name="Border" pos="17" />
+            <trackCircuitBorder id="td12" name="Border" pos="111" />
           </trainDetectionElements>
         </ocsElements>
       </track>
@@ -540,7 +541,7 @@
         <ocsElements>
           <trainDetectionElements>
             <trackCircuitBorder id="td10" name="Border" pos="28" />
-            <trackCircuitBorder id="td11" name="Border" pos="295" />
+            <trackCircuitBorder id="td11" name="Border" pos="285" />
           </trainDetectionElements>
         </ocsElements>
       </track>
@@ -586,12 +587,6 @@
             <connection id="ce39" ref="cb52" />
           </trackEnd>
         </trackTopology>
-        <ocsElements>
-          <trainDetectionElements>
-            <trackCircuitBorder id="td4" name="Border" pos="41" />
-            <trackCircuitBorder id="td5" name="Border" pos="254" />
-          </trainDetectionElements>
-        </ocsElements>
       </track>
       <track id="tr40" name="24T" mainDir="up" code="corner">
         <trackTopology>
@@ -629,12 +624,6 @@
             <connection id="ce42" ref="cb50" />
           </trackEnd>
         </trackTopology>
-        <ocsElements>
-          <trainDetectionElements>
-            <trackCircuitBorder id="td2" name="Border" pos="24" />
-            <trackCircuitBorder id="td3" name="Border" pos="162" />
-          </trainDetectionElements>
-        </ocsElements>
       </track>
       <track id="tr43" mainDir="none" code="plain">
         <trackTopology>
@@ -971,6 +960,9 @@
           <trackElementVis ref="td1">
             <position x="406.9230769230769" y="70" />
           </trackElementVis>
+          <trackElementVis ref="td12">
+            <position x="501.031746031746" y="70" />
+          </trackElementVis>
         </trackVis>
         <trackVis ref="tr17">
           <trackElementVis ref="tb17">
@@ -1171,7 +1163,7 @@
             <position x="317.6923076923076" y="190" />
           </trackElementVis>
           <trackElementVis ref="td11">
-            <position x="584.6153846153845" y="190" />
+            <position x="574.6153846153845" y="190" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr37">
@@ -1199,12 +1191,6 @@
           </trackElementVis>
           <trackElementVis ref="te39">
             <position x="610" y="230" />
-          </trackElementVis>
-          <trackElementVis ref="td4">
-            <position x="440.7692307692307" y="230" />
-          </trackElementVis>
-          <trackElementVis ref="td5">
-            <position x="653.8461538461537" y="230" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr40">
@@ -1235,12 +1221,6 @@
           </trackElementVis>
           <trackElementVis ref="te42">
             <position x="600" y="270" />
-          </trackElementVis>
-          <trackElementVis ref="td2">
-            <position x="433.8461538461538" y="270" />
-          </trackElementVis>
-          <trackElementVis ref="td3">
-            <position x="571.5384615384614" y="270" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr43">
