@@ -26,7 +26,19 @@ namespace RailmlEditor
             // Let's ensure Load() is called or just access Current which defaults to Light.
             // Actually, safe to just read Current.Theme
             Services.ConfigService.Load(); // Ensure it's loaded
+
             SetTheme(Services.ConfigService.Current.Theme);
+            UpdateTitle(); // Initialize Title
+        }
+
+        private void UpdateTitle()
+        {
+            string fileName = "notitle.railml";
+            if (!string.IsNullOrEmpty(_currentFilePath))
+            {
+                fileName = System.IO.Path.GetFileName(_currentFilePath);
+            }
+            this.Title = $"RailML Editor - {fileName}";
         }
 
         public void SetTheme(string theme)
@@ -969,6 +981,7 @@ namespace RailmlEditor
                 try
                 {
                     service.Load(_currentFilePath, _viewModel);
+                    UpdateTitle();
                 }
                 catch (Exception ex)
                 {
@@ -1204,6 +1217,7 @@ namespace RailmlEditor
             }
             _viewModel.Elements.Clear();
             _currentFilePath = null; 
+            UpdateTitle();
         }
 
         private void FileSaveAs_Click(object sender, RoutedEventArgs e)
@@ -1220,6 +1234,7 @@ namespace RailmlEditor
                 try
                 {
                     service.Save(_currentFilePath, _viewModel);
+                    UpdateTitle();
                     MessageBox.Show("File saved successfully.");
                 }
                 catch (Exception ex)
