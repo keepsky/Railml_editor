@@ -90,6 +90,13 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _pos, value);
         }
 
+        private double _absPos;
+        public double AbsPos
+        {
+            get => _absPos;
+            set => SetProperty(ref _absPos, value);
+        }
+
         public TrackNodeViewModel()
         {
             IsIdReadOnly = true; 

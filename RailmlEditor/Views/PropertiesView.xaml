@@ -201,17 +201,24 @@
                     <TextBox Text="{Binding Pos, StringFormat=F0}" IsReadOnly="True" Style="{StaticResource PropInput}" Foreground="Gray"/>
                 </Border>
 
-                <Border Grid.Row="5" Grid.Column="0" Style="{StaticResource PropLabelBorder}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Connection}">
-                    <TextBlock Text="Connection ID" Style="{StaticResource PropLabelText}"/>
+                <Border Grid.Row="5" Grid.Column="0" Style="{StaticResource PropLabelBorder}">
+                    <TextBlock Text="AbsPos" Style="{StaticResource PropLabelText}"/>
                 </Border>
-                <Border Grid.Row="5" Grid.Column="1" Style="{StaticResource PropValueBorder}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Connection}">
-                    <TextBox Text="{Binding ConnectionId}" IsReadOnly="True" Style="{StaticResource PropInput}" Background="#FFFFE0"/>
+                <Border Grid.Row="5" Grid.Column="1" Style="{StaticResource PropValueBorder}">
+                    <TextBox Text="{Binding AbsPos, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PropInput}"/>
                 </Border>
 
                 <Border Grid.Row="6" Grid.Column="0" Style="{StaticResource PropLabelBorder}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Connection}">
-                    <TextBlock Text="Connection Ref" Style="{StaticResource PropLabelText}"/>
+                    <TextBlock Text="Connection ID" Style="{StaticResource PropLabelText}"/>
                 </Border>
                 <Border Grid.Row="6" Grid.Column="1" Style="{StaticResource PropValueBorder}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Connection}">
+                    <TextBox Text="{Binding ConnectionId}" IsReadOnly="True" Style="{StaticResource PropInput}" Background="#FFFFE0"/>
+                </Border>
+
+                <Border Grid.Row="7" Grid.Column="0" Style="{StaticResource PropLabelBorder}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Connection}">
+                    <TextBlock Text="Connection Ref" Style="{StaticResource PropLabelText}"/>
+                </Border>
+                <Border Grid.Row="7" Grid.Column="1" Style="{StaticResource PropValueBorder}" Visibility="{Binding NodeType, Converter={StaticResource ConnectionToVis}, ConverterParameter=Connection}">
                     <TextBox Text="{Binding ConnectionRef}" IsReadOnly="True" Style="{StaticResource PropInput}" Background="#FFFFE0"/>
                 </Border>
             </Grid>
@@ -224,7 +231,6 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -247,6 +253,7 @@
                     <!-- Checkbox -->
                     <RowDefinition Height="Auto"/>
                     <!-- Coords -->
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource PropLabelBorder}">
@@ -277,9 +284,6 @@
                     <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding Type, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PropComboInput}"/>
                 </Border>
 
-                <Border Grid.Row="4" Grid.Column="0" Style="{StaticResource PropLabelBorder}">
-                    <TextBlock Text="MainDir" Style="{StaticResource PropLabelText}"/>
-                </Border>
                 <Border Grid.Row="4" Grid.Column="1" Style="{StaticResource PropValueBorder}">
                     <ComboBox ItemsSource="{Binding AvailableMainDirs}" SelectedItem="{Binding MainDir, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PropComboInput}"/>
                 </Border>
