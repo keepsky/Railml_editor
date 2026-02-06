@@ -25,13 +25,21 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _direction, value);
         }
 
+        private string _label;
+        public string Label
+        {
+            get => _label;
+            set => SetProperty(ref _label, value);
+        }
+
         public ObservableCollection<IntermediateNode> IntermediateNodes { get; } = new ObservableCollection<IntermediateNode>();
 
-        public GraphEdgeViewModel(GraphNodeViewModel from, GraphNodeViewModel to, string direction = "none")
+        public GraphEdgeViewModel(GraphNodeViewModel from, GraphNodeViewModel to, string direction = "none", string label = "")
         {
             FromNode = from;
             ToNode = to;
             Direction = direction;
+            Label = label;
         }
     }
 

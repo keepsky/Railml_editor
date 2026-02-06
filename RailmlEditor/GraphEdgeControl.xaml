@@ -6,5 +6,6 @@
     <Canvas x:Name="MainCanvas">
         <Line x:Name="EdgeLine" Stroke="Black" StrokeThickness="1.5" />
         <Polygon x:Name="ArrowHead" Fill="Black" Points="0,0 10,5 0,10" Visibility="Collapsed" />
+        <TextBlock x:Name="LblEdge" Text="{Binding Label}" FontSize="10" Foreground="Blue" Background="White" Visibility="Collapsed" />
     </Canvas>
 </UserControl>

@@ -59,12 +59,14 @@ namespace RailmlEditor.Services
                         { 
                             Id = "tb" + System.Text.RegularExpressions.Regex.Match(trackId ?? "", @"\d+").Value,
                             Pos = 0,
+                            AbsPos = element.BeginNode.AbsPos,
                             ScreenPos = new ScreenPos { X = element.X, Y = element.Y }
                         },
                         TrackEnd = new TrackNode 
                         { 
                             Id = "te" + System.Text.RegularExpressions.Regex.Match(trackId ?? "", @"\d+").Value,
                             Pos = (int)element.Length,
+                            AbsPos = element.EndNode.AbsPos,
                             ScreenPos = new ScreenPos { X = element.X2, Y = element.Y2 }
                         }
                     },
@@ -715,6 +717,7 @@ namespace RailmlEditor.Services
                             trackVm.BeginNode.ConnectionRef = conn.Ref;
                         }
                     }
+                    trackVm.BeginNode.AbsPos = track.TrackTopology.TrackBegin.AbsPos;
                 }
 
                 if (track.TrackTopology?.TrackEnd != null)
@@ -746,6 +749,7 @@ namespace RailmlEditor.Services
                             trackVm.EndNode.ConnectionRef = conn.Ref;
                         }
                     }
+                    trackVm.EndNode.AbsPos = track.TrackTopology.TrackEnd.AbsPos;
                 }
 
                 newElements.Add(trackVm);
@@ -1008,6 +1012,7 @@ namespace RailmlEditor.Services
                         // Load BufferStop/OpenEnd
                         if (track.TrackTopology?.TrackBegin != null)
                         {
+                            trackVm.BeginNode.AbsPos = track.TrackTopology.TrackBegin.AbsPos;
                             if (track.TrackTopology.TrackBegin.BufferStop != null)
                             {
                                 trackVm.BeginType = TrackNodeType.BufferStop;
@@ -1052,6 +1057,7 @@ namespace RailmlEditor.Services
 
                         if (track.TrackTopology?.TrackEnd != null)
                         {
+                            trackVm.EndNode.AbsPos = track.TrackTopology.TrackEnd.AbsPos;
                             if (track.TrackTopology.TrackEnd.BufferStop != null)
                             {
                                 trackVm.EndType = TrackNodeType.BufferStop;

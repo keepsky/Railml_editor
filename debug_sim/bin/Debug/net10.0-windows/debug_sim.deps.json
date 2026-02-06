@@ -1,0 +1,118 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "debug_sim/1.0.0": {
+        "dependencies": {
+          "RailmlEditor": "1.0.0.0"
+        },
+        "runtime": {
+          "debug_sim.dll": {}
+        }
+      },
+      "RailmlEditor/1.0.0.0": {
+        "runtime": {
+          "RailmlEditor.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "AvalonDock/4.72.1.0": {
+        "runtime": {
+          "AvalonDock.dll": {
+            "assemblyVersion": "4.72.1.0",
+            "fileVersion": "4.72.1.0"
+          }
+        },
+        "resources": {
+          "ca-ES/AvalonDock.resources.dll": {
+            "locale": "ca-ES"
+          },
+          "cs-CZ/AvalonDock.resources.dll": {
+            "locale": "cs-CZ"
+          },
+          "de/AvalonDock.resources.dll": {
+            "locale": "de"
+          },
+          "es/AvalonDock.resources.dll": {
+            "locale": "es"
+          },
+          "fr/AvalonDock.resources.dll": {
+            "locale": "fr"
+          },
+          "hu/AvalonDock.resources.dll": {
+            "locale": "hu"
+          },
+          "it/AvalonDock.resources.dll": {
+            "locale": "it"
+          },
+          "ja/AvalonDock.resources.dll": {
+            "locale": "ja"
+          },
+          "ko/AvalonDock.resources.dll": {
+            "locale": "ko"
+          },
+          "nl-BE/AvalonDock.resources.dll": {
+            "locale": "nl-BE"
+          },
+          "pl/AvalonDock.resources.dll": {
+            "locale": "pl"
+          },
+          "pt/AvalonDock.resources.dll": {
+            "locale": "pt"
+          },
+          "ro/AvalonDock.resources.dll": {
+            "locale": "ro"
+          },
+          "ru/AvalonDock.resources.dll": {
+            "locale": "ru"
+          },
+          "sv/AvalonDock.resources.dll": {
+            "locale": "sv"
+          },
+          "zh-Hans/AvalonDock.resources.dll": {
+            "locale": "zh-Hans"
+          },
+          "zh-Hant/AvalonDock.resources.dll": {
+            "locale": "zh-Hant"
+          }
+        }
+      },
+      "AvalonDock.Themes.VS2013/4.72.1.0": {
+        "runtime": {
+          "AvalonDock.Themes.VS2013.dll": {
+            "assemblyVersion": "4.72.1.0",
+            "fileVersion": "4.72.1.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "debug_sim/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "RailmlEditor/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "AvalonDock/4.72.1.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "AvalonDock.Themes.VS2013/4.72.1.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

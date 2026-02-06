@@ -1,0 +1,5 @@
+C:\WORK\SRC\Railml_editor\obj\Debug\net6.0\test_deserialization.GeneratedMSBuildEditorConfig.editorconfig
+C:\WORK\SRC\Railml_editor\obj\Debug\net6.0\test_deserialization.AssemblyInfoInputs.cache
+C:\WORK\SRC\Railml_editor\obj\Debug\net6.0\test_deserialization.AssemblyInfo.cs
+C:\WORK\SRC\Railml_editor\obj\Debug\net6.0\test_deserialization.csproj.CoreCompileInputs.cache
+C:\WORK\SRC\Railml_editor\obj\Debug\net6.0\test_deserialization.sourcelink.json

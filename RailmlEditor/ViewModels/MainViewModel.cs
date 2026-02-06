@@ -212,7 +212,6 @@ namespace RailmlEditor.ViewModels
             get => _code;
             set => SetProperty(ref _code, value);
         }
-
         
         public override double X
         {

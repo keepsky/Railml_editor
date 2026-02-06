@@ -60,7 +60,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig1" dir="up" pos="15">
+            <signal id="sig1" dir="up" type="main" function="home" pos="15">
               <additionalName name="1A" />
             </signal>
           </signals>
@@ -77,7 +77,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig19" dir="up" pos="15">
+            <signal id="sig19" dir="up" type="shunting" pos="15">
               <additionalName name="21L" />
             </signal>
           </signals>
@@ -126,7 +126,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig20" dir="down" pos="30">
+            <signal id="sig20" dir="down" type="shunting" pos="30">
               <additionalName name="25R" />
             </signal>
           </signals>
@@ -242,6 +242,7 @@
         <ocsElements>
           <trainDetectionElements>
             <trackCircuitBorder id="td1" name="Border" pos="17" />
+            <trackCircuitBorder id="td12" name="Border" pos="111" />
           </trainDetectionElements>
         </ocsElements>
       </track>
@@ -256,7 +257,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig3" dir="up" pos="15">
+            <signal id="sig3" dir="up" type="shunting" pos="15">
               <additionalName name="54L" />
             </signal>
           </signals>
@@ -273,7 +274,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig4" dir="up" pos="15">
+            <signal id="sig4" dir="up" type="shunting" pos="15">
               <additionalName name="55L" />
             </signal>
           </signals>
@@ -316,7 +317,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig5" dir="up" pos="15">
+            <signal id="sig5" dir="up" type="shunting" pos="15">
               <additionalName name="56L" />
             </signal>
           </signals>
@@ -349,7 +350,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig7" dir="up" pos="15">
+            <signal id="sig7" dir="up" type="main" function="exit" pos="15">
               <additionalName name="4B" />
             </signal>
           </signals>
@@ -366,7 +367,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig6" dir="up" pos="15">
+            <signal id="sig6" dir="up" type="main" function="exit" pos="15">
               <additionalName name="4A" />
             </signal>
           </signals>
@@ -399,7 +400,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig16" dir="down" pos="30">
+            <signal id="sig16" dir="down" type="shunting" pos="30">
               <additionalName name="52R" />
             </signal>
           </signals>
@@ -446,7 +447,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig18" dir="up" pos="15">
+            <signal id="sig18" dir="up" type="shunting" pos="15">
               <additionalName name="22L" />
             </signal>
           </signals>
@@ -505,7 +506,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig10" dir="down" pos="50">
+            <signal id="sig10" dir="down" type="main" function="exit" pos="50">
               <additionalName name="3B" />
             </signal>
           </signals>
@@ -522,7 +523,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig11" dir="down" pos="67">
+            <signal id="sig11" dir="down" type="main" function="exit" pos="67">
               <additionalName name="3A" />
             </signal>
           </signals>
@@ -540,7 +541,7 @@
         <ocsElements>
           <trainDetectionElements>
             <trackCircuitBorder id="td10" name="Border" pos="28" />
-            <trackCircuitBorder id="td11" name="Border" pos="295" />
+            <trackCircuitBorder id="td11" name="Border" pos="285" />
           </trainDetectionElements>
         </ocsElements>
       </track>
@@ -571,7 +572,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig21" dir="down" pos="50">
+            <signal id="sig21" dir="down" type="shunting" pos="50">
               <additionalName name="27R" />
             </signal>
           </signals>
@@ -588,8 +589,8 @@
         </trackTopology>
         <ocsElements>
           <trainDetectionElements>
-            <trackCircuitBorder id="td4" name="Border" pos="41" />
-            <trackCircuitBorder id="td5" name="Border" pos="254" />
+            <trackCircuitBorder id="td13" name="Border" pos="22" />
+            <trackCircuitBorder id="td14" name="Border" pos="175" />
           </trainDetectionElements>
         </ocsElements>
       </track>
@@ -614,7 +615,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig12" dir="down" pos="30">
+            <signal id="sig12" dir="down" type="shunting" pos="30">
               <additionalName name="26R" />
             </signal>
           </signals>
@@ -631,8 +632,8 @@
         </trackTopology>
         <ocsElements>
           <trainDetectionElements>
-            <trackCircuitBorder id="td2" name="Border" pos="24" />
-            <trackCircuitBorder id="td3" name="Border" pos="162" />
+            <trackCircuitBorder id="td15" name="Border" pos="158" />
+            <trackCircuitBorder id="td16" name="Border" pos="24" />
           </trainDetectionElements>
         </ocsElements>
       </track>
@@ -709,7 +710,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig15" dir="down" pos="30">
+            <signal id="sig15" dir="down" type="shunting" pos="30">
               <additionalName name="51R" />
             </signal>
           </signals>
@@ -742,7 +743,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig13" dir="up" pos="15">
+            <signal id="sig13" dir="up" type="shunting" pos="15">
               <additionalName name="59L" />
             </signal>
           </signals>
@@ -759,7 +760,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig2" dir="down" pos="50">
+            <signal id="sig2" dir="down" type="main" function="home" pos="50">
               <additionalName name="2A" />
             </signal>
           </signals>
@@ -776,7 +777,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig14" dir="up" pos="15">
+            <signal id="sig14" dir="up" type="shunting" pos="15">
               <additionalName name="58L" />
             </signal>
           </signals>
@@ -793,7 +794,7 @@
         </trackTopology>
         <ocsElements>
           <signals>
-            <signal id="sig17" dir="down" pos="50">
+            <signal id="sig17" dir="down" type="repeater" function="home" pos="50">
               <additionalName name="2AR" />
             </signal>
           </signals>
@@ -970,6 +971,9 @@
           </trackElementVis>
           <trackElementVis ref="td1">
             <position x="406.9230769230769" y="70" />
+          </trackElementVis>
+          <trackElementVis ref="td12">
+            <position x="501.031746031746" y="70" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr17">
@@ -1171,7 +1175,7 @@
             <position x="317.6923076923076" y="190" />
           </trackElementVis>
           <trackElementVis ref="td11">
-            <position x="584.6153846153845" y="190" />
+            <position x="574.6153846153845" y="190" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr37">
@@ -1200,11 +1204,11 @@
           <trackElementVis ref="te39">
             <position x="610" y="230" />
           </trackElementVis>
-          <trackElementVis ref="td4">
-            <position x="440.7692307692307" y="230" />
+          <trackElementVis ref="td13">
+            <position x="422.5" y="230" />
           </trackElementVis>
-          <trackElementVis ref="td5">
-            <position x="653.8461538461537" y="230" />
+          <trackElementVis ref="td14">
+            <position x="575" y="230" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr40">
@@ -1236,11 +1240,11 @@
           <trackElementVis ref="te42">
             <position x="600" y="270" />
           </trackElementVis>
-          <trackElementVis ref="td2">
-            <position x="433.8461538461538" y="270" />
+          <trackElementVis ref="td15">
+            <position x="568.3333333333333" y="270" />
           </trackElementVis>
-          <trackElementVis ref="td3">
-            <position x="571.5384615384614" y="270" />
+          <trackElementVis ref="td16">
+            <position x="434.16666666666663" y="270" />
           </trackElementVis>
         </trackVis>
         <trackVis ref="tr43">
@@ -1362,7 +1366,7 @@
         </trackVis>
       </lineVis>
       <objectVis ref="sw13">
-        <position x="210" y="120" />
+        <position x="213" y="125" />
       </objectVis>
       <objectVis ref="sw2">
         <position x="250" y="150" />
@@ -1377,25 +1381,25 @@
         <position x="580" y="150" />
       </objectVis>
       <objectVis ref="sw5">
-        <position x="690" y="120" />
+        <position x="686" y="124" />
       </objectVis>
       <objectVis ref="sw6">
         <position x="180" y="190" />
       </objectVis>
       <objectVis ref="sw7">
-        <position x="240" y="170" />
+        <position x="243" y="166" />
       </objectVis>
       <objectVis ref="sw15">
-        <position x="360" y="200" />
+        <position x="356" y="206" />
       </objectVis>
       <objectVis ref="sw14">
         <position x="620" y="190" />
       </objectVis>
       <objectVis ref="sw11">
-        <position x="680" y="170" />
+        <position x="688" y="166" />
       </objectVis>
       <objectVis ref="sw12">
-        <position x="660" y="230" />
+        <position x="657" y="228" />
       </objectVis>
     </visualization>
   </infrastructureVisualizations>

@@ -66,7 +66,7 @@ namespace RailmlEditor.ViewModels
 
             foreach (var bor in borders)
             {
-                GetOrCreateNode(bor.Id, bor.Name ?? bor.Id, "Border", bor.X, bor.Y);
+                GetOrCreateNode(bor.Id, bor.Id, "Border", bor.X, bor.Y);
             }
 
             // 2. Map Nodes to Tracks
@@ -159,7 +159,38 @@ namespace RailmlEditor.ViewModels
                         string edgeKey = GetEdgeKey(startNode.Id, target.Id);
                         if (!createdEdges.Contains(edgeKey))
                         {
-                            Edges.Add(new GraphEdgeViewModel(startNode, target, "none")); 
+                            string direction = "none";
+                            string trackId = "";
+                            if (trackLookup.TryGetValue(probe.TrackId, out var track))
+                            {
+                                direction = track.MainDir ?? "none";
+                                trackId = track.Id;
+                            }
+                            
+                            // Normalize Edge Direction:
+                            // If nodes are on the SAME track, strictly sort by Position (From=Lower, To=Higher).
+                            // This guarantees consistency regardless of traversal direction.
+                            // If cross-track, rely on IsSearchUp (Initial).
+
+                            // Normalize Edge Direction:
+                            // Default: Fallback for cross-track connections (rely on IsSearchUp)
+                            var fromNode = probe.IsSearchUp ? startNode : target;
+                            var toNode = probe.IsSearchUp ? target : startNode;
+
+                            // Refinement: If nodes are on the SAME track, strictly sort by Position (From=Lower, To=Higher).
+                            if (onTrackNodes.TryGetValue(probe.TrackId, out var trackNodes))
+                            {
+                                var startEntry = trackNodes.FirstOrDefault(n => n.Node == startNode);
+                                var targetEntry = trackNodes.FirstOrDefault(n => n.Node == target);
+
+                                if (startEntry != null && targetEntry != null)
+                                {
+                                    fromNode = (startEntry.Pos <= targetEntry.Pos) ? startNode : target;
+                                    toNode = (startEntry.Pos <= targetEntry.Pos) ? target : startNode;
+                                }
+                            }
+
+                            Edges.Add(new GraphEdgeViewModel(fromNode, toNode, direction, trackId)); 
                             createdEdges.Add(edgeKey);
                         }
                     }
