@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using RailmlEditor.ViewModels.Elements;
 
 namespace RailmlEditor.ViewModels
 {
@@ -87,3 +88,4 @@ namespace RailmlEditor.ViewModels
         public List<string>? Directions => (_elements.FirstOrDefault(e => e is SignalViewModel) as SignalViewModel)?.AvailableDirections;
     }
 }
+

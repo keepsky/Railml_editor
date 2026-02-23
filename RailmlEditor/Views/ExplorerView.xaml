@@ -4,7 +4,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:RailmlEditor"
-    xmlns:viewmodels="clr-namespace:RailmlEditor.ViewModels" mc:Ignorable="d" d:DesignHeight="450" d:DesignWidth="300">
+    xmlns:viewmodels="clr-namespace:RailmlEditor.ViewModels"
+        xmlns:elements="clr-namespace:RailmlEditor.ViewModels.Elements" mc:Ignorable="d" d:DesignHeight="450" d:DesignWidth="300">
     <UserControl.Resources>
         <!-- Custom TreeViewItem Style for connecting lines -->
         <Style x:Key="RailmlTreeViewItemStyle" TargetType="{x:Type TreeViewItem}">
@@ -60,7 +61,7 @@
             <TreeView.Resources>
                 <!-- Level 1: File -->
                 <!-- Level 1: Infrastructure -->
-                <HierarchicalDataTemplate DataType="{x:Type viewmodels:InfrastructureViewModel}" ItemsSource="{Binding Categories}">
+                <HierarchicalDataTemplate DataType="{x:Type elements:InfrastructureViewModel}" ItemsSource="{Binding Categories}">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="/images/london.png" Width="16" Height="16" Margin="0,0,5,0"/>
                         <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
@@ -68,26 +69,26 @@
                 </HierarchicalDataTemplate>
 
                 <!-- Level 2: Category -->
-                <HierarchicalDataTemplate DataType="{x:Type viewmodels:CategoryViewModel}" ItemsSource="{Binding Items}">
+                <HierarchicalDataTemplate DataType="{x:Type elements:CategoryViewModel}" ItemsSource="{Binding Items}">
                     <TextBlock Text="{Binding Title}" FontWeight="Bold"/>
                 </HierarchicalDataTemplate>
 
                 <!-- Level 3: Elements -->
-                <HierarchicalDataTemplate DataType="{x:Type viewmodels:TrackViewModel}" ItemsSource="{Binding Children}">
+                <HierarchicalDataTemplate DataType="{x:Type elements:TrackViewModel}" ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Id}"/>
                         <TextBlock Text=" - " Opacity="0.5"/>
                         <TextBlock Text="{Binding Name}" Opacity="0.5" FontStyle="Italic"/>
                     </StackPanel>
                 </HierarchicalDataTemplate>
-                <HierarchicalDataTemplate DataType="{x:Type viewmodels:CurvedTrackViewModel}" ItemsSource="{Binding Children}">
+                <HierarchicalDataTemplate DataType="{x:Type elements:CurvedTrackViewModel}" ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Id}"/>
                         <TextBlock Text=" - " Opacity="0.5"/>
                         <TextBlock Text="{Binding Name}" Opacity="0.5" FontStyle="Italic"/>
                     </StackPanel>
                 </HierarchicalDataTemplate>
-                <DataTemplate DataType="{x:Type viewmodels:TrackNodeViewModel}">
+                <DataTemplate DataType="{x:Type elements:TrackNodeViewModel}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Role}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
                         <TextBlock Text="(" Opacity="0.5"/>
@@ -96,14 +97,14 @@
                         <TextBlock Text="{Binding Id}"/>
                     </StackPanel>
                 </DataTemplate>
-                <DataTemplate DataType="{x:Type viewmodels:TrackCircuitBorderViewModel}">
+                <DataTemplate DataType="{x:Type elements:TrackCircuitBorderViewModel}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Id}" Foreground="{DynamicResource SecondaryHueMidBrush}"/>
                         <TextBlock Text="-" Opacity="0.5"/>
                         <TextBlock Text="{Binding Name}" Foreground="{DynamicResource SecondaryHueMidBrush}" FontStyle="Italic"/>
                     </StackPanel>
                 </DataTemplate>
-                <DataTemplate DataType="{x:Type viewmodels:SignalViewModel}">
+                <DataTemplate DataType="{x:Type elements:SignalViewModel}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Id}"/>
                         <TextBlock Text="(" Opacity="0.5"/>
@@ -112,21 +113,21 @@
                         <TextBlock Text="{Binding Name}" Opacity="0.5" FontStyle="Italic"/>
                     </StackPanel>
                 </DataTemplate>
-                <DataTemplate DataType="{x:Type viewmodels:SwitchViewModel}">
+                <DataTemplate DataType="{x:Type elements:SwitchViewModel}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Id}"/>
                         <TextBlock Text=" - " Opacity="0.5"/>
                         <TextBlock Text="{Binding Name}" Opacity="0.5" FontStyle="Italic"/>
                     </StackPanel>
                 </DataTemplate>
-                <DataTemplate DataType="{x:Type viewmodels:RouteViewModel}">
+                <DataTemplate DataType="{x:Type elements:RouteViewModel}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Id}"/>
                         <TextBlock Text=" - " Opacity="0.5"/>
                         <TextBlock Text="{Binding Name}" Opacity="0.5" FontStyle="Italic"/>
                     </StackPanel>
                 </DataTemplate>
-                <HierarchicalDataTemplate DataType="{x:Type viewmodels:AreaViewModel}" ItemsSource="{Binding Borders}">
+                <HierarchicalDataTemplate DataType="{x:Type elements:AreaViewModel}" ItemsSource="{Binding Borders}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Id}" FontWeight="Bold" Foreground="{DynamicResource SecondaryHueMidBrush}"/>
                         <TextBlock Text=" - " Opacity="0.5"/>
@@ -140,3 +141,4 @@
         </TreeView>
     </DockPanel>
 </UserControl>
+

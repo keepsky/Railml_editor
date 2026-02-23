@@ -1,10 +1,11 @@
-﻿<Window x:Class="RailmlEditor.MainWindow"
+<Window x:Class="RailmlEditor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:xcad="https://github.com/Dirkster99/AvalonDock"
     xmlns:viewmodels="clr-namespace:RailmlEditor.ViewModels"
+        xmlns:elements="clr-namespace:RailmlEditor.ViewModels.Elements"
     xmlns:views="clr-namespace:RailmlEditor.Views"
     xmlns:utils="clr-namespace:RailmlEditor.Utils"
     xmlns:local="clr-namespace:RailmlEditor"
@@ -22,7 +23,7 @@
 
 
         <!-- Data Templates for Visual Elements (Canvas) -->
-        <DataTemplate DataType="{x:Type local:ViewModels.TrackViewModel}">
+        <DataTemplate DataType="{x:Type elements:TrackViewModel}">
             <Canvas>
                 <Rectangle Height="10" Fill="White" Stroke="Black" StrokeThickness="1" RadiusX="5" RadiusY="5">
                     <Rectangle.ContextMenu>
@@ -116,7 +117,7 @@
             </Canvas>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type local:ViewModels.SwitchViewModel}">
+        <DataTemplate DataType="{x:Type elements:SwitchViewModel}">
             <Canvas>
                 <Grid Width="35" Height="12" Canvas.Left="-15" Canvas.Top="7" Background="Transparent" MouseLeftButtonDown="Tag_MouseLeftButtonDown" MouseMove="Tag_MouseMove" MouseLeftButtonUp="Tag_MouseLeftButtonUp">
                     <Viewbox Stretch="Uniform">
@@ -143,7 +144,7 @@
             </Viewbox>
         </ControlTemplate>
 
-        <DataTemplate DataType="{x:Type viewmodels:TrackCircuitBorderViewModel}">
+        <DataTemplate DataType="{x:Type elements:TrackCircuitBorderViewModel}">
             <Grid Width="20" Height="10" RenderTransformOrigin="0.5,0.5" Background="Transparent">
                 <Grid.ContextMenu>
                     <ContextMenu>
@@ -314,7 +315,7 @@
             </Viewbox>
         </ControlTemplate>
 
-        <DataTemplate DataType="{x:Type local:ViewModels.SignalViewModel}">
+        <DataTemplate DataType="{x:Type elements:SignalViewModel}">
             <Grid Width="20" Height="10" ClipToBounds="False" Background="Transparent">
                 <Control Template="{StaticResource SignalIcon}" Width="20" Height="10" RenderTransformOrigin="0.5,0.5">
                     <Control.Style>
@@ -364,7 +365,7 @@
             </Grid>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type local:ViewModels.CurvedTrackViewModel}">
+        <DataTemplate DataType="{x:Type elements:CurvedTrackViewModel}">
             <Canvas>
                 <Rectangle Height="10" Fill="White" Stroke="Black" StrokeThickness="1" RadiusX="5" RadiusY="5">
                     <Rectangle.ContextMenu>
@@ -775,3 +776,4 @@
         </xcad:DockingManager>
     </DockPanel>
 </Window>
+

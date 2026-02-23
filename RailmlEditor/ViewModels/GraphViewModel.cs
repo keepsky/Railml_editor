@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Xml.Linq;
 using RailmlEditor.Utils;
+using RailmlEditor.ViewModels.Elements;
 
 namespace RailmlEditor.ViewModels
 {
@@ -430,3 +431,8 @@ namespace RailmlEditor.ViewModels
         }
     }
 }
+
+
+
+
+

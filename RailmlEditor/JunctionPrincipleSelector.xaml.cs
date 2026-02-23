@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Windows;
 using RailmlEditor.ViewModels;
+using RailmlEditor.ViewModels.Elements;
 
 namespace RailmlEditor
 {
@@ -54,3 +55,5 @@ namespace RailmlEditor
         }
     }
 }
+
+

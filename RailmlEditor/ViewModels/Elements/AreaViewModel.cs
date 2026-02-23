@@ -1,7 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using RailmlEditor.ViewModels.Elements;
 
-namespace RailmlEditor.ViewModels
+namespace RailmlEditor.ViewModels.Elements
 {
     public class AreaViewModel : BaseElementViewModel
     {
@@ -29,3 +30,8 @@ namespace RailmlEditor.ViewModels
         public override double Y { get => 0; set { } }
     }
 }
+
+
+
+
+

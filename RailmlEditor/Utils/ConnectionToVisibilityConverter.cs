@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 using RailmlEditor.ViewModels;
+using RailmlEditor.ViewModels.Elements;
 
 namespace RailmlEditor.Utils
 {

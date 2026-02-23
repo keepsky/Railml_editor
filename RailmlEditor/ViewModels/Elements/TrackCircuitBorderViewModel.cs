@@ -1,6 +1,6 @@
 using System;
 
-namespace RailmlEditor.ViewModels
+namespace RailmlEditor.ViewModels.Elements
 {
     public class TrackCircuitBorderViewModel : BaseElementViewModel
     {
@@ -43,3 +43,4 @@ namespace RailmlEditor.ViewModels
         }
     }
 }
+

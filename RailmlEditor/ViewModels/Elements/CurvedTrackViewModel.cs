@@ -1,6 +1,6 @@
 using System;
 
-namespace RailmlEditor.ViewModels
+namespace RailmlEditor.ViewModels.Elements
 {
     public class CurvedTrackViewModel : TrackViewModel
     {
@@ -151,3 +151,4 @@ namespace RailmlEditor.ViewModels
         }
     }
 }
+

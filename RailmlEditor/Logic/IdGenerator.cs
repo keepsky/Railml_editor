@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using RailmlEditor.ViewModels;
+using RailmlEditor.ViewModels.Elements;
 
 namespace RailmlEditor.Logic
 {
@@ -25,3 +26,5 @@ namespace RailmlEditor.Logic
         }
     }
 }
+
+

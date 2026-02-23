@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml.Serialization;
 using RailmlEditor.Models;
 using RailmlEditor.ViewModels;
+using RailmlEditor.ViewModels.Elements;
 
 namespace RailmlEditor.Services
 {
@@ -1449,3 +1450,5 @@ namespace RailmlEditor.Services
         }
     }
 }
+
+

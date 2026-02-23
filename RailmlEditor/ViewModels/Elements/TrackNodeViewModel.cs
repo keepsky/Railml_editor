@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using RailmlEditor.Models;
 
-namespace RailmlEditor.ViewModels
+namespace RailmlEditor.ViewModels.Elements
 {
     public class TrackNodeViewModel : BaseElementViewModel
     {
@@ -107,3 +107,4 @@ namespace RailmlEditor.ViewModels
             .Where(t => t != TrackNodeType.Connection);
     }
 }
+
