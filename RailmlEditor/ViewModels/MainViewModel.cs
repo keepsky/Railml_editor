@@ -1,4 +1,3 @@
-#pragma warning disable
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -17,7 +16,7 @@ namespace RailmlEditor.ViewModels
     {
         private double _x;
         private double _y;
-        private string _id;
+        private string? _id;
         private bool _isSelected;
 
         public virtual double X
@@ -32,7 +31,7 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _y, value);
         }
 
-        public string Id
+        public string? Id
         {
             get => _id;
             set => SetProperty(ref _id, value);
@@ -451,20 +450,20 @@ namespace RailmlEditor.ViewModels
 
     public class DivergingConnectionViewModel : ObservableObject
     {
-        public string TrackId { get; set; }
+        public string? TrackId { get; set; }
 
-        private string _displayName;
-        public string DisplayName
+        private string? _displayName;
+        public string? DisplayName
         {
             get => _displayName;
             set => SetProperty(ref _displayName, value);
         }
 
-        private string _id;
-        public string Id { get => _id; set => SetProperty(ref _id, value); }
+        private string? _id;
+        public string? Id { get => _id; set => SetProperty(ref _id, value); }
 
-        private string _ref;
-        public string Ref { get => _ref; set => SetProperty(ref _ref, value); }
+        private string? _ref;
+        public string? Ref { get => _ref; set => SetProperty(ref _ref, value); }
 
         private string _orientation = "outgoing";
         public string Orientation { get => _orientation; set => SetProperty(ref _orientation, value); }
@@ -485,7 +484,7 @@ namespace RailmlEditor.ViewModels
             }
         }
 
-        private void Track_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void Track_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(BaseElementViewModel.Name) || e.PropertyName == nameof(BaseElementViewModel.Id))
             {
@@ -513,9 +512,9 @@ namespace RailmlEditor.ViewModels
 
     public class SwitchBranchInfo
     {
-        public SwitchViewModel Switch { get; set; }
-        public List<TrackViewModel> Candidates { get; set; }
-        public Action<TrackViewModel?> Callback { get; set; }
+        public SwitchViewModel? Switch { get; set; }
+        public List<TrackViewModel>? Candidates { get; set; }
+        public Action<TrackViewModel?>? Callback { get; set; }
     }
 
     public class SignalViewModel : BaseElementViewModel
@@ -586,37 +585,37 @@ namespace RailmlEditor.ViewModels
 
     public class SwitchPositionViewModel : ObservableObject
     {
-        private string _switchRef;
-        public string SwitchRef { get => _switchRef; set => SetProperty(ref _switchRef, value); }
+        private string? _switchRef;
+        public string? SwitchRef { get => _switchRef; set => SetProperty(ref _switchRef, value); }
 
         private string _switchPosition = "normal";
         public string SwitchPosition { get => _switchPosition; set => SetProperty(ref _switchPosition, value); }
 
         public List<string> AvailablePositions { get; } = new() { "normal", "reverse" };
 
-        public ICommand RemoveCommand { get; set; }
+        public ICommand? RemoveCommand { get; set; }
     }
 
     public class RouteViewModel : BaseElementViewModel
     {
         public override string TypeName => "Route";
 
-        private string _code;
+        private string _code = string.Empty;
         public string Code { get => _code; set => SetProperty(ref _code, value); }
 
-        private string _description;
+        private string _description = string.Empty;
         public string Description { get => _description; set => SetProperty(ref _description, value); }
 
-        private string _approachPointRef;
+        private string _approachPointRef = string.Empty;
         public string ApproachPointRef { get => _approachPointRef; set => SetProperty(ref _approachPointRef, value); }
 
-        private string _entryRef;
+        private string _entryRef = string.Empty;
         public string EntryRef { get => _entryRef; set => SetProperty(ref _entryRef, value); }
 
-        private string _exitRef;
+        private string _exitRef = string.Empty;
         public string ExitRef { get => _exitRef; set => SetProperty(ref _exitRef, value); }
 
-        private string _overlapEndRef;
+        private string _overlapEndRef = string.Empty;
         public string OverlapEndRef { get => _overlapEndRef; set => SetProperty(ref _overlapEndRef, value); }
 
         private string _proceedSpeed = "R";
@@ -625,7 +624,7 @@ namespace RailmlEditor.ViewModels
         private bool _releaseTriggerHead;
         public bool ReleaseTriggerHead { get => _releaseTriggerHead; set => SetProperty(ref _releaseTriggerHead, value); }
 
-        private string _releaseTriggerRef;
+        private string _releaseTriggerRef = string.Empty;
         public string ReleaseTriggerRef { get => _releaseTriggerRef; set => SetProperty(ref _releaseTriggerRef, value); }
 
         public ObservableCollection<SwitchPositionViewModel> SwitchAndPositions { get; } = new();
@@ -640,9 +639,9 @@ namespace RailmlEditor.ViewModels
 
         public RouteViewModel()
         {
-            AddSwitchPositionCommand = new RelayCommand(_ => SwitchAndPositions.Add(new SwitchPositionViewModel { RemoveCommand = new RelayCommand(p => SwitchAndPositions.Remove(p as SwitchPositionViewModel)) }));
-            AddOverlapSwitchPositionCommand = new RelayCommand(_ => OverlapSwitchAndPositions.Add(new SwitchPositionViewModel { RemoveCommand = new RelayCommand(p => OverlapSwitchAndPositions.Remove(p as SwitchPositionViewModel)) }));
-            AddReleaseSectionCommand = new RelayCommand(_ => ReleaseSections.Add(new ReleaseSectionViewModel { RemoveCommand = new RelayCommand(p => ReleaseSections.Remove(p as ReleaseSectionViewModel)) }));
+            AddSwitchPositionCommand = new RelayCommand(_ => SwitchAndPositions.Add(new SwitchPositionViewModel { RemoveCommand = new RelayCommand(p => { if (p is SwitchPositionViewModel vm) SwitchAndPositions.Remove(vm); }) }));
+            AddOverlapSwitchPositionCommand = new RelayCommand(_ => OverlapSwitchAndPositions.Add(new SwitchPositionViewModel { RemoveCommand = new RelayCommand(p => { if (p is SwitchPositionViewModel vm) OverlapSwitchAndPositions.Remove(vm); }) }));
+            AddReleaseSectionCommand = new RelayCommand(_ => ReleaseSections.Add(new ReleaseSectionViewModel { RemoveCommand = new RelayCommand(p => { if (p is ReleaseSectionViewModel vm) ReleaseSections.Remove(vm); }) }));
         }
 
         public override double X { get => 0; set { } }
@@ -651,13 +650,13 @@ namespace RailmlEditor.ViewModels
 
     public class ReleaseSectionViewModel : ObservableObject
     {
-        private string _trackRef;
-        public string TrackRef { get => _trackRef; set => SetProperty(ref _trackRef, value); }
+        private string? _trackRef;
+        public string? TrackRef { get => _trackRef; set => SetProperty(ref _trackRef, value); }
 
         private bool _flankProtection;
         public bool FlankProtection { get => _flankProtection; set => SetProperty(ref _flankProtection, value); }
 
-        public ICommand RemoveCommand { get; set; }
+        public ICommand? RemoveCommand { get; set; }
 
         public List<bool> AvailableProtections { get; } = new() { true, false };
     }
@@ -673,7 +672,7 @@ namespace RailmlEditor.ViewModels
 
     public class CategoryViewModel : ObservableObject
     {
-        public string Title { get; set; }
+        public string? Title { get; set; }
         public ObservableCollection<BaseElementViewModel> Items { get; } = new ObservableCollection<BaseElementViewModel>();
     }
 
@@ -684,7 +683,7 @@ namespace RailmlEditor.ViewModels
 
         public ObservableCollection<InfrastructureViewModel> TreeRoots { get; } = new ObservableCollection<InfrastructureViewModel>();
         
-        private InfrastructureViewModel _activeInfrastructure;
+        private InfrastructureViewModel _activeInfrastructure = null!;
         public InfrastructureViewModel ActiveInfrastructure
         {
             get => _activeInfrastructure;
@@ -806,7 +805,8 @@ namespace RailmlEditor.ViewModels
             _clipboard.Clear();
             foreach (var el in SelectedElements)
             {
-                _clipboard.Add(CloneElement(el));
+                var c = CloneElement(el);
+                if (c != null) _clipboard.Add(c);
             }
         }
 
@@ -822,6 +822,7 @@ namespace RailmlEditor.ViewModels
             foreach (var el in _clipboard)
             {
                 var clone = CloneElement(el);
+                if (clone == null) continue;
                 
                 // Offset position
                 clone.X += 20;
@@ -947,9 +948,10 @@ namespace RailmlEditor.ViewModels
                     var searchDirs = new[] { workingDir, currentDir };
                     foreach (var baseDir in searchDirs)
                     {
-                        string probeRoot = baseDir;
+                        string? probeRoot = baseDir;
                         for (int i = 0; i < 5; i++)
                         {
+                            if (probeRoot == null) break;
                             string probe = System.IO.Path.Combine(probeRoot, filePath);
                             if (System.IO.File.Exists(probe))
                             {
@@ -1047,7 +1049,7 @@ namespace RailmlEditor.ViewModels
             }
         }
 
-        private BaseElementViewModel CloneElement(BaseElementViewModel el)
+        private BaseElementViewModel? CloneElement(BaseElementViewModel el)
         {
             if (el is CurvedTrackViewModel curved)
             {
@@ -1159,11 +1161,11 @@ namespace RailmlEditor.ViewModels
                     ReleaseTriggerRef = r.ReleaseTriggerRef
                 };
                 foreach (var s in r.SwitchAndPositions)
-                    nr.SwitchAndPositions.Add(new SwitchPositionViewModel { SwitchRef = s.SwitchRef, SwitchPosition = s.SwitchPosition, RemoveCommand = new RelayCommand(p => nr.SwitchAndPositions.Remove(p as SwitchPositionViewModel)) });
+                    nr.SwitchAndPositions.Add(new SwitchPositionViewModel { SwitchRef = s.SwitchRef, SwitchPosition = s.SwitchPosition, RemoveCommand = new RelayCommand(p => { if (p is SwitchPositionViewModel vm) nr.SwitchAndPositions.Remove(vm); }) });
                 foreach (var s in r.OverlapSwitchAndPositions)
-                    nr.OverlapSwitchAndPositions.Add(new SwitchPositionViewModel { SwitchRef = s.SwitchRef, SwitchPosition = s.SwitchPosition, RemoveCommand = new RelayCommand(p => nr.OverlapSwitchAndPositions.Remove(p as SwitchPositionViewModel)) });
+                    nr.OverlapSwitchAndPositions.Add(new SwitchPositionViewModel { SwitchRef = s.SwitchRef, SwitchPosition = s.SwitchPosition, RemoveCommand = new RelayCommand(p => { if (p is SwitchPositionViewModel vm) nr.OverlapSwitchAndPositions.Remove(vm); }) });
                 foreach (var s in r.ReleaseSections)
-                    nr.ReleaseSections.Add(new ReleaseSectionViewModel { TrackRef = s.TrackRef, FlankProtection = s.FlankProtection, RemoveCommand = new RelayCommand(p => nr.ReleaseSections.Remove(p as ReleaseSectionViewModel)) });
+                    nr.ReleaseSections.Add(new ReleaseSectionViewModel { TrackRef = s.TrackRef, FlankProtection = s.FlankProtection, RemoveCommand = new RelayCommand(p => { if (p is ReleaseSectionViewModel vm) nr.ReleaseSections.Remove(vm); }) });
                  nr.ShowCoordinates = r.ShowCoordinates;
                 return nr;
             }
@@ -1190,7 +1192,7 @@ namespace RailmlEditor.ViewModels
 
         public List<BaseElementViewModel> TakeSnapshot()
         {
-            return Elements.Select(el => CloneElement(el)).ToList();
+            return Elements.Select(el => CloneElement(el)).Where(e => e != null).Cast<BaseElementViewModel>().ToList();
         }
 
         public void AddHistory(List<BaseElementViewModel> oldState)
@@ -1212,10 +1214,13 @@ namespace RailmlEditor.ViewModels
             foreach (var el in state)
             {
                 var clone = CloneElement(el);
-                Elements.Add(clone);
-                if (selectedIds.Contains(clone.Id))
+                if (clone != null)
                 {
-                    clone.IsSelected = true; // This will trigger Element_PropertyChanged and add to SelectedElements
+                    Elements.Add(clone);
+                    if (selectedIds.Contains(clone.Id))
+                    {
+                        clone.IsSelected = true; // This will trigger Element_PropertyChanged and add to SelectedElements
+                    }
                 }
             }
             Elements.CollectionChanged += Elements_CollectionChanged;
@@ -1238,7 +1243,7 @@ namespace RailmlEditor.ViewModels
             TreeRoots.Add(ActiveInfrastructure);
         }
 
-        private void Elements_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void Elements_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
              if (e.Action == NotifyCollectionChangedAction.Reset)
              {
@@ -1271,7 +1276,7 @@ namespace RailmlEditor.ViewModels
             {
                 if (e.PropertyName == nameof(SignalViewModel.RelatedTrackId))
                 {
-                    UpdateTrackChildrenBinding(sender as BaseElementViewModel);
+                    if (sender is BaseElementViewModel vm) UpdateTrackChildrenBinding(vm);
                 }
             }
             else if (sender is TrackViewModel track)
@@ -1429,7 +1434,7 @@ namespace RailmlEditor.ViewModels
              }
         }
 
-        private void Element_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void Element_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(BaseElementViewModel.IsSelected))
             {

@@ -72,7 +72,7 @@ namespace RailmlEditor.ViewModels
         public string? Direction
         {
             get => GetCommonValue(e => (e as SignalViewModel)?.Direction);
-            set { SetCommonValue((e, v) => { if (e is SignalViewModel s) s.Direction = v; }, value); OnPropertyChanged(); }
+            set { SetCommonValue((e, v) => { if (e is SignalViewModel s) s.Direction = v ?? string.Empty; }, value); OnPropertyChanged(); }
         }
 
         // Helper for showing/hiding sections in Property Panel

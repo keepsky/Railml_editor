@@ -4,21 +4,21 @@ namespace RailmlEditor.ViewModels
 {
     public class GraphNodeViewModel : ObservableObject
     {
-        private string _id;
+        private string _id = string.Empty;
         public string Id
         {
             get => _id;
             set => SetProperty(ref _id, value);
         }
 
-        private string _label;
+        private string _label = string.Empty;
         public string Label
         {
             get => _label;
             set => SetProperty(ref _label, value);
         }
 
-        private string _type;
+        private string _type = string.Empty;
         public string Type
         {
             get => _type;

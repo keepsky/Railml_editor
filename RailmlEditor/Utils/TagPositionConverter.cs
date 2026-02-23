@@ -13,7 +13,7 @@ namespace RailmlEditor.Utils
             {
                 var mVal = values[0] as double?;
                 var baseVal = values[1] is double d ? d : 0.0;
-                string axis = parameter as string;
+                string? axis = parameter as string;
 
                 if (axis == "X")
                 {
@@ -33,7 +33,7 @@ namespace RailmlEditor.Utils
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            return System.Array.Empty<object>();
         }
     }
 }

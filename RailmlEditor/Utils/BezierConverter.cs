@@ -19,12 +19,12 @@ namespace RailmlEditor.Utils
                 // M StartX,StartY Q ControlX,ControlY EndX,EndY
                 return Geometry.Parse($"M {x},{y} Q {mx},{my} {x2},{y2}");
             }
-            return null;
+            return System.Windows.DependencyProperty.UnsetValue;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            return System.Array.Empty<object>();
         }
     }
 }

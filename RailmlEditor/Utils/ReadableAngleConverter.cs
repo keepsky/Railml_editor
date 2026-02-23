@@ -30,7 +30,7 @@ namespace RailmlEditor.Utils
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            return System.Array.Empty<object>();
         }
     }
 }

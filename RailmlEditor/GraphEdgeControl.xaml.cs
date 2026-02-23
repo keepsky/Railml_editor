@@ -111,8 +111,11 @@ namespace RailmlEditor
                 double ix = x1 + (x2 - x1) * node.Ratio;
                 double iy = y1 + (y2 - y1) * node.Ratio;
                 
-                node.Node.X = ix;
-                node.Node.Y = iy;
+                if (node.Node != null)
+                {
+                    node.Node.X = ix;
+                    node.Node.Y = iy;
+                }
             }
         }
     }

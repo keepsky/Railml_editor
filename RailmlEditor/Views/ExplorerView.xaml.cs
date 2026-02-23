@@ -9,7 +9,6 @@ namespace RailmlEditor.Views
     public partial class ExplorerView : UserControl
     {
         private MainViewModel? _viewModel => DataContext as MainViewModel;
-        private bool _isInternalSelectionChange = false;
 
         public ExplorerView()
         {
@@ -59,22 +58,14 @@ namespace RailmlEditor.Views
              if (ElementTree == null) return;
 
             Dispatcher.BeginInvoke(new Action(() => {
-                _isInternalSelectionChange = true;
-                try
+                var container = GetTreeViewItem(ElementTree, item);
+                if (container != null)
                 {
-                    var container = GetTreeViewItem(ElementTree, item);
-                    if (container != null)
+                    container.IsSelected = true;
+                    if (!ElementTree.IsKeyboardFocusWithin)
                     {
-                        container.IsSelected = true;
-                        if (!ElementTree.IsKeyboardFocusWithin)
-                        {
-                            container.BringIntoView();
-                        }
+                        container.BringIntoView();
                     }
-                }
-                finally
-                {
-                    _isInternalSelectionChange = false;
                 }
             }), System.Windows.Threading.DispatcherPriority.Background);
         }

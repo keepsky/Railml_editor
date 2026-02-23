@@ -8,7 +8,7 @@ namespace RailmlEditor.Logic
     public class TopologyManager
     {
         // Event to request user selection (e.g. Principle switch branch)
-        public event Action<SwitchBranchInfo> PrincipleTrackSelectionRequested;
+        public event Action<SwitchBranchInfo>? PrincipleTrackSelectionRequested;
 
         public void CheckConnections(TrackViewModel source, IEnumerable<BaseElementViewModel> allElements)
         {
@@ -166,7 +166,7 @@ namespace RailmlEditor.Logic
             int maxId = 0;
             foreach (var sw in elements.OfType<SwitchViewModel>())
             {
-                 if (sw.Id.StartsWith("sw") && int.TryParse(sw.Id.Substring(2), out int num))
+                 if (sw.Id != null && sw.Id.StartsWith("sw") && int.TryParse(sw.Id.Substring(2), out int num))
                     if (num > maxId) maxId = num;
             }
 

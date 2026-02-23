@@ -1,4 +1,4 @@
-﻿#pragma warning disable
+
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -56,7 +56,6 @@ namespace RailmlEditor
         private Point _toolboxDragStart;
         private Point _startPoint;
         private bool _isDragging;
-        private bool _isInternalSelectionChange = false;
         private FrameworkElement? _draggedControl;
         private System.Collections.Generic.Dictionary<BaseElementViewModel, Point> _originalPositions = new System.Collections.Generic.Dictionary<BaseElementViewModel, Point>();
         private System.Collections.Generic.List<BaseElementViewModel>? _beforeDragSnapshot;
@@ -77,7 +76,7 @@ namespace RailmlEditor
                 if (Math.Abs(currentPos.X - _toolboxDragStart.X) > SystemParameters.MinimumHorizontalDragDistance ||
                     Math.Abs(currentPos.Y - _toolboxDragStart.Y) > SystemParameters.MinimumVerticalDragDistance)
                 {
-                    string type = button.Tag.ToString();
+                    string? type = button.Tag?.ToString();
                     DragDrop.DoDragDrop(button, type, DragDropEffects.Copy);
                 }
             }
@@ -89,10 +88,10 @@ namespace RailmlEditor
             if (sender is Button button)
             {
                 var oldState = _viewModel.TakeSnapshot();
-                string type = button.Tag.ToString();
+                string? type = button.Tag?.ToString();
                 Point defaultPos = new Point(100, 100);
 
-                BaseElementViewModel newElement = null;
+                BaseElementViewModel? newElement = null;
 
                 if (type == "Track")
                 {
@@ -201,10 +200,10 @@ namespace RailmlEditor
             if (e.Data.GetDataPresent(DataFormats.StringFormat))
             {
                 var oldState = _viewModel.TakeSnapshot();
-                string type = (string)e.Data.GetData(DataFormats.StringFormat);
+                string? type = e.Data.GetData(DataFormats.StringFormat) as string;
                 Point dropPosition = e.GetPosition(MainDesigner);
 
-                BaseElementViewModel newElement = null;
+                BaseElementViewModel? newElement = null;
 
                 if (type == "Track")
                 {
@@ -916,12 +915,12 @@ namespace RailmlEditor
             selector.Owner = this;
             if (selector.ShowDialog() == true)
             {
-                info.Callback(selector.SelectedTrack);
+                info.Callback?.Invoke(selector.SelectedTrack);
             }
             else
             {
                 RollbackMove();
-                info.Callback(null);
+                info.Callback?.Invoke(null);
             }
         }
 

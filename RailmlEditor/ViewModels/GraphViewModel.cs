@@ -1,4 +1,3 @@
-#pragma warning disable
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -25,7 +24,7 @@ namespace RailmlEditor.ViewModels
         private class TrackPositionNode
         {
             public double Pos { get; set; }
-            public GraphNodeViewModel Node { get; set; }
+            public GraphNodeViewModel? Node { get; set; }
         }
 
         public void BuildGraph(IEnumerable<BaseElementViewModel> allElements)
@@ -365,7 +364,7 @@ namespace RailmlEditor.ViewModels
                     // Return the terminal node if it exists
                     if (onTrackNodes.TryGetValue(track.Id, out var nodes))
                     {
-                        var termNode = nodes.FirstOrDefault(n => Math.Abs(n.Pos) < 0.001 && n.Node.Type == "Terminal");
+                        var termNode = nodes.FirstOrDefault(n => Math.Abs(n.Pos) < 0.001 && n.Node?.Type == "Terminal");
                         if (termNode != null && termNode.Node != startNode) return termNode.Node;
                     }
                 }
@@ -407,7 +406,7 @@ namespace RailmlEditor.ViewModels
                     // Return the terminal node if it exists
                     if (onTrackNodes.TryGetValue(track.Id, out var nodes))
                     {
-                        var termNode = nodes.FirstOrDefault(n => Math.Abs(n.Pos - track.Length) < 0.001 && n.Node.Type == "Terminal");
+                        var termNode = nodes.FirstOrDefault(n => Math.Abs(n.Pos - track.Length) < 0.001 && n.Node?.Type == "Terminal");
                         if (termNode != null && termNode.Node != startNode) return termNode.Node;
                     }
                 }

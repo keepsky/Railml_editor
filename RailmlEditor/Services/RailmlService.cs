@@ -1,4 +1,4 @@
-#pragma warning disable
+
 using System;
 using System.IO;
 using System.Linq;
@@ -96,7 +96,7 @@ namespace RailmlEditor.Services
                     trackVis.TrackElementVisList.Add(new TrackElementVis
                     {
                         Ref = $"{trackId}_mid", // Midpoint/Corner coordinate
-                        Position = new VisualizationPosition { X = ctv.MX, Y = ctv.MY }
+                        Position = new VisualizationPosition { X = ctv!.MX, Y = ctv.MY }
                     });
                 }
 
@@ -199,11 +199,17 @@ namespace RailmlEditor.Services
 
             foreach(var track in railml.Infrastructure.Tracks.TrackList)
             {
-                allNodes.Add(track.TrackTopology.TrackBegin);
-                nodeToTrack[track.TrackTopology.TrackBegin] = track;
+                if (track.TrackTopology?.TrackBegin != null)
+                {
+                    allNodes.Add(track.TrackTopology.TrackBegin);
+                    nodeToTrack[track.TrackTopology.TrackBegin] = track;
+                }
 
-                allNodes.Add(track.TrackTopology.TrackEnd);
-                nodeToTrack[track.TrackTopology.TrackEnd] = track;
+                if (track.TrackTopology?.TrackEnd != null)
+                {
+                    allNodes.Add(track.TrackTopology.TrackEnd);
+                    nodeToTrack[track.TrackTopology.TrackEnd] = track;
+                }
             }
 
             foreach(var nodeA in allNodes)
@@ -225,12 +231,12 @@ namespace RailmlEditor.Services
                 if (overlappingNodes.Count > 0)
                 {
                     var parentTrack = nodeToTrack[nodeA];
-                    bool isBeginA = nodeA.Id.StartsWith("tb"); // Updated to use new prefix
+                    bool isBeginA = nodeA.Id != null && nodeA.Id.StartsWith("tb"); // Updated to use new prefix
                     if (overlappingNodes.Count == 1)
                     {
                          foreach (var nodeB in overlappingNodes)
                          {
-                             bool isBeginB = nodeB.Id.StartsWith("tb");
+                             bool isBeginB = nodeB.Id != null && nodeB.Id.StartsWith("tb");
                              // if (isBeginA == isBeginB) continue; // Allow Begin-Begin and End-End connections 
 
                              var targetTrack = nodeToTrack[nodeB];
@@ -299,7 +305,7 @@ namespace RailmlEditor.Services
                              bool shouldHostSwitch = swVm.IsScenario1 ? isPrincipleNode : isEnteringNode;
                              if (shouldHostSwitch)
                              {
-                                 if (parentTrack.TrackTopology.Connections == null) 
+                                 if (parentTrack.TrackTopology!.Connections == null) 
                                      parentTrack.TrackTopology.Connections = new Connections();
 
                                  if (!parentTrack.TrackTopology.Connections.Switches.Any(s => s.Id == swVm.Id))
@@ -336,7 +342,7 @@ namespace RailmlEditor.Services
                                          var divTrackObj = railml.Infrastructure.Tracks.TrackList.FirstOrDefault(t => t.Id == GetRailmlId(divId));
                                          if (divTrackObj != null)
                                          {
-                                             var targetNode = swVm.IsScenario1 ? divTrackObj.TrackTopology.TrackBegin : divTrackObj.TrackTopology.TrackEnd;
+                                             var targetNode = swVm.IsScenario1 ? divTrackObj.TrackTopology!.TrackBegin : divTrackObj.TrackTopology!.TrackEnd;
                                              if (targetNode != null)
                                              {
                                                  if (!targetNode.ConnectionList.Any(c => c.Ref == swConnId))
@@ -573,7 +579,7 @@ namespace RailmlEditor.Services
             // First pass: Create ID mapping
             foreach (var track in railml.Infrastructure.Tracks.TrackList)
             {
-                if (!idMap.ContainsKey(track.Id))
+                if (track.Id != null && !idMap.ContainsKey(track.Id))
                 {
                     idMap[track.Id] = GetNextSnippetId("tr", ref trackCounter);
                 }
@@ -814,7 +820,7 @@ namespace RailmlEditor.Services
                                         if (match.Success)
                                         {
                                             var num = match.Value;
-                                            oldTrackId = railml.Infrastructure.Tracks.TrackList.FirstOrDefault(t => t.Id.EndsWith(num))?.Id;
+                                            oldTrackId = railml.Infrastructure.Tracks.TrackList.FirstOrDefault(t => t.Id != null && t.Id.EndsWith(num))?.Id;
                                         }
                                     }
 
@@ -840,7 +846,7 @@ namespace RailmlEditor.Services
                                         if (match.Success)
                                         {
                                             var num = match.Value;
-                                            oldTrackId = railml.Infrastructure.Tracks.TrackList.FirstOrDefault(t => t.Id.EndsWith(num))?.Id;
+                                            oldTrackId = railml.Infrastructure.Tracks.TrackList.FirstOrDefault(t => t.Id != null && t.Id.EndsWith(num))?.Id;
                                         }
                                     }
 
@@ -862,7 +868,7 @@ namespace RailmlEditor.Services
                                         if (match.Success)
                                         {
                                             var num = match.Value;
-                                            oldTrackId = railml.Infrastructure.Tracks.TrackList.FirstOrDefault(t => t.Id.EndsWith(num))?.Id;
+                                            oldTrackId = railml.Infrastructure.Tracks.TrackList.FirstOrDefault(t => t.Id != null && t.Id.EndsWith(num))?.Id;
                                         }
                                     }
 

@@ -1,4 +1,3 @@
-#pragma warning disable
 using System.Collections.Generic;
 using System.Windows;
 using RailmlEditor.ViewModels;
@@ -7,7 +6,7 @@ namespace RailmlEditor
 {
     public partial class JunctionPrincipleSelector : Window
     {
-        public TrackViewModel SelectedTrack { get; private set; }
+        public TrackViewModel? SelectedTrack { get; private set; }
 
         public JunctionPrincipleSelector(List<TrackViewModel> candidates)
         {
@@ -50,8 +49,8 @@ namespace RailmlEditor
 
         private class TrackDisplayWrapper
         {
-            public TrackViewModel Track { get; set; }
-            public string FullDisplayName => $"{Track.Id} ({Track.Name ?? "No Name"})";
+            public TrackViewModel? Track { get; set; }
+            public string FullDisplayName => $"{Track?.Id} ({Track?.Name ?? "No Name"})";
         }
     }
 }

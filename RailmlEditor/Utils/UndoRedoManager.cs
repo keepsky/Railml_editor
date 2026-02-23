@@ -35,7 +35,7 @@ namespace RailmlEditor.Utils
         public bool CanUndo => _undoStack.Count > 0;
         public bool CanRedo => _redoStack.Count > 0;
 
-        public event EventHandler StateChanged;
+        public event EventHandler? StateChanged;
 
         public void Execute(IUndoableAction action)
         {
