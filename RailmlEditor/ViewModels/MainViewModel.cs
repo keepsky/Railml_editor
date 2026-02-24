@@ -87,6 +87,19 @@ namespace RailmlEditor.ViewModels
         public ICommand SaveAsProjectCommand { get; }
         public ICommand CreateAreaCommand { get; }
 
+        private bool _isDirty = false;
+        public bool IsDirty
+        {
+            get => _isDirty;
+            set
+            {
+                if (SetProperty(ref _isDirty, value))
+                {
+                    RequestUpdateTitle?.Invoke();
+                }
+            }
+        }
+
         public event Action? RequestUpdateTitle;
 
         private readonly RailmlEditor.Logic.TopologyManager _topologyManager = new RailmlEditor.Logic.TopologyManager();
@@ -100,6 +113,7 @@ namespace RailmlEditor.ViewModels
             History.StateChanged += (s, e) => { 
                 (UndoCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 (RedoCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                IsDirty = true;
             };
 
             UndoCommand = new RelayCommand(_ => History.Undo(), _ => History.CanUndo && IsEditMode);
@@ -213,19 +227,35 @@ namespace RailmlEditor.ViewModels
 
         private void NewProject()
         {
-            if (Elements.Count > 0)
+            if (IsDirty)
             {
-                var result = MessageBox.Show("Save changes before creating new project?", "New Project", MessageBoxButton.YesNoCancel);
+                var result = MessageBox.Show("Save changes to current project?", "New Project", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.Cancel) return;
-                if (result == MessageBoxResult.Yes) SaveProject();
+                if (result == MessageBoxResult.Yes) 
+                {
+                    SaveProject();
+                    if (IsDirty) return; // If save failed or was cancelled
+                }
             }
             Elements.Clear();
             CurrentFilePath = null;
+            IsDirty = false;
             RequestUpdateTitle?.Invoke();
         }
 
         private void OpenProject()
         {
+            if (IsDirty)
+            {
+                var result = MessageBox.Show("Save changes before opening another project?", "Open Project", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+                if (result == MessageBoxResult.Cancel) return;
+                if (result == MessageBoxResult.Yes) 
+                {
+                    SaveProject();
+                    if (IsDirty) return; // If save failed or was cancelled
+                }
+            }
+
             var dialog = new Microsoft.Win32.OpenFileDialog();
             dialog.Filter = "RailML Files (*.xml;*.railml)|*.xml;*.railml|All Files (*.*)|*.*";
             if (dialog.ShowDialog() == true)
@@ -235,6 +265,7 @@ namespace RailmlEditor.ViewModels
                 try
                 {
                     service.Load(CurrentFilePath, this);
+                    IsDirty = false;
                     RequestUpdateTitle?.Invoke();
                 }
                 catch (Exception ex)
@@ -256,6 +287,8 @@ namespace RailmlEditor.ViewModels
             try
             {
                 service.Save(CurrentFilePath, this);
+                IsDirty = false;
+                RequestUpdateTitle?.Invoke();
                 MessageBox.Show("File saved successfully.");
             }
             catch (Exception ex)
@@ -278,6 +311,7 @@ namespace RailmlEditor.ViewModels
                 try
                 {
                     service.Save(CurrentFilePath, this);
+                    IsDirty = false;
                     RequestUpdateTitle?.Invoke();
                     MessageBox.Show("File saved successfully.");
                 }

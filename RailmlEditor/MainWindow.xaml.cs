@@ -21,6 +21,7 @@ namespace RailmlEditor
             _viewModel.PropertyChanged += ViewModel_PropertyChanged;
             this.DataContext = _viewModel;
             _viewModel.RequestUpdateTitle += UpdateTitle;
+            this.Closing += MainWindow_Closing;
             
             
             // Set Initial Theme based on Config
@@ -40,7 +41,29 @@ namespace RailmlEditor
             {
                 fileName = System.IO.Path.GetFileName(_viewModel.CurrentFilePath);
             }
-            this.Title = $"RailML Editor - {fileName}";
+            string dirtyMark = _viewModel.IsDirty ? "*" : "";
+            this.Title = $"RailML Editor - {fileName}{dirtyMark}";
+        }
+
+        private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (_viewModel.IsDirty)
+            {
+                var result = MessageBox.Show("Save changes before closing?", "Exit Application", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+                if (result == MessageBoxResult.Cancel)
+                {
+                    e.Cancel = true; // Stop closing
+                }
+                else if (result == MessageBoxResult.Yes)
+                {
+                    // Find a way to trigger Save
+                    if (_viewModel.SaveProjectCommand.CanExecute(null))
+                    {
+                        _viewModel.SaveProjectCommand.Execute(null);
+                        if (_viewModel.IsDirty) e.Cancel = true; // Save failed or cancelled
+                    }
+                }
+            }
         }
 
         public void SetTheme(string theme)
@@ -83,17 +106,17 @@ namespace RailmlEditor
                 }
             }
         }
-
-                private void Toolbox_Click(object sender, RoutedEventArgs e)
+        private void Toolbox_Click(object sender, RoutedEventArgs e)
         {
-            if (!_viewModel.IsEditMode) return;
-            if (sender is Button button && button.Tag is string type)
+                        if (!_viewModel.IsEditMode) return;
+            if (sender is Button button)
             {
-                if (type == "Border")
+                string? type = button.Tag?.ToString();
+                                if (type == "Border")
                 {
                     StartBorderPlacement();
                 }
-                else
+                else if (type != null)
                 {
                     _viewModel.AddElement(type, new Point(100, 100));
                 }
