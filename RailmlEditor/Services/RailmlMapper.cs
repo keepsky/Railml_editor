@@ -8,7 +8,7 @@ namespace RailmlEditor.Services
 {
     public static class RailmlMapper
     {
-        public static Railml ToRailml(MainViewModel viewModel)
+        public static Railml ToRailml(MainViewModel viewModel, DocumentViewModel doc)
         {
             var railml = new Railml
             {
@@ -36,7 +36,7 @@ namespace RailmlEditor.Services
 
             // 1. Create Tracks
             var trackMap = new System.Collections.Generic.Dictionary<string, Track>();
-            foreach (var element in viewModel.Elements.OfType<TrackViewModel>())
+            foreach (var element in doc.Elements.OfType<TrackViewModel>())
             {
                 // Determine if Curved
                 bool isCurved = element is CurvedTrackViewModel;
@@ -98,6 +98,20 @@ namespace RailmlEditor.Services
                     });
                 }
 
+                // Serialize TextElements inside mainVis (Generic Labels or other things)
+                var textElements = doc.Elements.Where(e => !(e is TrackViewModel || e is SwitchViewModel || e is SignalViewModel || e is TrackCircuitBorderViewModel || e is RouteViewModel || e is AreaViewModel)).ToList();
+                if (textElements.Count > 0)
+                {
+                    foreach (var textVm in textElements)
+                    {
+                        mainVis.ObjectVisList.Add(new ObjectVis
+                        {
+                            Ref = textVm.Id,
+                            Position = new VisualizationPosition { X = textVm.X, Y = textVm.Y }
+                        });
+                    }
+                }
+
                 // Add Signals and Borders bound to this track
                 var trackVm = element as TrackViewModel; // Cast to access properties
 
@@ -122,8 +136,8 @@ namespace RailmlEditor.Services
                         track.TrackTopology.TrackEnd.OpenEnd = new OpenEnd { Id = trackVm.EndNode.Id, Code = trackVm.EndNode.Code, Name = trackVm.EndNode.Name, Description = trackVm.EndNode.Description };
                     }
                 }
-                var boundSignals = viewModel.Elements.OfType<SignalViewModel>().Where(s => s.RelatedTrackId == element.Id).ToList();
-                var boundBorders = viewModel.Elements.OfType<TrackCircuitBorderViewModel>().Where(b => b.RelatedTrackId == element.Id).ToList();
+                var boundSignals = doc.Elements.OfType<SignalViewModel>().Where(s => s.RelatedTrackId == element.Id).ToList();
+                var boundBorders = doc.Elements.OfType<TrackCircuitBorderViewModel>().Where(b => b.RelatedTrackId == element.Id).ToList();
                 
                 if (boundSignals.Count > 0 || boundBorders.Count > 0)
                 {
@@ -187,12 +201,26 @@ namespace RailmlEditor.Services
                 trackMap[element.Id] = track;
             }
 
-            // 2. Add Switches (they are nested in Tracks/TrackTopology/Connections)
-            // Need to handle switch visualizations after they are created in the next loop or integrated
-            // Actually, existing code generates connections/switches by analyzing overlaps.
-            // Let's keep that logic but extract visualization data.
+            // Switches are handled inside track topology connections, not top-level
+            // The existing topology builder handles switches during save, but if we need visual data:
+            var switchMap = new Dictionary<string, SwitchViewModel>();
+            foreach (var sw in doc.Elements.OfType<SwitchViewModel>())
+            {
+                switchMap[sw.Id] = sw;
+
+                // Switch Vis (Usually switch visualization is its own objectVis or trackElementVis)
+                // For simplified railML, maybe just an ObjectVis
+                mainVis.ObjectVisList.Add(new ObjectVis
+                {
+                    Ref = sw.Id,
+                    Position = new VisualizationPosition { X = sw.X, Y = sw.Y }
+                });
+            }
+            // 6. Finalize topology building?
+            // Existing logic relies on RailmlTopologyBuilder to populate TrackBegin/TrackEnd/Connections
+            // So we don't manually map Switches to railml structure here, just let RailmlTopologyBuilder handle it.
             // 4. Create Routes
-            var routeList = viewModel.Elements.OfType<RouteViewModel>().ToList();
+            var routeList = doc.Elements.OfType<RouteViewModel>().ToList();
             if (routeList.Any())
             {
                 railml.Infrastructure.Routes = new Routes();
@@ -250,7 +278,7 @@ namespace RailmlEditor.Services
             }
 
             // 5. Create Areas
-            var areaList = viewModel.Elements.OfType<AreaViewModel>().ToList();
+            var areaList = doc.Elements.OfType<AreaViewModel>().ToList();
             if (areaList.Any())
             {
                 railml.Infrastructure.Areas = new Areas();
@@ -271,21 +299,12 @@ namespace RailmlEditor.Services
                 }
             }
 
-            // 6. Save Switch Visualizations (Point Coordinates)
-            foreach (var swVm in viewModel.Elements.OfType<SwitchViewModel>())
-            {
-                var objVis = new ObjectVis
-                {
-                    Ref = swVm.Id,
-                    Position = new VisualizationPosition { X = swVm.X, Y = swVm.Y }
-                };
-                mainVis.ObjectVisList.Add(objVis);
-            }
+
 
             return railml;
         }
 
-        public static System.Collections.Generic.List<BaseElementViewModel> ToViewModelsForSnippet(Railml? railml, MainViewModel viewModel)
+        public static System.Collections.Generic.List<BaseElementViewModel> ToViewModelsForSnippet(Railml? railml, MainViewModel viewModel, DocumentViewModel doc)
         {
             var newElements = new System.Collections.Generic.List<BaseElementViewModel>();
             if (railml?.Infrastructure?.Tracks?.TrackList == null) return newElements;
@@ -333,7 +352,7 @@ namespace RailmlEditor.Services
             string GetNextSnippetId(string prefix, ref int localCounter)
             {
                 int max = 0;
-                foreach (var el in viewModel.Elements)
+                foreach (var el in doc.Elements)
                 {
                     if (el.Id != null && el.Id.StartsWith(prefix) && int.TryParse(el.Id.Substring(prefix.Length), out int num))
                     {
@@ -703,8 +722,10 @@ namespace RailmlEditor.Services
         }
 
 
-        public static void LoadIntoViewModel(Railml? railml, MainViewModel viewModel)
+        public static void LoadIntoViewModel(Railml? railml, MainViewModel viewModel, DocumentViewModel doc)
         {
+            doc.Elements.Clear();
+            if (railml == null) return;
             if (railml?.Infrastructure != null)
             {
                 viewModel.ActiveInfrastructure.Id = railml.Infrastructure.Id ?? "inf001";
@@ -745,9 +766,6 @@ namespace RailmlEditor.Services
                         }
                     }
                 }
-
-                viewModel.Elements.Clear();
-
                 if (railml?.Infrastructure?.Tracks?.TrackList != null)
                 {
                     foreach (var track in railml.Infrastructure.Tracks.TrackList)
@@ -927,16 +945,14 @@ namespace RailmlEditor.Services
                             // Default length 100 if no end specified
                             trackVm.Length = 100; 
                         }
-
-                        viewModel.Elements.Add(trackVm);
+                        doc.Elements.Add(trackVm);
                         
 
                         // NEW: Load Switches from TrackTopology.Connections (Standardized Location)
                         if (track.TrackTopology?.Connections?.Switches != null)
                         {
                             foreach (var sw in track.TrackTopology.Connections.Switches)
-                            {
-                                var switchVm = viewModel.Elements.OfType<SwitchViewModel>().FirstOrDefault(e => e.Id == sw.Id);
+                            {                                var switchVm = doc.Elements.OfType<SwitchViewModel>().FirstOrDefault(e => e.Id == sw.Id);
                                 VisualizationPosition? swPos = null;
                                 coordMap.TryGetValue(sw.Id, out swPos);
 
@@ -977,8 +993,7 @@ namespace RailmlEditor.Services
                                             TrackContinueCourse = sw.TrackContinueCourse ?? "straight",
                                             NormalPosition = sw.NormalPosition ?? "straight"
                                         };
-                                    }
-                                    viewModel.Elements.Add(switchVm);
+                                    }                                    doc.Elements.Add(switchVm);
                                 }
                                 else if (swPos != null)
                                 {
@@ -1090,8 +1105,7 @@ namespace RailmlEditor.Services
                                      // Snapping logic puts it at +/- 20.
                                      // So we should respect that.
                                 }
-
-                                viewModel.Elements.Add(signalVm);
+                                doc.Elements.Add(signalVm);
                             }
                         }
 
@@ -1115,8 +1129,7 @@ namespace RailmlEditor.Services
                                     Angle = Math.Atan2(trackVm.Y2 - trackVm.Y, trackVm.X2 - trackVm.X) * 180 / Math.PI,
                                     RelatedTrackId = track.Id
                                 };
-
-                                viewModel.Elements.Add(borderVm);
+                                doc.Elements.Add(borderVm);
                             }
                         }
                     }
@@ -1179,8 +1192,7 @@ namespace RailmlEditor.Services
                                 });
                             }
                         }
-
-                        viewModel.Elements.Add(rVm);
+                        doc.Elements.Add(rVm);
                     }
                 }
 
@@ -1197,23 +1209,20 @@ namespace RailmlEditor.Services
                             Type = aObj.Type
                         };
                         foreach (var lim in aObj.IsLimitedByList)
-                        {
-                            var border = viewModel.Elements.OfType<TrackCircuitBorderViewModel>().FirstOrDefault(b => b.Id == lim.Ref);
+                        {                            var border = doc.Elements.OfType<TrackCircuitBorderViewModel>().FirstOrDefault(b => b.Id == lim.Ref);
                             if (border != null)
                             {
                                 aVm.Borders.Add(border);
                             }
-                        }
-                        viewModel.Elements.Add(aVm);
+                        }                        doc.Elements.Add(aVm);
                     }
                 }
 
-            // Post-process to update DisplayNames in DivergingConnections
-            foreach (var sw in viewModel.Elements.OfType<SwitchViewModel>())
+            // Post-process to update DisplayNames in DivergingConnections            
+            foreach (var sw in doc.Elements.OfType<SwitchViewModel>())
             {
                 foreach (var dc in sw.DivergingConnections)
-                {
-                    var track = viewModel.Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == dc.TrackId);
+                {                    var track = doc.Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == dc.TrackId);
                     if (track != null)
                     {
                         dc.TargetTrack = track;

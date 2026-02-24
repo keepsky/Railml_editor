@@ -8,10 +8,10 @@ namespace RailmlEditor.Services
 {
     public class RailmlService
     {
-        public void Save(string path, MainViewModel viewModel)
+        public void Save(string path, MainViewModel viewModel, DocumentViewModel doc)
         {
-            var railml = RailmlMapper.ToRailml(viewModel);
-            RailmlTopologyBuilder.BuildTopology(railml, viewModel);
+            var railml = RailmlMapper.ToRailml(viewModel, doc);
+            RailmlTopologyBuilder.BuildTopology(railml, doc);
 
             try
             {
@@ -26,29 +26,29 @@ namespace RailmlEditor.Services
             }
         }
 
-        public System.Collections.Generic.List<BaseElementViewModel> LoadSnippet(string path, MainViewModel viewModel)
+        public System.Collections.Generic.List<BaseElementViewModel> LoadSnippet(string path, MainViewModel viewModel, DocumentViewModel doc)
         {
             var serializer = new XmlSerializer(typeof(Railml));
             using var fs = new FileStream(path, FileMode.Open);
             var railml = (Railml?)serializer.Deserialize(fs);
-            return RailmlMapper.ToViewModelsForSnippet(railml, viewModel);
+            return RailmlMapper.ToViewModelsForSnippet(railml, viewModel, doc);
         }
 
-        public System.Collections.Generic.List<BaseElementViewModel> LoadSnippetFromXml(string xmlContent, MainViewModel viewModel)
+        public System.Collections.Generic.List<BaseElementViewModel> LoadSnippetFromXml(string xmlContent, MainViewModel viewModel, DocumentViewModel doc)
         {
             var serializer = new XmlSerializer(typeof(Railml));
             using var reader = new StringReader(xmlContent);
             var railml = (Railml?)serializer.Deserialize(reader);
-            return RailmlMapper.ToViewModelsForSnippet(railml, viewModel);
+            return RailmlMapper.ToViewModelsForSnippet(railml, viewModel, doc);
         }
 
-        public void Load(string path, MainViewModel viewModel)
+        public void Load(string path, MainViewModel viewModel, DocumentViewModel doc)
         {
             var serializer = new XmlSerializer(typeof(Railml));
             using var fs = new FileStream(path, FileMode.Open);
             var railml = (Railml?)serializer.Deserialize(fs);
 
-            RailmlMapper.LoadIntoViewModel(railml, viewModel);
+            RailmlMapper.LoadIntoViewModel(railml, viewModel, doc);
         }
     }
 }

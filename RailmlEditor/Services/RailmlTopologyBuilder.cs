@@ -8,7 +8,7 @@ namespace RailmlEditor.Services
 {
     public static class RailmlTopologyBuilder
     {
-        public static void BuildTopology(Railml railml, MainViewModel viewModel)
+        public static void BuildTopology(Railml railml, DocumentViewModel doc)
         {
             var allNodes = new System.Collections.Generic.List<TrackNode>();
             var nodeToTrack = new System.Collections.Generic.Dictionary<TrackNode, Track>(); // Map Node -> Track
@@ -30,11 +30,12 @@ namespace RailmlEditor.Services
 
             foreach(var nodeA in allNodes)
             {
+                double ax = nodeA.ScreenPos?.X ?? 0;
+                double ay = nodeA.ScreenPos?.Y ?? 0;
+                
                 var overlappingNodes = new System.Collections.Generic.List<TrackNode>();
                 foreach(var nodeB in allNodes)
                 {
-                    double ax = nodeA.ScreenPos?.X ?? 0;
-                    double ay = nodeA.ScreenPos?.Y ?? 0;
                     double bx = nodeB.ScreenPos?.X ?? 0;
                     double by = nodeB.ScreenPos?.Y ?? 0;
 
@@ -70,17 +71,61 @@ namespace RailmlEditor.Services
                                  });
                              }
                          }
+                        // If a node has only one overlapping node, and it's not connected, it's an open end or buffer stop
+                        var trackVm = doc.Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == parentTrack.Id || t.Id == "tr" + System.Text.RegularExpressions.Regex.Match(parentTrack.Id ?? "", @"\d+").Value);
+                        if (trackVm != null)
+                        {
+                            if (isBeginA)
+                            {
+                                trackVm.BeginType = TrackNodeType.BufferStop;
+                                trackVm.BeginNode.Code = "bufferStop";
+                                trackVm.BeginNode.Name = $"End({trackVm.Name})";
+                            }
+                            else
+                            {
+                                trackVm.EndType = TrackNodeType.OpenEnd;
+                                trackVm.EndNode.Code = "openEnd";
+                                trackVm.EndNode.Name = $"OEnd({trackVm.Name})";
+                            }
+                        }
+                    }
+                    else if (overlappingNodes.Count == 2)
+                    {
+                        // 2 nodes -> 2 tracks meeting = "joint"
+                        var otherNode = overlappingNodes.First(n => n != nodeA);
+                        var otherTrack = nodeToTrack[otherNode];
+                        bool isBeginB = otherNode.Id != null && otherNode.Id.StartsWith("tb");
+
+                        var trackVmA = doc.Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == parentTrack.Id || t.Id == "tr" + System.Text.RegularExpressions.Regex.Match(parentTrack.Id ?? "", @"\d+").Value);
+                        var trackVmB = doc.Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == otherTrack.Id || t.Id == "tr" + System.Text.RegularExpressions.Regex.Match(otherTrack.Id ?? "", @"\d+").Value);
+                    }
+                    else if (overlappingNodes.Count == 3) // This is a switch
+                    {
+                        // Switch mapping (3 nodes meeting)
+                        var otherNodes = overlappingNodes.Where(n => n != nodeA).ToList();
+                        var otherTrack1 = nodeToTrack[otherNodes[0]];
+                        var otherTrack2 = nodeToTrack[otherNodes[1]];
+
+                        // Try to find an existing switch in the ViewModel at this screen position
+                        var sw = doc.Elements.OfType<SwitchViewModel>().FirstOrDefault(s => Math.Sqrt(Math.Pow(s.X - ax, 2) + Math.Pow(s.Y - ay, 2)) < RailmlEditor.Models.AppSettings.Instance.NodeMappingTolerance);
+                        if (sw != null)
+                        {
+                            // Assign branches
+                            var trackA = doc.Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == parentTrack.Id || t.Id == "tr" + System.Text.RegularExpressions.Regex.Match(parentTrack.Id ?? "", @"\d+").Value);
+                            var trackB = doc.Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == otherTrack1.Id || t.Id == "tr" + System.Text.RegularExpressions.Regex.Match(otherTrack1.Id ?? "", @"\d+").Value);
+                            var trackC = doc.Elements.OfType<TrackViewModel>().FirstOrDefault(t => t.Id == otherTrack2.Id || t.Id == "tr" + System.Text.RegularExpressions.Regex.Match(otherTrack2.Id ?? "", @"\d+").Value);
+                        }
                     }
                     else
                     {
-                         var swVm = viewModel.Elements.OfType<SwitchViewModel>()
+                         var swVm = doc.Elements.OfType<SwitchViewModel>()
                                  .FirstOrDefault(s => {
-                                     var swTracks = new System.Collections.Generic.HashSet<string>();
+                                     var swTracks = new System.Collections.Generic.HashSet<string?>();
                                      if (!string.IsNullOrEmpty(s.EnteringTrackId)) swTracks.Add(GetRailmlId(s.EnteringTrackId));
                                      if (!string.IsNullOrEmpty(s.PrincipleTrackId)) swTracks.Add(GetRailmlId(s.PrincipleTrackId));
                                      foreach (var id in s.DivergingTrackIds) if (!string.IsNullOrEmpty(id)) swTracks.Add(GetRailmlId(id));
 
-                                     var clusterTracks = new System.Collections.Generic.HashSet<string>(overlappingNodes.Select(n => nodeToTrack[n].Id));
+                                     var clusterTracks = new System.Collections.Generic.HashSet<string?>(overlappingNodes.Select(n => nodeToTrack[n].Id));
                                      clusterTracks.Add(parentTrack.Id);
                                      
                                      return swTracks.Count > 0 && swTracks.SetEquals(clusterTracks);

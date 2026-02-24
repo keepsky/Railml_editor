@@ -16,8 +16,32 @@ namespace RailmlEditor.ViewModels
 {
     public class MainViewModel : ObservableObject
     {
-        public ObservableCollection<BaseElementViewModel> Elements { get; } = new ObservableCollection<BaseElementViewModel>();
-        public ObservableCollection<BaseElementViewModel> SelectedElements { get; } = new ObservableCollection<BaseElementViewModel>();
+        public ObservableCollection<DocumentViewModel> Documents { get; } = new ObservableCollection<DocumentViewModel>();
+
+        private DocumentViewModel? _activeDocument;
+        public DocumentViewModel? ActiveDocument
+        {
+            get => _activeDocument;
+            set
+            {
+                if (SetProperty(ref _activeDocument, value))
+                {
+                    if (_activeDocument != null)
+                    {
+                        foreach (var doc in Documents)
+                        {
+                            doc.IsActive = (doc == _activeDocument);
+                        }
+                    }
+                    OnActiveDocumentChanged();
+                }
+            }
+        }
+
+        // Forward properties for compatibility, or update bindings to use ActiveDocument.Elements
+        public ObservableCollection<BaseElementViewModel>? Elements => ActiveDocument?.Elements;
+        public ObservableCollection<BaseElementViewModel>? SelectedElements => ActiveDocument?.SelectedElements;
+        public UndoRedoManager? History => ActiveDocument?.History;
 
         public ObservableCollection<InfrastructureViewModel> TreeRoots { get; } = new ObservableCollection<InfrastructureViewModel>();
         
@@ -28,11 +52,17 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _activeInfrastructure, value);
         }
 
-        private BaseElementViewModel? _selectedElement;
         public BaseElementViewModel? SelectedElement
         {
-            get => _selectedElement;
-            set => SetProperty(ref _selectedElement, value);
+            get => ActiveDocument?.SelectedElement;
+            set
+            {
+                if (ActiveDocument != null)
+                {
+                    ActiveDocument.SelectedElement = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         private BulkEditViewModel? _bulkEdit;
@@ -72,33 +102,11 @@ namespace RailmlEditor.ViewModels
             }
         }
 
-        public UndoRedoManager History { get; } = new();
-
-        private string? _currentFilePath;
-        public string? CurrentFilePath
-        {
-            get => _currentFilePath;
-            set => SetProperty(ref _currentFilePath, value);
-        }
-
         public ICommand NewProjectCommand { get; }
         public ICommand OpenProjectCommand { get; }
         public ICommand SaveProjectCommand { get; }
         public ICommand SaveAsProjectCommand { get; }
         public ICommand CreateAreaCommand { get; }
-
-        private bool _isDirty = false;
-        public bool IsDirty
-        {
-            get => _isDirty;
-            set
-            {
-                if (SetProperty(ref _isDirty, value))
-                {
-                    RequestUpdateTitle?.Invoke();
-                }
-            }
-        }
 
         public event Action? RequestUpdateTitle;
 
@@ -107,26 +115,19 @@ namespace RailmlEditor.ViewModels
         public MainViewModel()
         {
             InitializeInfrastructure();
-            Elements.CollectionChanged += Elements_CollectionChanged;
             _topologyManager.PrincipleTrackSelectionRequested += info => PrincipleTrackSelectionRequested?.Invoke(info);
 
-            History.StateChanged += (s, e) => { 
-                (UndoCommand as RelayCommand)?.RaiseCanExecuteChanged();
-                (RedoCommand as RelayCommand)?.RaiseCanExecuteChanged();
-                IsDirty = true;
-            };
-
-            UndoCommand = new RelayCommand(_ => History.Undo(), _ => History.CanUndo && IsEditMode);
-            RedoCommand = new RelayCommand(_ => History.Redo(), _ => History.CanRedo && IsEditMode);
+            UndoCommand = new RelayCommand(_ => History?.Undo(), _ => History?.CanUndo == true && IsEditMode);
+            RedoCommand = new RelayCommand(_ => History?.Redo(), _ => History?.CanRedo == true && IsEditMode);
 
             SelectCommand = new RelayCommand(param => 
             {
-                if (param is BaseElementViewModel vm)
+                if (param is BaseElementViewModel vm && ActiveDocument != null)
                 {
                     bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
                     if (!isMulti)
                     {
-                        foreach (var el in Elements) el.IsSelected = (el == vm);
+                        foreach (var el in ActiveDocument.Elements) el.IsSelected = (el == vm);
                     }
                     else
                     {
@@ -135,9 +136,9 @@ namespace RailmlEditor.ViewModels
                 }
             });
 
-            DeleteCommand = new RelayCommand(_ => DeleteSelected(), _ => IsEditMode);
-            CopyCommand = new RelayCommand(_ => CopySelected()); // Copy is allowed in read-only
-            PasteCommand = new RelayCommand(_ => PasteElements(), _ => IsEditMode);
+            DeleteCommand = new RelayCommand(_ => DeleteSelected(), _ => IsEditMode && ActiveDocument != null);
+            CopyCommand = new RelayCommand(_ => CopySelected(), _ => ActiveDocument != null); 
+            PasteCommand = new RelayCommand(_ => PasteElements(), _ => IsEditMode && ActiveDocument != null);
 
             OpenTemplatesCommand = new RelayCommand(_ => 
             {
@@ -148,14 +149,36 @@ namespace RailmlEditor.ViewModels
 
             NewProjectCommand = new RelayCommand(_ => NewProject());
             OpenProjectCommand = new RelayCommand(_ => OpenProject());
-            SaveProjectCommand = new RelayCommand(_ => SaveProject());
-            SaveAsProjectCommand = new RelayCommand(_ => SaveAsProject());
-            CreateAreaCommand = new RelayCommand(_ => CreateAreaFromSelectedBorders());
-
-            // Test Data
-            // Test Data Removed
+            SaveProjectCommand = new RelayCommand(_ => SaveProject(), _ => ActiveDocument != null);
+            SaveAsProjectCommand = new RelayCommand(_ => SaveAsProject(), _ => ActiveDocument != null);
+            CreateAreaCommand = new RelayCommand(_ => CreateAreaFromSelectedBorders(), _ => ActiveDocument != null);
 
             LoadCustomTemplates();
+            
+            // Create initial empty document
+            NewProject();
+        }
+
+        private void OnActiveDocumentChanged()
+        {
+            OnPropertyChanged(nameof(Elements));
+            OnPropertyChanged(nameof(SelectedElements));
+            OnPropertyChanged(nameof(History));
+            OnPropertyChanged(nameof(SelectedElement));
+            
+            // Hook up collection changed if needed, or rely on UI binding directly to ActiveDocument.Elements
+            if (ActiveDocument != null)
+            {
+                // Re-evaluate commands
+                (UndoCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (RedoCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (DeleteCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (CopyCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (PasteCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (SaveProjectCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (SaveAsProjectCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (CreateAreaCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            }
         }
 
 
@@ -225,48 +248,37 @@ namespace RailmlEditor.ViewModels
             }
         }
 
+        private int _untitledCounter = 1;
+
         private void NewProject()
         {
-            if (IsDirty)
-            {
-                var result = MessageBox.Show("Save changes to current project?", "New Project", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
-                if (result == MessageBoxResult.Cancel) return;
-                if (result == MessageBoxResult.Yes) 
-                {
-                    SaveProject();
-                    if (IsDirty) return; // If save failed or was cancelled
-                }
-            }
-            Elements.Clear();
-            CurrentFilePath = null;
-            IsDirty = false;
-            RequestUpdateTitle?.Invoke();
+            var newDoc = new DocumentViewModel(this) { InitialTitle = $"notitle-{_untitledCounter++}.railml" };
+            Documents.Add(newDoc);
+            ActiveDocument = newDoc;
         }
 
         private void OpenProject()
         {
-            if (IsDirty)
-            {
-                var result = MessageBox.Show("Save changes before opening another project?", "Open Project", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
-                if (result == MessageBoxResult.Cancel) return;
-                if (result == MessageBoxResult.Yes) 
-                {
-                    SaveProject();
-                    if (IsDirty) return; // If save failed or was cancelled
-                }
-            }
-
             var dialog = new Microsoft.Win32.OpenFileDialog();
             dialog.Filter = "RailML Files (*.xml;*.railml)|*.xml;*.railml|All Files (*.*)|*.*";
             if (dialog.ShowDialog() == true)
             {
-                CurrentFilePath = dialog.FileName;
+                // Check if already open
+                var existing = Documents.FirstOrDefault(d => d.FilePath == dialog.FileName);
+                if (existing != null)
+                {
+                    ActiveDocument = existing;
+                    return;
+                }
+
+                var newDoc = new DocumentViewModel(this) { FilePath = dialog.FileName };
                 var service = new Services.RailmlService();
                 try
                 {
-                    service.Load(CurrentFilePath, this);
-                    IsDirty = false;
-                    RequestUpdateTitle?.Invoke();
+                    service.Load(dialog.FileName, this, newDoc); // Need to modify RailmlService to support loading into specific doc
+                    newDoc.IsDirty = false;
+                    Documents.Add(newDoc);
+                    ActiveDocument = newDoc;
                 }
                 catch (Exception ex)
                 {
@@ -277,27 +289,43 @@ namespace RailmlEditor.ViewModels
 
         private void SaveProject()
         {
-            if (string.IsNullOrEmpty(CurrentFilePath))
+            if (ActiveDocument != null)
             {
-                SaveAsProject();
-                return;
+                SaveDocument(ActiveDocument);
+            }
+        }
+
+        public bool SaveDocument(DocumentViewModel doc)
+        {
+            if (string.IsNullOrEmpty(doc.FilePath))
+            {
+                return SaveAsDocument(doc);
             }
 
             var service = new Services.RailmlService();
             try
             {
-                service.Save(CurrentFilePath, this);
-                IsDirty = false;
-                RequestUpdateTitle?.Invoke();
-                MessageBox.Show("File saved successfully.");
+                service.Save(doc.FilePath, this, doc); // Modify RailmlService to save a specific doc
+                doc.IsDirty = false;
+                MessageBox.Show($"File {doc.Title} saved successfully.");
+                return true;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error saving file: {ex.Message}");
+                return false;
             }
         }
 
         private void SaveAsProject()
+        {
+            if (ActiveDocument != null)
+            {
+                SaveAsDocument(ActiveDocument);
+            }
+        }
+
+        public bool SaveAsDocument(DocumentViewModel doc)
         {
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.FileName = "railway"; 
@@ -306,20 +334,22 @@ namespace RailmlEditor.ViewModels
 
             if (dlg.ShowDialog() == true)
             {
-                CurrentFilePath = dlg.FileName;
+                doc.FilePath = dlg.FileName;
                 var service = new Services.RailmlService();
                 try
                 {
-                    service.Save(CurrentFilePath, this);
-                    IsDirty = false;
-                    RequestUpdateTitle?.Invoke();
-                    MessageBox.Show("File saved successfully.");
+                    service.Save(doc.FilePath, this, doc);
+                    doc.IsDirty = false;
+                    MessageBox.Show($"File {doc.Title} saved successfully.");
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Error saving file: {ex.Message}");
+                    return false;
                 }
             }
+            return false;
         }
 
         private void DeleteSelected()
@@ -464,10 +494,12 @@ namespace RailmlEditor.ViewModels
             var service = new RailmlEditor.Services.RailmlService();
             System.Collections.Generic.List<BaseElementViewModel> snippet = new System.Collections.Generic.List<BaseElementViewModel>();
 
+            if (ActiveDocument == null) return;
+
             if (CustomTemplates.ContainsKey(templateKey) && !string.IsNullOrWhiteSpace(CustomTemplates[templateKey]))
             {
                 // Use custom template
-                snippet = service.LoadSnippetFromXml(CustomTemplates[templateKey], this);
+                snippet = service.LoadSnippetFromXml(CustomTemplates[templateKey], this, ActiveDocument);
             }
             else
             {
@@ -513,7 +545,10 @@ namespace RailmlEditor.ViewModels
                 
                 try
                 {
-                    snippet = service.LoadSnippet(finalPath, this);
+                    if (ActiveDocument != null)
+                    {
+                        snippet = service.LoadSnippet(finalPath, this, ActiveDocument);
+                    }
                 }
                 catch (System.Exception ex)
                 {
@@ -522,10 +557,10 @@ namespace RailmlEditor.ViewModels
                 }
             }
 
-            if (snippet.Count > 0)
+            if (snippet.Count > 0 && ActiveDocument != null)
             {
                 // Deselect current
-                foreach (var el in Elements) el.IsSelected = false;
+                foreach (var el in ActiveDocument.Elements) el.IsSelected = false;
 
                 if (targetPos.HasValue)
                 {

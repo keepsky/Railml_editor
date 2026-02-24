@@ -30,37 +30,47 @@ namespace RailmlEditor
             // Actually, safe to just read Current.Theme
             Services.ConfigService.Load(); // Ensure it's loaded
 
+            dockManager.ActiveContentChanged += DockManager_ActiveContentChanged;
+
             SetTheme(Services.ConfigService.Current.Theme);
             UpdateTitle(); // Initialize Title
+        }
+
+        private void DockManager_ActiveContentChanged(object? sender, EventArgs e)
+        {
+            _viewModel.ActiveDocument = dockManager.ActiveContent as DocumentViewModel;
         }
 
         private void UpdateTitle()
         {
             string fileName = "notitle.railml";
-            if (!string.IsNullOrEmpty(_viewModel.CurrentFilePath))
+            if (_viewModel.ActiveDocument != null && !string.IsNullOrEmpty(_viewModel.ActiveDocument.FilePath))
             {
-                fileName = System.IO.Path.GetFileName(_viewModel.CurrentFilePath);
+                fileName = System.IO.Path.GetFileName(_viewModel.ActiveDocument.FilePath);
             }
-            string dirtyMark = _viewModel.IsDirty ? "*" : "";
+            string dirtyMark = (_viewModel.ActiveDocument?.IsDirty == true) ? "*" : "";
             this.Title = $"RailML Editor - {fileName}{dirtyMark}";
         }
 
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (_viewModel.IsDirty)
+            foreach (var doc in _viewModel.Documents.ToList())
             {
-                var result = MessageBox.Show("Save changes before closing?", "Exit Application", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
-                if (result == MessageBoxResult.Cancel)
+                if (doc.IsDirty)
                 {
-                    e.Cancel = true; // Stop closing
-                }
-                else if (result == MessageBoxResult.Yes)
-                {
-                    // Find a way to trigger Save
-                    if (_viewModel.SaveProjectCommand.CanExecute(null))
+                    var result = MessageBox.Show($"Save changes to {doc.Title.TrimEnd('*')} before closing?", "Exit Application", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+                    if (result == MessageBoxResult.Cancel)
                     {
-                        _viewModel.SaveProjectCommand.Execute(null);
-                        if (_viewModel.IsDirty) e.Cancel = true; // Save failed or cancelled
+                        e.Cancel = true; // Stop closing
+                        return;
+                    }
+                    else if (result == MessageBoxResult.Yes)
+                    {
+                        if (!_viewModel.SaveDocument(doc)) 
+                        {
+                            e.Cancel = true; // Save failed or cancelled
+                            return;
+                        }
                     }
                 }
             }
@@ -108,13 +118,30 @@ namespace RailmlEditor
         }
         private void Toolbox_Click(object sender, RoutedEventArgs e)
         {
-                        if (!_viewModel.IsEditMode) return;
+            if (!_viewModel.IsEditMode) return;
             if (sender is Button button)
             {
                 string? type = button.Tag?.ToString();
-                                if (type == "Border")
+                
+                if (type == "Border")
                 {
-                    StartBorderPlacement();
+                    var elems = GetEditorElements(dockManager); // Fallback conceptually to ActiveContent's layout root.
+                    // Actually, Toolbox_Click sender is a Button in the ToolBarTray.
+                    // It is NOT inside the DataTemplate. So GetEditorElements(sender) will return null.
+                    // We need to find the active document's MainGrid. Let's use dockManager to find it.
+                    // Or, simpler, we could use the ActiveContent of DockingManager if we could.
+                    
+                    // The correct way in AvalonDock to find elements in the active document's view:
+                    // Since StartBorderPlacement requires EditorElements, we must get it from the ActiveContent view.
+                    // Best way: find the active View/Control. For now, since StartBorderPlacement modifies VM and cursor,
+                    // we can find the MainGrid globally or skip cursor modify if not found.
+                    
+                    // Easy fix: just refactor StartBorderPlacement to not need EditorElements, 
+                    // it only needed it for setting the Cursor on MainDesigner.
+                    // Let's change StartBorderPlacement to set cursor globally or remove cursor logic.
+                    // Or, pass null for now and handle it inside. Let's look at StartBorderPlacement.
+                    
+                    StartBorderPlacement(null!);
                 }
                 else if (type != null)
                 {
@@ -133,10 +160,13 @@ namespace RailmlEditor
                 private void MainDesigner_Drop(object sender, DragEventArgs e)
         {
             if (!_viewModel.IsEditMode) return;
+            var elems = GetEditorElements(sender);
+            if (elems == null) return;
+
             if (e.Data.GetDataPresent(DataFormats.StringFormat))
             {
                 string? type = e.Data.GetData(DataFormats.StringFormat) as string;
-                Point dropPosition = e.GetPosition(MainDesigner);
+                Point dropPosition = e.GetPosition(elems.MainDesigner);
 
                 if (type == "Border")
                 {
@@ -156,6 +186,77 @@ namespace RailmlEditor
 
 
 
+        // UI Element Retrieval Helper
+        private class EditorElements
+        {
+            public Grid MainGrid { get; set; } = null!;
+            public ItemsControl MainDesigner { get; set; } = null!;
+            public Canvas OverlayCanvas { get; set; } = null!;
+            public System.Windows.Shapes.Rectangle SelectionBox { get; set; } = null!;
+            public ScrollViewer MainScrollViewer { get; set; } = null!;
+            public ScaleTransform MainScaleTransform { get; set; } = null!;
+        }
+
+        private T? FindVisualChild<T>(DependencyObject parent, string name) where T : FrameworkElement
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T typedChild && typedChild.Name == name)
+                {
+                    return typedChild;
+                }
+                var result = FindVisualChild<T>(child, name);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        private EditorElements? GetEditorElements(object sender)
+        {
+            if (sender is DependencyObject dObj)
+            {
+                // Find the root MainGrid of this template instance
+                Grid? mainGrid = sender as Grid;
+                if (mainGrid == null || mainGrid.Name != "MainGrid")
+                {
+                    // If sender is not MainGrid, walk up to find it
+                    DependencyObject current = dObj;
+                    while (current != null)
+                    {
+                        if (current is Grid g && g.Name == "MainGrid")
+                        {
+                            mainGrid = g;
+                            break;
+                        }
+                        current = VisualTreeHelper.GetParent(current);
+                    }
+                }
+
+                if (mainGrid != null)
+                {
+                    var mainDesigner = FindVisualChild<ItemsControl>(mainGrid, "MainDesigner")!;
+                    var scaleTransform = mainDesigner.LayoutTransform as ScaleTransform;
+                    if (scaleTransform == null)
+                    {
+                        // Fallback or create if not found (though it should be defined in XAML)
+                        scaleTransform = new ScaleTransform(1, 1);
+                        mainDesigner.LayoutTransform = scaleTransform;
+                    }
+
+                    return new EditorElements
+                    {
+                        MainGrid = mainGrid,
+                        MainDesigner = mainDesigner,
+                        OverlayCanvas = FindVisualChild<Canvas>(mainGrid, "OverlayCanvas")!,
+                        SelectionBox = FindVisualChild<System.Windows.Shapes.Rectangle>(mainGrid, "SelectionBox")!,
+                        MainScrollViewer = FindVisualChild<ScrollViewer>(mainGrid, "MainScrollViewer")!,
+                        MainScaleTransform = scaleTransform
+                    };
+                }
+            }
+            return null;
+        }
 
         // Selection & Panning State
         private bool _isSelecting = false;
@@ -176,20 +277,22 @@ namespace RailmlEditor
         private void MainGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (Mouse.Captured != null) return;
-            
+            var elems = GetEditorElements(sender);
+            if (elems == null) return;
+
             if (e.ChangedButton == MouseButton.Left)
             {
                 // Start Selection
                 _isSelecting = true;
-                _selectionStartPoint = e.GetPosition(OverlayCanvas);
-                _selectionStartLogicalPoint = e.GetPosition(MainDesigner);
+                _selectionStartPoint = e.GetPosition(elems.OverlayCanvas);
+                _selectionStartLogicalPoint = e.GetPosition(elems.MainDesigner);
                 
                 // Reset styling
-                Canvas.SetLeft(SelectionBox, _selectionStartPoint.X);
-                Canvas.SetTop(SelectionBox, _selectionStartPoint.Y);
-                SelectionBox.Width = 0;
-                SelectionBox.Height = 0;
-                SelectionBox.Visibility = Visibility.Visible;
+                Canvas.SetLeft(elems.SelectionBox, _selectionStartPoint.X);
+                Canvas.SetTop(elems.SelectionBox, _selectionStartPoint.Y);
+                elems.SelectionBox.Width = 0;
+                elems.SelectionBox.Height = 0;
+                elems.SelectionBox.Visibility = Visibility.Visible;
 
                 // Clear existing selection unless Ctrl or Shift is pressed
                 bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
@@ -199,19 +302,19 @@ namespace RailmlEditor
                     _viewModel.SelectedElement = null;
                 }
                 
-                MainDesigner.Focus();
-                MainDesigner.CaptureMouse();
+                elems.MainDesigner.Focus();
+                elems.MainDesigner.CaptureMouse();
                 e.Handled = true;
             }
             else if (e.ChangedButton == MouseButton.Middle)
             {
                 // Start Panning (Global Move)
                 _isPanning = true;
-                _panStartPoint = e.GetPosition(MainGrid); // Initial point, acts as "Last Point"
+                _panStartPoint = e.GetPosition(elems.MainGrid); // Initial point, acts as "Last Point"
                 
-                MainDesigner.Focus();
-                MainDesigner.CaptureMouse();
-                MainDesigner.Cursor = Cursors.SizeAll;
+                elems.MainDesigner.Focus();
+                elems.MainDesigner.CaptureMouse();
+                elems.MainDesigner.Cursor = Cursors.SizeAll;
                 e.Handled = true;
             }
             
@@ -219,18 +322,18 @@ namespace RailmlEditor
             {
                 if (e.ChangedButton == MouseButton.Left)
                 {
-                    FinalizeBorderPlacement(e.GetPosition(MainDesigner));
+                    FinalizeBorderPlacement(e.GetPosition(elems.MainDesigner), elems);
                     e.Handled = true;
                 }
                 else if (e.ChangedButton == MouseButton.Right)
                 {
-                    CancelBorderPlacement();
+                    CancelBorderPlacement(elems);
                     e.Handled = true;
                 }
             }
         }
 
-        private void StartBorderPlacement()
+        private void StartBorderPlacement(EditorElements? elems)
         {
             _isPlacingBorder = true;
             _ghostBorder = new TrackCircuitBorderViewModel
@@ -241,18 +344,27 @@ namespace RailmlEditor
                 Y = -1000
             };
             _viewModel.Elements.Add(_ghostBorder);
-            MainDesigner.Cursor = Cursors.Cross;
+            
+            if (elems != null)
+            {
+                elems.MainDesigner.Cursor = Cursors.Cross;
+            }
+            else
+            {
+                Mouse.OverrideCursor = Cursors.Cross;
+            }
         }
 
-        private void CancelBorderPlacement()
+        private void CancelBorderPlacement(EditorElements elems)
         {
             if (_ghostBorder != null) _viewModel.Elements.Remove(_ghostBorder);
             _isPlacingBorder = false;
             _ghostBorder = null;
-            MainDesigner.Cursor = Cursors.Arrow;
+            if (elems != null) elems.MainDesigner.Cursor = Cursors.Arrow;
+            Mouse.OverrideCursor = null;
         }
 
-        private void FinalizeBorderPlacement(Point pos)
+        private void FinalizeBorderPlacement(Point pos, EditorElements elems)
         {
             if (_ghostBorder == null) return;
 
@@ -288,7 +400,7 @@ namespace RailmlEditor
                 var finalBorder = _ghostBorder;
                 _ghostBorder = null;
                 _isPlacingBorder = false;
-                MainDesigner.Cursor = Cursors.Arrow;
+                elems.MainDesigner.Cursor = Cursors.Arrow;
                 
                 _viewModel.AddHistory(oldState);
                 
@@ -305,22 +417,25 @@ namespace RailmlEditor
 
         private void MainGrid_MouseMove(object sender, MouseEventArgs e)
         {
+            var elems = GetEditorElements(sender);
+            if (elems == null) return;
+
             if (_isSelecting)
             {
-                var curPos = e.GetPosition(OverlayCanvas);
+                var curPos = e.GetPosition(elems.OverlayCanvas);
                 var x = Math.Min(curPos.X, _selectionStartPoint.X);
                 var y = Math.Min(curPos.Y, _selectionStartPoint.Y);
                 var w = Math.Abs(curPos.X - _selectionStartPoint.X);
                 var h = Math.Abs(curPos.Y - _selectionStartPoint.Y);
 
-                Canvas.SetLeft(SelectionBox, x);
-                Canvas.SetTop(SelectionBox, y);
-                SelectionBox.Width = w;
-                SelectionBox.Height = h;
+                Canvas.SetLeft(elems.SelectionBox, x);
+                Canvas.SetTop(elems.SelectionBox, y);
+                elems.SelectionBox.Width = w;
+                elems.SelectionBox.Height = h;
             }
             else if (_isPlacingBorder && _ghostBorder != null)
             {
-                var pos = e.GetPosition(MainDesigner);
+                var pos = e.GetPosition(elems.MainDesigner);
                 _ghostBorder.X = pos.X;
                 _ghostBorder.Y = pos.Y;
                 _ghostBorder.Angle = 0;
@@ -340,10 +455,10 @@ namespace RailmlEditor
             }
             else if (_isPanning)
             {
-                var curPos = e.GetPosition(MainGrid);
+                var curPos = e.GetPosition(elems.MainGrid);
                 // Divide screen delta by current scale to get logical delta
-                var deltaX = (curPos.X - _panStartPoint.X) / MainScaleTransform.ScaleX;
-                var deltaY = (curPos.Y - _panStartPoint.Y) / MainScaleTransform.ScaleY;
+                var deltaX = (curPos.X - _panStartPoint.X) / elems.MainScaleTransform.ScaleX;
+                var deltaY = (curPos.Y - _panStartPoint.Y) / elems.MainScaleTransform.ScaleY;
 
                 if (Math.Abs(deltaX) >= 1.0 || Math.Abs(deltaY) >= 1.0)
                 {
@@ -387,14 +502,17 @@ namespace RailmlEditor
 
         private void MainGrid_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            var elems = GetEditorElements(sender);
+            if (elems == null) return;
+
             if (_isSelecting)
             {
                 _isSelecting = false;
-                SelectionBox.Visibility = Visibility.Collapsed;
-                MainDesigner.ReleaseMouseCapture();
+                elems.SelectionBox.Visibility = Visibility.Collapsed;
+                elems.MainDesigner.ReleaseMouseCapture();
 
                 // Perform Selection Logic
-                Point logicalEnd = e.GetPosition(MainDesigner);
+                Point logicalEnd = e.GetPosition(elems.MainDesigner);
                 Rect selectionRect = new Rect(_selectionStartLogicalPoint, logicalEnd);
 
                 bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
@@ -468,8 +586,8 @@ namespace RailmlEditor
             else if (_isPanning)
             {
                 _isPanning = false;
-                MainDesigner.ReleaseMouseCapture();
-                MainDesigner.Cursor = Cursors.Arrow;
+                elems.MainDesigner.ReleaseMouseCapture();
+                elems.MainDesigner.Cursor = Cursors.Arrow;
             }
         }
 
@@ -545,7 +663,12 @@ namespace RailmlEditor
                     _beforeDragSnapshot = _viewModel.TakeSnapshot();
                     _isDragging = true;
                     _draggedControl = element;
-                    _startPoint = e.GetPosition(MainDesigner);
+                    
+                    var elems = GetEditorElements(sender);
+                    if (elems != null)
+                    {
+                        _startPoint = e.GetPosition(elems.MainDesigner);
+                    }
                     _viewModel.SuppressTopologyUpdates = true; // Added line
                     
                     bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
@@ -574,7 +697,7 @@ namespace RailmlEditor
 
                     _viewModel.SelectedElement = viewModel; // Keep this for property grid focus
                     
-                    MainDesigner.Focus();
+                    elems?.MainDesigner.Focus();
                     element.CaptureMouse();
                     e.Handled = true;
                 }
@@ -585,7 +708,10 @@ namespace RailmlEditor
         {
             if (_isDragging && _draggedControl != null)
             {
-                Point currentPos = e.GetPosition(MainDesigner);
+                var elems = GetEditorElements(sender);
+                if (elems == null) return;
+                
+                Point currentPos = e.GetPosition(elems.MainDesigner);
                 // Total Delta from Start
                 double deltaX = currentPos.X - _startPoint.X;
                 double deltaY = currentPos.Y - _startPoint.Y;
@@ -718,7 +844,11 @@ namespace RailmlEditor
         private void Thumb_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
         {
             _beforeDragSnapshot = _viewModel.TakeSnapshot();
-            _dragStartMousePos = Mouse.GetPosition(MainDesigner);
+            var elems = GetEditorElements(sender);
+            if (elems != null)
+            {
+                _dragStartMousePos = Mouse.GetPosition(elems.MainDesigner);
+            }
             if (sender is FrameworkElement thumb && thumb.DataContext is TrackViewModel track)
             {
                 _dragStartElementX = track.X;
@@ -735,9 +865,12 @@ namespace RailmlEditor
 
         private void StartThumb_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
         {
+            var elems = GetEditorElements(sender);
+            if (elems == null) return;
+
             if (sender is FrameworkElement thumb && thumb.DataContext is TrackViewModel track)
             {
-                Point currentMousePos = Mouse.GetPosition(MainDesigner);
+                Point currentMousePos = Mouse.GetPosition(elems.MainDesigner);
                 double totalDeltaX = (currentMousePos.X - _dragStartMousePos.X);
                 double totalDeltaY = (currentMousePos.Y - _dragStartMousePos.Y);
 
@@ -748,9 +881,12 @@ namespace RailmlEditor
 
         private void EndThumb_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
         {
+             var elems = GetEditorElements(sender);
+             if (elems == null) return;
+
              if (sender is FrameworkElement thumb && thumb.DataContext is TrackViewModel track)
             {
-                Point currentMousePos = Mouse.GetPosition(MainDesigner);
+                Point currentMousePos = Mouse.GetPosition(elems.MainDesigner);
                 double totalDeltaX = (currentMousePos.X - _dragStartMousePos.X);
                 double totalDeltaY = (currentMousePos.Y - _dragStartMousePos.Y);
 
@@ -761,9 +897,12 @@ namespace RailmlEditor
 
         private void MidThumb_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
         {
+             var elems = GetEditorElements(sender);
+             if (elems == null) return;
+
              if (sender is FrameworkElement thumb && thumb.DataContext is CurvedTrackViewModel curved)
              {
-                Point currentMousePos = Mouse.GetPosition(MainDesigner);
+                Point currentMousePos = Mouse.GetPosition(elems.MainDesigner);
                 double totalDeltaX = (currentMousePos.X - _dragStartMousePos.X);
                 double totalDeltaY = (currentMousePos.Y - _dragStartMousePos.Y);
 
@@ -843,14 +982,17 @@ namespace RailmlEditor
 
         private void MainScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
+            var elems = GetEditorElements(sender);
+            if (elems == null) return;
+
             if (System.Windows.Input.Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
                 e.Handled = true;
                 double scaleFactor = e.Delta > 0 ? 0.1 : -0.1;
                 
                 // Get current scale
-                double newScaleX = MainScaleTransform.ScaleX + scaleFactor;
-                double newScaleY = MainScaleTransform.ScaleY + scaleFactor;
+                double newScaleX = elems.MainScaleTransform.ScaleX + scaleFactor;
+                double newScaleY = elems.MainScaleTransform.ScaleY + scaleFactor;
 
                 // Clamp limits (0.2x to 5.0x)
                 if (newScaleX < 0.2) newScaleX = 0.2;
@@ -858,8 +1000,8 @@ namespace RailmlEditor
                 if (newScaleX > 5.0) newScaleX = 5.0;
                 if (newScaleY > 5.0) newScaleY = 5.0;
 
-                MainScaleTransform.ScaleX = newScaleX;
-                MainScaleTransform.ScaleY = newScaleY;
+                elems.MainScaleTransform.ScaleX = newScaleX;
+                elems.MainScaleTransform.ScaleY = newScaleY;
             }
         }
 
@@ -898,7 +1040,11 @@ namespace RailmlEditor
                 // Drag Init (Delayed)
                 _isTagDragging = false; 
                 _draggedTagSwitch = swVm;
-                _tagDragStartPoint = e.GetPosition(MainDesigner);
+                var elems = GetEditorElements(sender);
+                if (elems != null)
+                {
+                    _tagDragStartPoint = e.GetPosition(elems.MainDesigner);
+                }
                 
                 double currentX = swVm.X;
                 double currentY = swVm.Y;
@@ -915,9 +1061,12 @@ namespace RailmlEditor
         {
             if (_draggedTagSwitch != null && sender is FrameworkElement el)
             {
+                var elems = GetEditorElements(sender);
+                if (elems == null) return;
+
                 if (!_isTagDragging)
                 {
-                    Point cur = e.GetPosition(MainDesigner);
+                    Point cur = e.GetPosition(elems.MainDesigner);
                     if (Math.Abs(cur.X - _tagDragStartPoint.X) > 5 || Math.Abs(cur.Y - _tagDragStartPoint.Y) > 5)
                     {
                         _isTagDragging = true;
@@ -926,7 +1075,7 @@ namespace RailmlEditor
 
                 if (_isTagDragging)
                 {
-                    Point currentPos = e.GetPosition(MainDesigner);
+                    Point currentPos = e.GetPosition(elems.MainDesigner);
                     Point startPoint = _tagDragStartPoint;
                     
                     double deltaX = currentPos.X - startPoint.X;
