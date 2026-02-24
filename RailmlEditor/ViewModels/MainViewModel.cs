@@ -460,6 +460,14 @@ namespace RailmlEditor.ViewModels
                                 candidate = probe;
                                 break;
                             }
+                            
+                            string templateProbe = System.IO.Path.Combine(probeRoot, "template", filePath);
+                            if (System.IO.File.Exists(templateProbe))
+                            {
+                                candidate = templateProbe;
+                                break;
+                            }
+                            
                             probeRoot = System.IO.Path.GetDirectoryName(probeRoot);
                             if (string.IsNullOrEmpty(probeRoot)) break;
                         }
@@ -468,7 +476,16 @@ namespace RailmlEditor.ViewModels
                     
                     if (candidate != null) finalPath = candidate;
                 }
-                snippet = service.LoadSnippet(finalPath, this);
+                
+                try
+                {
+                    snippet = service.LoadSnippet(finalPath, this);
+                }
+                catch (System.Exception ex)
+                {
+                    MessageBox.Show($"Failed to load template '{finalPath}':\n{ex.Message}", "Template Load Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Diagnostics.Debug.WriteLine($"Template load failed: {ex}");
+                }
             }
 
             if (snippet.Count > 0)
