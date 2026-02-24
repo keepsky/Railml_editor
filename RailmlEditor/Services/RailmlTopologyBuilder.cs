@@ -33,29 +33,28 @@ namespace RailmlEditor.Services
                 var overlappingNodes = new System.Collections.Generic.List<TrackNode>();
                 foreach(var nodeB in allNodes)
                 {
-                    if(nodeA == nodeB) continue;
-
                     double ax = nodeA.ScreenPos?.X ?? 0;
                     double ay = nodeA.ScreenPos?.Y ?? 0;
                     double bx = nodeB.ScreenPos?.X ?? 0;
                     double by = nodeB.ScreenPos?.Y ?? 0;
 
                     double dist = Math.Sqrt(Math.Pow(ax - bx, 2) + Math.Pow(ay - by, 2));
-                    if(dist < 5.0) overlappingNodes.Add(nodeB);
+                    if(dist < RailmlEditor.Models.AppSettings.Instance.NodeMappingTolerance) overlappingNodes.Add(nodeB);
                 }
 
                 if (overlappingNodes.Count > 0)
                 {
                     var parentTrack = nodeToTrack[nodeA];
-                    bool isBeginA = nodeA.Id != null && nodeA.Id.StartsWith("tb"); // Updated to use new prefix
+                    bool isBeginA = nodeA.Id != null && nodeA.Id.StartsWith("tb");
+
                     if (overlappingNodes.Count == 1)
                     {
-                         foreach (var nodeB in overlappingNodes)
+                         foreach (var overlappingNode in overlappingNodes)
                          {
-                             bool isBeginB = nodeB.Id != null && nodeB.Id.StartsWith("tb");
+                             bool isBeginB = overlappingNode.Id != null && overlappingNode.Id.StartsWith("tb");
                              // if (isBeginA == isBeginB) continue; // Allow Begin-Begin and End-End connections 
 
-                             var targetTrack = nodeToTrack[nodeB];
+                             var targetTrack = nodeToTrack[overlappingNode];
                              string targetTrackPart = System.Text.RegularExpressions.Regex.Match(targetTrack.Id, @"\d+").Value;
                              string targetConnId = (isBeginB ? "cb" : "ce") + targetTrackPart;
 

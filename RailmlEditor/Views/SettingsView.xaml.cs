@@ -12,7 +12,22 @@ namespace RailmlEditor.Views
         {
             InitializeComponent();
             LoadCurrentTheme();
+            LoadTolerance();
             _isInitialized = true;
+        }
+
+        private void LoadTolerance()
+        {
+            ToleranceSlider.Value = Models.AppSettings.Instance.NodeMappingTolerance;
+            ToleranceValueText.Text = ToleranceSlider.Value.ToString("0.0");
+        }
+
+        private void ToleranceSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_isInitialized) return;
+            ToleranceValueText.Text = e.NewValue.ToString("0.0");
+            Models.AppSettings.Instance.NodeMappingTolerance = e.NewValue;
+            Models.AppSettings.Instance.Save();
         }
 
         private void LoadCurrentTheme()

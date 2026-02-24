@@ -539,7 +539,19 @@ namespace RailmlEditor.Services
                         double startY = trackVm.Y;
                         double endX = trackVm.X2;
                         double endY = trackVm.Y2;
+                        
+                        // Default straight line length
                         double length = Math.Sqrt(Math.Pow(endX - startX, 2) + Math.Pow(endY - startY, 2));
+
+                        // If curved, calculate approximate length and new ratio 
+                        bool isCurved = trackVm is CurvedTrackViewModel;
+                        CurvedTrackViewModel? ctv = trackVm as CurvedTrackViewModel;
+                        
+                        if (isCurved && ctv != null)
+                        {
+                            length = ctv.Length;
+                        }
+
                         if (length < 0.1) length = 1;
                         coordMap.TryGetValue(sw.Id, out var swPos);
                         double swX = swPos?.X ?? 0;
@@ -548,8 +560,23 @@ namespace RailmlEditor.Services
                         if (swPos == null)
                         {
                              double ratio = pos / length;
-                             swX = startX + ratio * (endX - startX);
-                             swY = startY + ratio * (endY - startY);
+                             
+                             if (isCurved && ctv != null)
+                             {
+                                 // Quadratic Bezier interpolation point for switches on curved tracks
+                                 // B(t) = (1-t)^2 * P0 + 2(1-t)t * P1 + t^2 * P2
+                                 double t = ratio;
+                                 double invT = 1.0 - t;
+                                 
+                                 swX = (invT * invT * startX) + (2 * invT * t * ctv.MX) + (t * t * endX);
+                                 swY = (invT * invT * startY) + (2 * invT * t * ctv.MY) + (t * t * endY);
+                             }
+                             else
+                             {
+                                 // Standard linear interpolation
+                                 swX = startX + ratio * (endX - startX);
+                                 swY = startY + ratio * (endY - startY);
+                             }
                         }
                         
                         var switchVm = new SwitchViewModel
