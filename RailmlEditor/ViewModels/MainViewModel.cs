@@ -187,58 +187,23 @@ namespace RailmlEditor.ViewModels
             var oldState = TakeSnapshot();
             BaseElementViewModel? newElement = null;
 
-            if (type == "Track")
+            // Try single elements first
+            newElement = RailmlEditor.Services.ElementFactoryService.CreateElement(type, position, GetNextId);
+
+            // If not found, check if it's a template
+            if (newElement == null)
             {
-                newElement = new TrackViewModel
+                switch (type)
                 {
-                    Id = GetNextId("tr"),
-                    X = position.X, 
-                    Y = position.Y,
-                    Length = 100 
-                };
+                    case "Single": AddDoubleTrack("single.railml", position); break;
+                    case "SingleR": AddDoubleTrack("singleR.railml", position); break;
+                    case "SingleU": AddDoubleTrack("singleU.railml", position); break;
+                    case "SingleRU": AddDoubleTrack("singleRU.railml", position); break;
+                    case "Double": AddDoubleTrack("double.railml", position); break;
+                    case "DoubleR": AddDoubleTrack("doubleR.railml", position); break;
+                    case "Cross": AddDoubleTrack("cross.railml", position); break;
+                }
             }
-            else if (type == "Switch")
-            {
-                newElement = new SwitchViewModel
-                {
-                    Id = GetNextId("sw"),
-                    X = position.X,
-                    Y = position.Y
-                };
-            }
-            else if (type == "Signal")
-            {
-                newElement = new SignalViewModel
-                {
-                    Id = GetNextId("sig"),
-                    X = position.X,
-                    Y = position.Y
-                };
-            }
-            else if (type == "Corner")
-            {
-                double mx = position.X + 20;
-                double my = position.Y - 40;
-                newElement = new CurvedTrackViewModel
-                {
-                    Id = GetNextId("tr"),
-                    Code = "corner",
-                    X = position.X,
-                    Y = position.Y,
-                    MX = mx,
-                    MY = my,
-                    X2 = mx + 10,
-                    Y2 = my
-                };
-            }
-            else if (type == "Single") AddDoubleTrack("single.railml", position);
-            else if (type == "SingleR") AddDoubleTrack("singleR.railml", position);
-            else if (type == "SingleU") AddDoubleTrack("singleU.railml", position);
-            else if (type == "SingleRU") AddDoubleTrack("singleRU.railml", position);
-            else if (type == "Route") newElement = new RouteViewModel { Id = GetNextId("R") };
-            else if (type == "Double") AddDoubleTrack("double.railml", position);
-            else if (type == "DoubleR") AddDoubleTrack("doubleR.railml", position);
-            else if (type == "Cross") AddDoubleTrack("cross.railml", position);
             
             if (newElement != null)
             {
