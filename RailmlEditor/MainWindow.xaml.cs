@@ -477,20 +477,7 @@ namespace RailmlEditor
                             if (element is SignalViewModel s && !string.IsNullOrEmpty(s.RelatedTrackId)) continue;
                             if (element is TrackCircuitBorderViewModel b && !string.IsNullOrEmpty(b.RelatedTrackId)) continue;
 
-                            element.X += snapX;
-                            element.Y += snapY;
-
-                            if (element is TrackViewModel track)
-                            {
-                                track.X2 += snapX;
-                                track.Y2 += snapY;
-
-                                if (track is CurvedTrackViewModel curved)
-                                {
-                                    curved.MX += snapX;
-                                    curved.MY += snapY;
-                                }
-                            }
+                            element.MoveBy(snapX, snapY);
                         }
                         // Update "Last Point" by the snapped amount to avoid drift
                         _panStartPoint.X += snapX;
@@ -737,24 +724,7 @@ namespace RailmlEditor
                     double shiftY = proposedY - element.Y;
                     
                     // Update Position
-                    element.X = proposedX;
-                    element.Y = proposedY;
-
-                    if (element is TrackViewModel trackVm)
-                    {
-                         trackVm.X2 += shiftX;
-                         trackVm.Y2 += shiftY;
-                         
-                         if (trackVm is CurvedTrackViewModel curved)
-                         {
-                             curved.MX += shiftX;
-                             curved.MY += shiftY;
-                         }
-                    }
-                    else if (element is SwitchViewModel sw)
-                    {
-                        // X/Y already updated above
-                    }
+                    element.MoveBy(shiftX, shiftY);
                 }
                 
                 // Now apply Snapping Logic for Signals (Post-Processing)

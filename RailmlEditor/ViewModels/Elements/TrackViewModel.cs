@@ -256,6 +256,13 @@ namespace RailmlEditor.ViewModels.Elements
             }
         }
 
+        public override void MoveBy(double deltaX, double deltaY)
+        {
+            base.MoveBy(deltaX, deltaY);
+            X2 += deltaX;
+            Y2 += deltaY;
+        }
+
         public ObservableCollection<BaseElementViewModel> Children { get; } = new();
 
         public TrackNodeViewModel BeginNode { get; } = new TrackNodeViewModel();

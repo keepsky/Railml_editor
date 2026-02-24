@@ -391,18 +391,10 @@ namespace RailmlEditor.ViewModels
                 if (clone == null) continue;
                 
                 // Offset position
-                clone.X += 20;
-                clone.Y += 20;
+                clone.MoveBy(20, 20);
                 
                 if (clone is TrackViewModel track)
                 {
-                    track.X2 += 20;
-                    track.Y2 += 20;
-                    if (track is CurvedTrackViewModel curved)
-                    {
-                        curved.MX += 20;
-                        curved.MY += 20;
-                    }
                     clone.Id = GetNextId("tr");
                 }
                 else if (clone is SignalViewModel signal)
@@ -422,19 +414,8 @@ namespace RailmlEditor.ViewModels
             // Update clipboard for next paste (cumulative offset)
             for (int i = 0; i < _clipboard.Count; i++)
             {
-                _clipboard[i].X += 20;
-                _clipboard[i].Y += 20;
-                if (_clipboard[i] is TrackViewModel t)
-                {
-                    t.X2 += 20;
-                    t.Y2 += 20;
-                    if (t is CurvedTrackViewModel c)
-                    {
-                        c.MX += 20;
-                        c.MY += 20;
-                    }
-                }
-                else if (_clipboard[i] is SwitchViewModel sw)
+                _clipboard[i].MoveBy(20, 20);
+                if (_clipboard[i] is SwitchViewModel sw)
                 {
                     // Sw coordinates already handled by base property increment in PasteElements if needed
                 }
@@ -607,21 +588,10 @@ namespace RailmlEditor.ViewModels
                         
                         foreach (var el in snippet)
                         {
-                            el.X += dx;
-                            el.Y += dy;
-                            if (el is TrackViewModel t)
+                            el.MoveBy(dx, dy);
+                            if (el is SwitchViewModel sw)
                             {
-                                t.X2 += dx;
-                                t.Y2 += dy;
-                                if (t is CurvedTrackViewModel c)
-                                {
-                                    c.MX += dx;
-                                    c.MY += dy;
-                                }
-                            }
-                            else if (el is SwitchViewModel sw)
-                            {
-                                // Sw coordinates already handled by base property increment above
+                                // Sw coordinates already handled by MoveBy
                             }
                         }
                     }

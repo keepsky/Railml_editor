@@ -23,6 +23,12 @@ namespace RailmlEditor.ViewModels
             set => SetProperty(ref _y, value);
         }
 
+        public virtual void MoveBy(double deltaX, double deltaY)
+        {
+            X += deltaX;
+            Y += deltaY;
+        }
+
         public string? Id
         {
             get => _id;

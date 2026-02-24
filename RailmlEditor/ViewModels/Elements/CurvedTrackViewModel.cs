@@ -109,6 +109,13 @@ namespace RailmlEditor.ViewModels.Elements
         public bool Segment1LengthGreaterThan2 => Segment1Length >= Segment2Length;
         public bool Segment2LengthGreaterThan1 => Segment2Length > Segment1Length;
 
+        public override void MoveBy(double deltaX, double deltaY)
+        {
+            base.MoveBy(deltaX, deltaY);
+            MX += deltaX;
+            MY += deltaY;
+        }
+
         protected override void FlipHorizontally()
         {
             double oldX = X;
