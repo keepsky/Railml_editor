@@ -6,3 +6,8 @@ RailmlEditor/bin/*
 TestSerializer/obj/*
 TestSerializer/bin/*
 TestSerializer/error.log
+*.log
+*.txt
+obj/
+bin/
+test_folder/
