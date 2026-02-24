@@ -17,7 +17,10 @@ namespace RailmlEditor.Utils
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
-            return System.Array.Empty<object>();
+            var result = new object[targetTypes.Length];
+            for (int i = 0; i < targetTypes.Length; i++)
+                result[i] = Binding.DoNothing;
+            return result;
         }
     }
 }
