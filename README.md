@@ -22,6 +22,7 @@ RailML Editor provides a comprehensive environment for designing and managing ra
 - .NET 8.0 or higher
 - Visual Studio 2022 (recommended)
 - *Note: For Windows/WSL specific build instructions, see [Build Policies](docs/BuildPolicies.md)*
+- *Note: Before releasing, follow the [Smoke Test Plan](docs/SmokeTestPlan.md)*
 
 ### Installation
 1. Clone the repository.
