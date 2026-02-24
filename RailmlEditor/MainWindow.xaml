@@ -148,7 +148,7 @@
             <Grid Width="20" Height="10" RenderTransformOrigin="0.5,0.5" Background="Transparent">
                 <Grid.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Area 생성" Click="CreateArea_Click"/>
+                        <MenuItem Header="Area 생성" Command="{Binding DataContext.CreateAreaCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
                     </ContextMenu>
                 </Grid.ContextMenu>
                 <Grid.RenderTransform>
@@ -636,10 +636,10 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
-                <MenuItem Header="New Project" Click="FileNew_Click"/>
-                <MenuItem Header="Open Project..." Click="FileOpen_Click"/>
-                <MenuItem Header="Save Project..." Click="FileSave_Click"/>
-                <MenuItem Header="Save As..." Click="FileSaveAs_Click"/>
+                <MenuItem Header="New Project" Command="{Binding NewProjectCommand}"/>
+                <MenuItem Header="Open Project..." Command="{Binding OpenProjectCommand}"/>
+                <MenuItem Header="Save Project..." Command="{Binding SaveProjectCommand}"/>
+                <MenuItem Header="Save As..." Command="{Binding SaveAsProjectCommand}"/>
                 <Separator/>
                 <MenuItem Header="Preferences">
                     <MenuItem Header="Settings" Click="FileSettings_Click"/>

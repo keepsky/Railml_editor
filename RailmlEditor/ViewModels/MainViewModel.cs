@@ -74,6 +74,21 @@ namespace RailmlEditor.ViewModels
 
         public UndoRedoManager History { get; } = new();
 
+        private string? _currentFilePath;
+        public string? CurrentFilePath
+        {
+            get => _currentFilePath;
+            set => SetProperty(ref _currentFilePath, value);
+        }
+
+        public ICommand NewProjectCommand { get; }
+        public ICommand OpenProjectCommand { get; }
+        public ICommand SaveProjectCommand { get; }
+        public ICommand SaveAsProjectCommand { get; }
+        public ICommand CreateAreaCommand { get; }
+
+        public event Action? RequestUpdateTitle;
+
         private readonly RailmlEditor.Logic.TopologyManager _topologyManager = new RailmlEditor.Logic.TopologyManager();
 
         public MainViewModel()
@@ -117,12 +132,161 @@ namespace RailmlEditor.ViewModels
                 win.ShowDialog();
             });
 
+            NewProjectCommand = new RelayCommand(_ => NewProject());
+            OpenProjectCommand = new RelayCommand(_ => OpenProject());
+            SaveProjectCommand = new RelayCommand(_ => SaveProject());
+            SaveAsProjectCommand = new RelayCommand(_ => SaveAsProject());
+            CreateAreaCommand = new RelayCommand(_ => CreateAreaFromSelectedBorders());
+
             // Test Data
             // Test Data Removed
 
             LoadCustomTemplates();
         }
 
+
+        public void AddElement(string type, System.Windows.Point position)
+        {
+            var oldState = TakeSnapshot();
+            BaseElementViewModel? newElement = null;
+
+            if (type == "Track")
+            {
+                newElement = new TrackViewModel
+                {
+                    Id = GetNextId("tr"),
+                    X = position.X, 
+                    Y = position.Y,
+                    Length = 100 
+                };
+            }
+            else if (type == "Switch")
+            {
+                newElement = new SwitchViewModel
+                {
+                    Id = GetNextId("sw"),
+                    X = position.X,
+                    Y = position.Y
+                };
+            }
+            else if (type == "Signal")
+            {
+                newElement = new SignalViewModel
+                {
+                    Id = GetNextId("sig"),
+                    X = position.X,
+                    Y = position.Y
+                };
+            }
+            else if (type == "Corner")
+            {
+                double mx = position.X + 20;
+                double my = position.Y - 40;
+                newElement = new CurvedTrackViewModel
+                {
+                    Id = GetNextId("tr"),
+                    Code = "corner",
+                    X = position.X,
+                    Y = position.Y,
+                    MX = mx,
+                    MY = my,
+                    X2 = mx + 10,
+                    Y2 = my
+                };
+            }
+            else if (type == "Single") AddDoubleTrack("single.railml", position);
+            else if (type == "SingleR") AddDoubleTrack("singleR.railml", position);
+            else if (type == "SingleU") AddDoubleTrack("singleU.railml", position);
+            else if (type == "SingleRU") AddDoubleTrack("singleRU.railml", position);
+            else if (type == "Route") newElement = new RouteViewModel { Id = GetNextId("R") };
+            else if (type == "Double") AddDoubleTrack("double.railml", position);
+            else if (type == "DoubleR") AddDoubleTrack("doubleR.railml", position);
+            else if (type == "Cross") AddDoubleTrack("cross.railml", position);
+            
+            if (newElement != null)
+            {
+                Elements.Add(newElement);
+                if (newElement is TrackViewModel) UpdateProximitySwitches();
+                AddHistory(oldState);
+            }
+        }
+
+        private void NewProject()
+        {
+            if (Elements.Count > 0)
+            {
+                var result = MessageBox.Show("Save changes before creating new project?", "New Project", MessageBoxButton.YesNoCancel);
+                if (result == MessageBoxResult.Cancel) return;
+                if (result == MessageBoxResult.Yes) SaveProject();
+            }
+            Elements.Clear();
+            CurrentFilePath = null;
+            RequestUpdateTitle?.Invoke();
+        }
+
+        private void OpenProject()
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog();
+            dialog.Filter = "RailML Files (*.xml;*.railml)|*.xml;*.railml|All Files (*.*)|*.*";
+            if (dialog.ShowDialog() == true)
+            {
+                CurrentFilePath = dialog.FileName;
+                var service = new Services.RailmlService();
+                try
+                {
+                    service.Load(CurrentFilePath, this);
+                    RequestUpdateTitle?.Invoke();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error loading file: {ex.Message}");
+                }
+            }
+        }
+
+        private void SaveProject()
+        {
+            if (string.IsNullOrEmpty(CurrentFilePath))
+            {
+                SaveAsProject();
+                return;
+            }
+
+            var service = new Services.RailmlService();
+            try
+            {
+                service.Save(CurrentFilePath, this);
+                MessageBox.Show("File saved successfully.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving file: {ex.Message}");
+            }
+        }
+
+        private void SaveAsProject()
+        {
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.FileName = "railway"; 
+            dlg.DefaultExt = ".railml"; 
+            dlg.Filter = "RailML documents (.railml)|*.railml"; 
+
+            if (dlg.ShowDialog() == true)
+            {
+                CurrentFilePath = dlg.FileName;
+                var service = new Services.RailmlService();
+                try
+                {
+                    service.Save(CurrentFilePath, this);
+                    RequestUpdateTitle?.Invoke();
+                    MessageBox.Show("File saved successfully.");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error saving file: {ex.Message}");
+                }
+            }
+        }
 
         private void DeleteSelected()
         {

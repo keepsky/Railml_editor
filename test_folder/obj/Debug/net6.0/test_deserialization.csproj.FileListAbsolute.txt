@@ -1,0 +1,15 @@
+C:\WORK\SRC\Railml_editor\test_folder\bin\Debug\net6.0\test_deserialization.exe
+C:\WORK\SRC\Railml_editor\test_folder\bin\Debug\net6.0\test_deserialization.deps.json
+C:\WORK\SRC\Railml_editor\test_folder\bin\Debug\net6.0\test_deserialization.runtimeconfig.json
+C:\WORK\SRC\Railml_editor\test_folder\bin\Debug\net6.0\test_deserialization.dll
+C:\WORK\SRC\Railml_editor\test_folder\bin\Debug\net6.0\test_deserialization.pdb
+C:\WORK\SRC\Railml_editor\test_folder\obj\Debug\net6.0\test_deserialization.GeneratedMSBuildEditorConfig.editorconfig
+C:\WORK\SRC\Railml_editor\test_folder\obj\Debug\net6.0\test_deserialization.AssemblyInfoInputs.cache
+C:\WORK\SRC\Railml_editor\test_folder\obj\Debug\net6.0\test_deserialization.AssemblyInfo.cs
+C:\WORK\SRC\Railml_editor\test_folder\obj\Debug\net6.0\test_deserialization.csproj.CoreCompileInputs.cache
+C:\WORK\SRC\Railml_editor\test_folder\obj\Debug\net6.0\test_deserialization.sourcelink.json
+C:\WORK\SRC\Railml_editor\test_folder\obj\Debug\net6.0\test_deserialization.dll
+C:\WORK\SRC\Railml_editor\test_folder\obj\Debug\net6.0\refint\test_deserialization.dll
+C:\WORK\SRC\Railml_editor\test_folder\obj\Debug\net6.0\test_deserialization.pdb
+C:\WORK\SRC\Railml_editor\test_folder\obj\Debug\net6.0\test_deserialization.genruntimeconfig.cache
+C:\WORK\SRC\Railml_editor\test_folder\obj\Debug\net6.0\ref\test_deserialization.dll

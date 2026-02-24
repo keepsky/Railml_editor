@@ -1,4 +1,4 @@
-
+﻿
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,6 +20,7 @@ namespace RailmlEditor
             _viewModel.PrincipleTrackSelectionRequested += OnPrincipleTrackSelectionRequested;
             _viewModel.PropertyChanged += ViewModel_PropertyChanged;
             this.DataContext = _viewModel;
+            _viewModel.RequestUpdateTitle += UpdateTitle;
             
             
             // Set Initial Theme based on Config
@@ -35,9 +36,9 @@ namespace RailmlEditor
         private void UpdateTitle()
         {
             string fileName = "notitle.railml";
-            if (!string.IsNullOrEmpty(_currentFilePath))
+            if (!string.IsNullOrEmpty(_viewModel.CurrentFilePath))
             {
-                fileName = System.IO.Path.GetFileName(_currentFilePath);
+                fileName = System.IO.Path.GetFileName(_viewModel.CurrentFilePath);
             }
             this.Title = $"RailML Editor - {fileName}";
         }
@@ -83,107 +84,18 @@ namespace RailmlEditor
             }
         }
 
-        private void Toolbox_Click(object sender, RoutedEventArgs e)
+                private void Toolbox_Click(object sender, RoutedEventArgs e)
         {
             if (!_viewModel.IsEditMode) return;
-            if (sender is Button button)
+            if (sender is Button button && button.Tag is string type)
             {
-                var oldState = _viewModel.TakeSnapshot();
-                string? type = button.Tag?.ToString();
-                Point defaultPos = new Point(100, 100);
-
-                BaseElementViewModel? newElement = null;
-
-                if (type == "Track")
-                {
-                    newElement = new TrackViewModel
-                    {
-                        Id = GetNextId("tr"),
-                        X = defaultPos.X, 
-                        Y = defaultPos.Y,
-                        Length = 100 
-                    };
-                }
-                else if (type == "Switch")
-                {
-                    newElement = new SwitchViewModel
-                    {
-                        Id = _viewModel.GetNextId("sw"),
-                        X = defaultPos.X,
-                        Y = defaultPos.Y
-                    };
-                }
-                else if (type == "Signal")
-                {
-                    newElement = new SignalViewModel
-                    {
-                        Id = GetNextId("sig"),
-                        X = defaultPos.X,
-                        Y = defaultPos.Y
-                    };
-                }
-                else if (type == "Corner")
-                {
-                    double mx = defaultPos.X + 20;
-                    double my = defaultPos.Y - 40;
-                    newElement = new CurvedTrackViewModel
-                    {
-                        Id = GetNextId("tr"),
-                        Code = "corner",
-                        X = defaultPos.X,
-                        Y = defaultPos.Y,
-                        MX = mx,
-                        MY = my,
-                        X2 = mx + 10,
-                        Y2 = my
-                    };
-                }
-                else if (type == "Single")
-                {
-                    _viewModel.AddDoubleTrack("single.railml", defaultPos);
-                }
-                else if (type == "SingleR")
-                {
-                    _viewModel.AddDoubleTrack("singleR.railml", defaultPos);
-                }
-                else if (type == "SingleU")
-                {
-                    _viewModel.AddDoubleTrack("singleU.railml", defaultPos);
-                }
-                else if (type == "SingleRU")
-                {
-                    _viewModel.AddDoubleTrack("singleRU.railml", defaultPos);
-                }
-                else if (type == "Route")
-                {
-                    newElement = new RouteViewModel
-                    {
-                        Id = GetNextId("R")
-                    };
-                }
-                else if (type == "Double")
-                {
-                    _viewModel.AddDoubleTrack("double.railml", defaultPos);
-                }
-                else if (type == "DoubleR")
-                {
-                    _viewModel.AddDoubleTrack("doubleR.railml", defaultPos);
-                }
-                else if (type == "Cross")
-                {
-                    _viewModel.AddDoubleTrack("cross.railml", defaultPos);
-                }
-                else if (type == "Border")
+                if (type == "Border")
                 {
                     StartBorderPlacement();
                 }
-                
-
-                if (newElement != null)
+                else
                 {
-                    _viewModel.Elements.Add(newElement);
-                    if (newElement is TrackViewModel) _viewModel.UpdateProximitySwitches();
-                    _viewModel.AddHistory(oldState);
+                    _viewModel.AddElement(type, new Point(100, 100));
                 }
             }
         }
@@ -195,88 +107,21 @@ namespace RailmlEditor
             settingsView.ShowDialog();
         }
 
-        private void MainDesigner_Drop(object sender, DragEventArgs e)
+                private void MainDesigner_Drop(object sender, DragEventArgs e)
         {
             if (!_viewModel.IsEditMode) return;
             if (e.Data.GetDataPresent(DataFormats.StringFormat))
             {
-                var oldState = _viewModel.TakeSnapshot();
                 string? type = e.Data.GetData(DataFormats.StringFormat) as string;
                 Point dropPosition = e.GetPosition(MainDesigner);
 
-                BaseElementViewModel? newElement = null;
-
-                if (type == "Track")
+                if (type == "Border")
                 {
-                    newElement = new TrackViewModel
-                    {
-                        Id = GetNextId("T"),
-                        X = dropPosition.X,
-                        Y = dropPosition.Y,
-                        Length = 100 // Default Length
-                    };
+                    // Border drop not supported via generic AddElement yet, original code didn't handle it in Drop either
                 }
-                else if (type == "Corner")
+                else if (type != null)
                 {
-                    double mx = dropPosition.X + 20;
-                    double my = dropPosition.Y - 40;
-                    newElement = new CurvedTrackViewModel
-                    {
-                        Id = GetNextId("T"),
-                        Code = "corner",
-                        X = dropPosition.X,
-                        Y = dropPosition.Y,
-                        MX = mx,
-                        MY = my,
-                        X2 = mx + 10,
-                        Y2 = my
-                    };
-                }
-                else if (type == "Single")
-                {
-                    _viewModel.AddDoubleTrack("single.railml", dropPosition);
-                }
-                else if (type == "SingleR")
-                {
-                    _viewModel.AddDoubleTrack("singleR.railml", dropPosition);
-                }
-                
-                else if (type == "Signal")
-                {
-                    newElement = new SignalViewModel
-                    {
-                        Id = GetNextId("S"),
-                        X = dropPosition.X,
-                        Y = dropPosition.Y
-                    };
-                }
-                else if (type == "Route")
-                {
-                    newElement = new RouteViewModel
-                    {
-                        Id = GetNextId("R")
-                    };
-                }
-                else if (type == "Double")
-                {
-                    _viewModel.AddDoubleTrack("double.railml", dropPosition);
-                }
-                else if (type == "DoubleR")
-                {
-                    _viewModel.AddDoubleTrack("doubleR.railml", dropPosition);
-                }
-                else if (type == "Cross")
-                {
-                    _viewModel.AddDoubleTrack("cross.railml", dropPosition);
-                }
-
-                if (newElement != null)
-                {
-                    _viewModel.Elements.Add(newElement);
-                    _viewModel.SelectedElement = newElement; // Auto Select
-                    
-                    if (newElement is TrackViewModel) _viewModel.UpdateProximitySwitches();
-                    _viewModel.AddHistory(oldState);
+                    _viewModel.AddElement(type, dropPosition);
                 }
             }
         }
@@ -395,7 +240,7 @@ namespace RailmlEditor
 
             foreach (var t in _viewModel.Elements.OfType<TrackViewModel>())
             {
-                GetNearestPointOnTrack(pos, t, out Point nearest, out double dist, out double angle);
+                RailmlEditor.Utils.GeometryUtils.GetNearestPointOnTrack(pos, t, out Point nearest, out double dist, out double angle);
                 if (dist < minDist)
                 {
                     nearestTrack = t;
@@ -460,7 +305,7 @@ namespace RailmlEditor
                 // Snapping preview
                 foreach (var t in _viewModel.Elements.OfType<TrackViewModel>())
                 {
-                    GetNearestPointOnTrack(pos, t, out Point nearest, out double dist, out double angle);
+                    RailmlEditor.Utils.GeometryUtils.GetNearestPointOnTrack(pos, t, out Point nearest, out double dist, out double angle);
                     if (dist < 20)
                     {
                         _ghostBorder.X = nearest.X;
@@ -557,7 +402,7 @@ namespace RailmlEditor
                         }
                         
                         // Check line segment
-                        if (!hit) hit = IntersectsLine(selectionRect, new Point(track.X, track.Y), new Point(track.X2, track.Y2));
+                        if (!hit) hit = RailmlEditor.Utils.GeometryUtils.IntersectsLine(selectionRect, new Point(track.X, track.Y), new Point(track.X2, track.Y2));
 
                         if (track is CurvedTrackViewModel curved)
                         {
@@ -568,8 +413,8 @@ namespace RailmlEditor
                             // Check both segments
                             if (!hit)
                             {
-                                hit = IntersectsLine(selectionRect, new Point(curved.X, curved.Y), new Point(curved.MX, curved.MY)) ||
-                                      IntersectsLine(selectionRect, new Point(curved.MX, curved.MY), new Point(curved.X2, curved.Y2));
+                                hit = RailmlEditor.Utils.GeometryUtils.IntersectsLine(selectionRect, new Point(curved.X, curved.Y), new Point(curved.MX, curved.MY)) ||
+                                      RailmlEditor.Utils.GeometryUtils.IntersectsLine(selectionRect, new Point(curved.MX, curved.MY), new Point(curved.X2, curved.Y2));
                             }
                         }
                     }
@@ -813,7 +658,7 @@ namespace RailmlEditor
 
                           foreach (var t in _viewModel.Elements.OfType<TrackViewModel>())
                           {
-                              GetNearestPointOnTrack(new Point(borderVm.X, borderVm.Y), t, out Point nearest, out double dist, out double angle);
+                              RailmlEditor.Utils.GeometryUtils.GetNearestPointOnTrack(new Point(borderVm.X, borderVm.Y), t, out Point nearest, out double dist, out double angle);
                               if (dist < minDist)
                               {
                                   minDist = dist;
@@ -965,48 +810,6 @@ namespace RailmlEditor
                 _viewModel.SuppressTopologyUpdates = false;
                 _viewModel.UpdateProximitySwitches();
                 if (_beforeDragSnapshot != null) _viewModel.AddHistory(_beforeDragSnapshot);
-            }
-        }
-
-        private string? _currentFilePath = null;
-
-        private void FileOpen_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new Microsoft.Win32.OpenFileDialog();
-            dialog.Filter = "RailML Files (*.xml;*.railml)|*.xml;*.railml|All Files (*.*)|*.*";
-            if (dialog.ShowDialog() == true)
-            {
-                _currentFilePath = dialog.FileName;
-                var service = new Services.RailmlService();
-                try
-                {
-                    service.Load(_currentFilePath, _viewModel);
-                    UpdateTitle();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error loading file: {ex.Message}");
-                }
-            }
-        }
-
-        private void FileSave_Click(object sender, RoutedEventArgs e)
-        {
-            if (string.IsNullOrEmpty(_currentFilePath))
-            {
-                FileSaveAs_Click(sender, e);
-                return;
-            }
-
-            var service = new Services.RailmlService();
-            try
-            {
-                service.Save(_currentFilePath, _viewModel);
-                MessageBox.Show("File saved successfully.");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error saving file: {ex.Message}");
             }
         }
 
@@ -1180,73 +983,10 @@ namespace RailmlEditor
             return false;
         }
 
-        private bool IntersectsLine(Rect rect, Point p1, Point p2)
-        {
-            if (rect.Contains(p1) || rect.Contains(p2)) return true;
-            Point topLeft = rect.TopLeft;
-            Point topRight = rect.TopRight;
-            Point bottomLeft = rect.BottomLeft;
-            Point bottomRight = rect.BottomRight;
-            return LineIntersectsLine(p1, p2, topLeft, topRight) ||
-                   LineIntersectsLine(p1, p2, topRight, bottomRight) ||
-                   LineIntersectsLine(p1, p2, bottomRight, bottomLeft) ||
-                   LineIntersectsLine(p1, p2, bottomLeft, topLeft);
-        }
-
-        private bool LineIntersectsLine(Point a1, Point a2, Point b1, Point b2)
-        {
-            double d = (a2.X - a1.X) * (b2.Y - b1.Y) - (a2.Y - a1.Y) * (b2.X - b1.X);
-            if (d == 0) return false;
-            double u = ((b1.X - a1.X) * (b2.Y - b1.Y) - (b1.Y - a1.Y) * (b2.X - b1.X)) / d;
-            double v = ((b1.X - a1.X) * (a2.Y - a1.Y) - (b1.Y - a1.Y) * (a2.X - a1.X)) / d;
-            return u >= 0 && u <= 1 && v >= 0 && v <= 1;
-        }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             // KeyBindings handle Delete, Ctrl+C, Ctrl+V now.
-        }
-
-        private void FileNew_Click(object sender, RoutedEventArgs e)
-        {
-            if (_viewModel.Elements.Count > 0)
-            {
-                var result = MessageBox.Show("Save changes before creating new project?", "New Project", MessageBoxButton.YesNoCancel);
-                if (result == MessageBoxResult.Cancel) return;
-                if (result == MessageBoxResult.Yes) FileSave_Click(sender, e);
-            }
-            _viewModel.Elements.Clear();
-            _currentFilePath = null; 
-            UpdateTitle();
-        }
-
-        private void FileSaveAs_Click(object sender, RoutedEventArgs e)
-        {
-            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.FileName = "railway"; 
-            dlg.DefaultExt = ".railml"; 
-            dlg.Filter = "RailML documents (.railml)|*.railml"; 
-
-            if (dlg.ShowDialog() == true)
-            {
-                _currentFilePath = dlg.FileName;
-                var service = new Services.RailmlService();
-                try
-                {
-                    service.Save(_currentFilePath, _viewModel);
-                    UpdateTitle();
-                    MessageBox.Show("File saved successfully.");
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error saving file: {ex.Message}");
-                }
-            }
-        }
-
-        private void CreateArea_Click(object sender, RoutedEventArgs e)
-        {
-            _viewModel.CreateAreaFromSelectedBorders();
         }
 
         private void ViewGraph_Click(object sender, RoutedEventArgs e)
@@ -1254,32 +994,6 @@ namespace RailmlEditor
             var graphWin = new GraphWindow(_viewModel);
             graphWin.Owner = this;
             graphWin.Show();
-        }
-
-        private void GetNearestPointOnTrack(Point p, TrackViewModel track, out Point nearest, out double dist, out double angle)
-        {
-            double x1 = track.X, y1 = track.Y;
-            double x2 = track.X2, y2 = track.Y2;
-
-            double dx = x2 - x1;
-            double dy = y2 - y1;
-            double lenSq = dx * dx + dy * dy;
-
-            if (lenSq == 0)
-            {
-                nearest = new Point(x1, y1);
-                dist = Math.Sqrt(Math.Pow(p.X - x1, 2) + Math.Pow(p.Y - y1, 2));
-                angle = 0;
-                return;
-            }
-
-            double t = ((p.X - x1) * dx + (p.Y - y1) * dy) / lenSq;
-            t = Math.Max(0, Math.Min(1, t));
-
-            nearest = new Point(x1 + t * dx, y1 + t * dy);
-            dist = Math.Sqrt(Math.Pow(p.X - nearest.X, 2) + Math.Pow(p.Y - nearest.Y, 2));
-
-            angle = Math.Atan2(dy, dx) * 180 / Math.PI;
         }
     }
 }
