@@ -34,191 +34,49 @@ namespace RailmlEditor.Services
             var lineVis = new LineVis();
             mainVis.LineVisList.Add(lineVis);
 
+            var context = new Mappers.MappingContext(viewModel, doc)
+            {
+                Railml = railml,
+                MainLineVis = lineVis,
+                MainVis = mainVis
+            };
+
+            var trackMapper = new Mappers.TrackMapper();
+            var switchMapper = new Mappers.SwitchMapper();
+            var routeMapper = new Mappers.RouteMapper();
+            var areaMapper = new Mappers.AreaMapper();
+
             // 1. Create Tracks
-            var trackMap = new System.Collections.Generic.Dictionary<string, Track>();
             foreach (var element in doc.Elements.OfType<TrackViewModel>())
             {
-                // Determine if Curved
-                bool isCurved = element is CurvedTrackViewModel;
-                CurvedTrackViewModel ctv = isCurved ? (CurvedTrackViewModel)element : null;
+                var track = new Track();
+                trackMapper.MapToRailml(element, track, context);
+                railml.Infrastructure.Tracks.TrackList.Add(track);
+                context.TrackLookup[element.Id] = element;
+            }
 
-                var trackId = GetRailmlId(element.Id);
-                var track = new Track
+            // Serialize TextElements inside mainVis (Generic Labels or other things)
+            var textElements = doc.Elements.Where(e => !(e is TrackViewModel || e is SwitchViewModel || e is SignalViewModel || e is TrackCircuitBorderViewModel || e is RouteViewModel || e is AreaViewModel)).ToList();
+            if (textElements.Count > 0)
+            {
+                foreach (var textVm in textElements)
                 {
-                    Id = trackId,
-                    Name = element.Name,
-                    Description = element.Description,
-                    Type = element.Type,
-                    MainDir = element.MainDir,
-                    Code = element.Code ?? (isCurved ? "corner" : "plain"),
-                    TrackTopology = new TrackTopology
+                    mainVis.ObjectVisList.Add(new ObjectVis
                     {
-                        TrackBegin = new TrackNode 
-                        { 
-                            Id = "tb" + System.Text.RegularExpressions.Regex.Match(trackId ?? "", @"\d+").Value,
-                            Pos = 0,
-                            AbsPos = element.BeginNode.AbsPos,
-                            ScreenPos = new ScreenPos { X = element.X, Y = element.Y }
-                        },
-                        TrackEnd = new TrackNode 
-                        { 
-                            Id = "te" + System.Text.RegularExpressions.Regex.Match(trackId ?? "", @"\d+").Value,
-                            Pos = (int)element.Length,
-                            AbsPos = element.EndNode.AbsPos,
-                            ScreenPos = new ScreenPos { X = element.X2, Y = element.Y2 }
-                        }
-                    },
-                };
-
-                // Visualization for Track
-                var trackVis = new TrackVis { Ref = trackId };
-                lineVis.TrackVisList.Add(trackVis);
-
-                // Track Begin Vis
-                trackVis.TrackElementVisList.Add(new TrackElementVis
-                {
-                    Ref = track.TrackTopology.TrackBegin.Id,
-                    Position = new VisualizationPosition { X = element.X, Y = element.Y }
-                });
-
-                // Track End Vis
-                trackVis.TrackElementVisList.Add(new TrackElementVis
-                {
-                    Ref = track.TrackTopology.TrackEnd.Id,
-                    Position = new VisualizationPosition { X = element.X2, Y = element.Y2 }
-                });
-
-                // Curved Midpoint Vis
-                if (isCurved)
-                {
-                    trackVis.TrackElementVisList.Add(new TrackElementVis
-                    {
-                        Ref = $"{trackId}_mid", // Midpoint/Corner coordinate
-                        Position = new VisualizationPosition { X = ctv!.MX, Y = ctv.MY }
+                        Ref = textVm.Id,
+                        Position = new VisualizationPosition { X = textVm.X, Y = textVm.Y }
                     });
                 }
-
-                // Serialize TextElements inside mainVis (Generic Labels or other things)
-                var textElements = doc.Elements.Where(e => !(e is TrackViewModel || e is SwitchViewModel || e is SignalViewModel || e is TrackCircuitBorderViewModel || e is RouteViewModel || e is AreaViewModel)).ToList();
-                if (textElements.Count > 0)
-                {
-                    foreach (var textVm in textElements)
-                    {
-                        mainVis.ObjectVisList.Add(new ObjectVis
-                        {
-                            Ref = textVm.Id,
-                            Position = new VisualizationPosition { X = textVm.X, Y = textVm.Y }
-                        });
-                    }
-                }
-
-                // Add Signals and Borders bound to this track
-                var trackVm = element as TrackViewModel; // Cast to access properties
-
-                // Map BufferStop/OpenEnd from ViewModel
-                if (trackVm != null)
-                {
-                    if (trackVm.BeginType == TrackNodeType.BufferStop)
-                    {
-                        track.TrackTopology.TrackBegin.BufferStop = new BufferStop { Id = trackVm.BeginNode.Id, Code = trackVm.BeginNode.Code, Name = trackVm.BeginNode.Name, Description = trackVm.BeginNode.Description };
-                    }
-                    else if (trackVm.BeginType == TrackNodeType.OpenEnd)
-                    {
-                        track.TrackTopology.TrackBegin.OpenEnd = new OpenEnd { Id = trackVm.BeginNode.Id, Code = trackVm.BeginNode.Code, Name = trackVm.BeginNode.Name, Description = trackVm.BeginNode.Description };
-                    }
-
-                    if (trackVm.EndType == TrackNodeType.BufferStop)
-                    {
-                        track.TrackTopology.TrackEnd.BufferStop = new BufferStop { Id = trackVm.EndNode.Id, Code = trackVm.EndNode.Code, Name = trackVm.EndNode.Name, Description = trackVm.EndNode.Description };
-                    }
-                    else if (trackVm.EndType == TrackNodeType.OpenEnd)
-                    {
-                        track.TrackTopology.TrackEnd.OpenEnd = new OpenEnd { Id = trackVm.EndNode.Id, Code = trackVm.EndNode.Code, Name = trackVm.EndNode.Name, Description = trackVm.EndNode.Description };
-                    }
-                }
-                var boundSignals = doc.Elements.OfType<SignalViewModel>().Where(s => s.RelatedTrackId == element.Id).ToList();
-                var boundBorders = doc.Elements.OfType<TrackCircuitBorderViewModel>().Where(b => b.RelatedTrackId == element.Id).ToList();
-                
-                if (boundSignals.Count > 0 || boundBorders.Count > 0)
-                {
-                    track.OcsElements = new OcsElements();
-                    
-                    if (boundSignals.Count > 0)
-                    {
-                        track.OcsElements.Signals = new Signals();
-                        foreach (var sigVm in boundSignals)
-                        {
-                            // Calculate Pos relative to track start
-                            double dist = Math.Sqrt(Math.Pow(sigVm.X - element.X, 2) + Math.Pow(sigVm.Y - element.Y, 2));
-                            
-                            var signal = new Signal
-                            {
-                                Id = sigVm.Id,
-                                Dir = sigVm.Direction,
-                                Type = sigVm.Type,
-                                Function = sigVm.Function,
-                                AdditionalName = new AdditionalName { Name = sigVm.Name },
-                                Pos = (int)dist,
-                                ScreenPos = new ScreenPos { X = sigVm.X, Y = sigVm.Y }
-                            };
-                            track.OcsElements.Signals.SignalList.Add(signal);
-
-                            // Signal Vis
-                            trackVis.TrackElementVisList.Add(new TrackElementVis
-                            {
-                                Ref = signal.Id,
-                                Position = new VisualizationPosition { X = sigVm.X, Y = sigVm.Y }
-                            });
-                        }
-                    }
-
-                    if (boundBorders.Count > 0)
-                    {
-                        track.OcsElements.TrainDetectionElements = new TrainDetectionElements();
-                        foreach (var borderVm in boundBorders)
-                        {
-                            var border = new TrackCircuitBorder
-                            {
-                                Id = borderVm.Id,
-                                Name = borderVm.Name,
-                                Code = borderVm.Code,
-                                Description = borderVm.Description,
-                                Pos = (int)borderVm.Pos
-                            };
-                            track.OcsElements.TrainDetectionElements.TrackCircuitBorderList.Add(border);
-
-                            // Border Vis
-                            trackVis.TrackElementVisList.Add(new TrackElementVis
-                            {
-                                Ref = border.Id,
-                                Position = new VisualizationPosition { X = borderVm.X, Y = borderVm.Y }
-                            });
-                        }
-                    }
-                }
-
-                railml.Infrastructure.Tracks.TrackList.Add(track);
-                trackMap[element.Id] = track;
             }
 
-            // Switches are handled inside track topology connections, not top-level
-            // The existing topology builder handles switches during save, but if we need visual data:
-            var switchMap = new Dictionary<string, SwitchViewModel>();
+            // 2. Switches
             foreach (var sw in doc.Elements.OfType<SwitchViewModel>())
             {
-                switchMap[sw.Id] = sw;
-
-                // Switch Vis (Usually switch visualization is its own objectVis or trackElementVis)
-                // For simplified railML, maybe just an ObjectVis
-                mainVis.ObjectVisList.Add(new ObjectVis
-                {
-                    Ref = sw.Id,
-                    Position = new VisualizationPosition { X = sw.X, Y = sw.Y }
-                });
+                context.SwitchLookup[sw.Id] = sw;
+                var switchObj = new Switch();
+                switchMapper.MapToRailml(sw, switchObj, context);
             }
-            // 6. Finalize topology building?
-            // Existing logic relies on RailmlTopologyBuilder to populate TrackBegin/TrackEnd/Connections
-            // So we don't manually map Switches to railml structure here, just let RailmlTopologyBuilder handle it.
+
             // 4. Create Routes
             var routeList = doc.Elements.OfType<RouteViewModel>().ToList();
             if (routeList.Any())
@@ -226,53 +84,8 @@ namespace RailmlEditor.Services
                 railml.Infrastructure.Routes = new Routes();
                 foreach (var rVm in routeList)
                 {
-                    var r = new Route
-                    {
-                        Id = rVm.Id,
-                        Name = rVm.Name,
-                        Code = rVm.Code,
-                        Description = rVm.Description,
-                        ApproachPointRef = rVm.ApproachPointRef,
-                        EntryRef = rVm.EntryRef,
-                        ExitRef = rVm.ExitRef,
-                        OverlapEndRef = rVm.OverlapEndRef,
-                        ProceedSpeed = rVm.ProceedSpeed,
-                        ReleaseTriggerHead = rVm.ReleaseTriggerHead,
-                        ReleaseTriggerHeadSpecified = true,
-                        ReleaseTriggerRef = rVm.ReleaseTriggerRef
-                    };
-
-                    foreach (var sV in rVm.SwitchAndPositions)
-                    {
-                        r.SwitchAndPositionList.Add(new SwitchAndPosition
-                        {
-                            SwitchRef = sV.SwitchRef,
-                            SwitchPosition = sV.SwitchPosition
-                        });
-                    }
-
-                    foreach (var sV in rVm.OverlapSwitchAndPositions)
-                    {
-                        r.OverlapSwitchAndPositionList.Add(new SwitchAndPosition
-                        {
-                            SwitchRef = sV.SwitchRef,
-                            SwitchPosition = sV.SwitchPosition
-                        });
-                    }
-
-                    if (rVm.ReleaseSections.Any())
-                    {
-                        r.ReleaseGroup = new ReleaseGroup();
-                        foreach (var rsV in rVm.ReleaseSections)
-                        {
-                            r.ReleaseGroup.TrackSectionRefList.Add(new TrackSectionRef
-                            {
-                                Ref = rsV.TrackRef,
-                                FlankProtection = rsV.FlankProtection
-                            });
-                        }
-                    }
-
+                    var r = new Route();
+                    routeMapper.MapToRailml(rVm, r, context);
                     railml.Infrastructure.Routes.RouteList.Add(r);
                 }
             }
@@ -284,17 +97,8 @@ namespace RailmlEditor.Services
                 railml.Infrastructure.Areas = new Areas();
                 foreach (var aVm in areaList)
                 {
-                    var a = new Area
-                    {
-                        Id = aVm.Id,
-                        Name = aVm.Name,
-                        Description = aVm.Description,
-                        Type = aVm.Type
-                    };
-                    foreach (var b in aVm.Borders)
-                    {
-                        a.IsLimitedByList.Add(new IsLimitedBy { Ref = b.Id });
-                    }
+                    var a = new Area();
+                    areaMapper.MapToRailml(aVm, a, context);
                     railml.Infrastructure.Areas.AreaList.Add(a);
                 }
             }
@@ -733,6 +537,13 @@ namespace RailmlEditor.Services
             }
             viewModel.Elements.Clear();
 
+            var context = new Mappers.MappingContext(viewModel, doc) { Railml = railml };
+            var trackMapper = new Mappers.TrackMapper();
+            var switchMapper = new Mappers.SwitchMapper();
+            var routeMapper = new Mappers.RouteMapper();
+            var areaMapper = new Mappers.AreaMapper();
+            var signalMapper = new Mappers.SignalMapper();
+
                 // Build Coordinate Map from Visualizations
                 var coordMap = new System.Collections.Generic.Dictionary<string, VisualizationPosition>();
                 if (railml?.InfrastructureVisualizations?.VisualizationList != null)
@@ -818,12 +629,7 @@ namespace RailmlEditor.Services
                             trackVm = new TrackViewModel();
                         }
 
-                        trackVm.Id = track.Id;
-                        trackVm.Name = track.Name;
-                        trackVm.Description = track.Description;
-                        trackVm.Type = track.Type;
-                        trackVm.MainDir = track.MainDir;
-                        trackVm.Code = track.Code;
+                        trackMapper.MapToViewModel(track, trackVm, context);
 
                         // Load BufferStop/OpenEnd
                         if (track.TrackTopology?.TrackBegin != null)
@@ -1139,59 +945,8 @@ namespace RailmlEditor.Services
                 {
                     foreach (var r in railml.Infrastructure.Routes.RouteList)
                     {
-                        var rVm = new RouteViewModel
-                        {
-                            Id = r.Id,
-                            Name = r.Name,
-                            Code = r.Code,
-                            Description = r.Description,
-                            ApproachPointRef = r.ApproachPointRef,
-                            EntryRef = r.EntryRef,
-                            ExitRef = r.ExitRef,
-                            OverlapEndRef = r.OverlapEndRef,
-                            ProceedSpeed = r.ProceedSpeed ?? "R",
-                            ReleaseTriggerHead = r.ReleaseTriggerHead,
-                            ReleaseTriggerRef = r.ReleaseTriggerRef
-                        };
-
-                        if (r.SwitchAndPositionList != null)
-                        {
-                            foreach (var s in r.SwitchAndPositionList)
-                            {
-                                rVm.SwitchAndPositions.Add(new SwitchPositionViewModel
-                                {
-                                    SwitchRef = s.SwitchRef,
-                                    SwitchPosition = s.SwitchPosition,
-                                    RemoveCommand = new RelayCommand(p => { if (p is SwitchPositionViewModel vm) rVm.SwitchAndPositions.Remove(vm); })
-                                });
-                            }
-                        }
-
-                        if (r.OverlapSwitchAndPositionList != null)
-                        {
-                            foreach (var s in r.OverlapSwitchAndPositionList)
-                            {
-                                rVm.OverlapSwitchAndPositions.Add(new SwitchPositionViewModel
-                                {
-                                    SwitchRef = s.SwitchRef,
-                                    SwitchPosition = s.SwitchPosition,
-                                    RemoveCommand = new RelayCommand(p => { if (p is SwitchPositionViewModel vm) rVm.OverlapSwitchAndPositions.Remove(vm); })
-                                });
-                            }
-                        }
-
-                        if (r.ReleaseGroup?.TrackSectionRefList != null)
-                        {
-                            foreach (var rs in r.ReleaseGroup.TrackSectionRefList)
-                            {
-                                rVm.ReleaseSections.Add(new ReleaseSectionViewModel
-                                {
-                                    TrackRef = rs.Ref,
-                                    FlankProtection = rs.FlankProtection,
-                                    RemoveCommand = new RelayCommand(p => { if (p is ReleaseSectionViewModel vm) rVm.ReleaseSections.Remove(vm); })
-                                });
-                            }
-                        }
+                        var rVm = new RouteViewModel();
+                        routeMapper.MapToViewModel(r, rVm, context);
                         doc.Elements.Add(rVm);
                     }
                 }
@@ -1201,20 +956,9 @@ namespace RailmlEditor.Services
                 {
                     foreach (var aObj in railml.Infrastructure.Areas.AreaList)
                     {
-                        var aVm = new AreaViewModel
-                        {
-                            Id = aObj.Id,
-                            Name = aObj.Name,
-                            Description = aObj.Description,
-                            Type = aObj.Type
-                        };
-                        foreach (var lim in aObj.IsLimitedByList)
-                        {                            var border = doc.Elements.OfType<TrackCircuitBorderViewModel>().FirstOrDefault(b => b.Id == lim.Ref);
-                            if (border != null)
-                            {
-                                aVm.Borders.Add(border);
-                            }
-                        }                        doc.Elements.Add(aVm);
+                        var aVm = new AreaViewModel();
+                        areaMapper.MapToViewModel(aObj, aVm, context);
+                        doc.Elements.Add(aVm);
                     }
                 }
 
