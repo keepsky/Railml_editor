@@ -1,22 +1,24 @@
-﻿
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using RailmlEditor.ViewModels;
 using RailmlEditor.ViewModels.Elements;
 using System.Windows.Media;
+using RailmlEditor.Controllers;
 
 namespace RailmlEditor
 {
     public partial class MainWindow : Window
     {
         private MainViewModel _viewModel;
+        private RailmlEditor.Controllers.CanvasInteractionController _canvasController;
 
         public MainWindow()
         {
             InitializeComponent();
             _viewModel = new MainViewModel();
+            _canvasController = new RailmlEditor.Controllers.CanvasInteractionController(_viewModel);
             _viewModel.PrincipleTrackSelectionRequested += OnPrincipleTrackSelectionRequested;
             _viewModel.PropertyChanged += ViewModel_PropertyChanged;
             this.DataContext = _viewModel;
@@ -125,7 +127,7 @@ namespace RailmlEditor
                 
                 if (type == "Border")
                 {
-                    var elems = GetEditorElements(dockManager); // Fallback conceptually to ActiveContent's layout root.
+                    var elems = _canvasController.GetEditorElements(dockManager); // Fallback conceptually to ActiveContent's layout root.
                     // Actually, Toolbox_Click sender is a Button in the ToolBarTray.
                     // It is NOT inside the DataTemplate. So GetEditorElements(sender) will return null.
                     // We need to find the active document's MainGrid. Let's use dockManager to find it.
@@ -141,7 +143,7 @@ namespace RailmlEditor
                     // Let's change StartBorderPlacement to set cursor globally or remove cursor logic.
                     // Or, pass null for now and handle it inside. Let's look at StartBorderPlacement.
                     
-                    StartBorderPlacement(null!);
+                    _canvasController.StartBorderPlacement(null!);
                 }
                 else if (type != null)
                 {
@@ -160,7 +162,7 @@ namespace RailmlEditor
                 private void MainDesigner_Drop(object sender, DragEventArgs e)
         {
             if (!_viewModel.IsEditMode) return;
-            var elems = GetEditorElements(sender);
+            var elems = _canvasController.GetEditorElements(sender);
             if (elems == null) return;
 
             if (e.Data.GetDataPresent(DataFormats.StringFormat))
@@ -187,396 +189,25 @@ namespace RailmlEditor
 
 
         // UI Element Retrieval Helper
-        private class EditorElements
-        {
-            public Grid MainGrid { get; set; } = null!;
-            public ItemsControl MainDesigner { get; set; } = null!;
-            public Canvas OverlayCanvas { get; set; } = null!;
-            public System.Windows.Shapes.Rectangle SelectionBox { get; set; } = null!;
-            public ScrollViewer MainScrollViewer { get; set; } = null!;
-            public ScaleTransform MainScaleTransform { get; set; } = null!;
-        }
 
-        private T? FindVisualChild<T>(DependencyObject parent, string name) where T : FrameworkElement
-        {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-            {
-                var child = VisualTreeHelper.GetChild(parent, i);
-                if (child is T typedChild && typedChild.Name == name)
-                {
-                    return typedChild;
-                }
-                var result = FindVisualChild<T>(child, name);
-                if (result != null) return result;
-            }
-            return null;
-        }
-
-        private EditorElements? GetEditorElements(object sender)
-        {
-            if (sender is DependencyObject dObj)
-            {
-                // Find the root MainGrid of this template instance
-                Grid? mainGrid = sender as Grid;
-                if (mainGrid == null || mainGrid.Name != "MainGrid")
-                {
-                    // If sender is not MainGrid, walk up to find it
-                    DependencyObject current = dObj;
-                    while (current != null)
-                    {
-                        if (current is Grid g && g.Name == "MainGrid")
-                        {
-                            mainGrid = g;
-                            break;
-                        }
-                        current = VisualTreeHelper.GetParent(current);
-                    }
-                }
-
-                if (mainGrid != null)
-                {
-                    var mainDesigner = FindVisualChild<ItemsControl>(mainGrid, "MainDesigner")!;
-                    var scaleTransform = mainDesigner.LayoutTransform as ScaleTransform;
-                    if (scaleTransform == null)
-                    {
-                        // Fallback or create if not found (though it should be defined in XAML)
-                        scaleTransform = new ScaleTransform(1, 1);
-                        mainDesigner.LayoutTransform = scaleTransform;
-                    }
-
-                    return new EditorElements
-                    {
-                        MainGrid = mainGrid,
-                        MainDesigner = mainDesigner,
-                        OverlayCanvas = FindVisualChild<Canvas>(mainGrid, "OverlayCanvas")!,
-                        SelectionBox = FindVisualChild<System.Windows.Shapes.Rectangle>(mainGrid, "SelectionBox")!,
-                        MainScrollViewer = FindVisualChild<ScrollViewer>(mainGrid, "MainScrollViewer")!,
-                        MainScaleTransform = scaleTransform
-                    };
-                }
-            }
-            return null;
-        }
-
-        // Selection & Panning State
-        private bool _isSelecting = false;
-        private Point _selectionStartPoint;
-        private Point _selectionStartLogicalPoint;
-        private bool _isPanning = false;
-        private Point _panStartPoint;
-
-        // Thumb Drag State (Absolute)
-        private Point _dragStartMousePos;
-        private double _dragStartElementX;
-        private double _dragStartElementY;
-        private double _dragStartElementX2;
-        private double _dragStartElementY2;
-        private double _dragStartElementMX;
-        private double _dragStartElementMY;
 
         private void MainGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (Mouse.Captured != null) return;
-            var elems = GetEditorElements(sender);
-            if (elems == null) return;
-
-            if (e.ChangedButton == MouseButton.Left)
-            {
-                // Start Selection
-                _isSelecting = true;
-                _selectionStartPoint = e.GetPosition(elems.OverlayCanvas);
-                _selectionStartLogicalPoint = e.GetPosition(elems.MainDesigner);
-                
-                // Reset styling
-                Canvas.SetLeft(elems.SelectionBox, _selectionStartPoint.X);
-                Canvas.SetTop(elems.SelectionBox, _selectionStartPoint.Y);
-                elems.SelectionBox.Width = 0;
-                elems.SelectionBox.Height = 0;
-                elems.SelectionBox.Visibility = Visibility.Visible;
-
-                // Clear existing selection unless Ctrl or Shift is pressed
-                bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
-                if (!isMulti)
-                {
-                    _viewModel.ClearAllSelections();
-                    _viewModel.SelectedElement = null;
-                }
-                
-                elems.MainDesigner.Focus();
-                elems.MainDesigner.CaptureMouse();
-                e.Handled = true;
-            }
-            else if (e.ChangedButton == MouseButton.Middle)
-            {
-                // Start Panning (Global Move)
-                _isPanning = true;
-                _panStartPoint = e.GetPosition(elems.MainGrid); // Initial point, acts as "Last Point"
-                
-                elems.MainDesigner.Focus();
-                elems.MainDesigner.CaptureMouse();
-                elems.MainDesigner.Cursor = Cursors.SizeAll;
-                e.Handled = true;
-            }
-            
-            if (_isPlacingBorder)
-            {
-                if (e.ChangedButton == MouseButton.Left)
-                {
-                    FinalizeBorderPlacement(e.GetPosition(elems.MainDesigner), elems);
-                    e.Handled = true;
-                }
-                else if (e.ChangedButton == MouseButton.Right)
-                {
-                    CancelBorderPlacement(elems);
-                    e.Handled = true;
-                }
-            }
-        }
-
-        private void StartBorderPlacement(EditorElements? elems)
-        {
-            _isPlacingBorder = true;
-            _ghostBorder = new TrackCircuitBorderViewModel
-            {
-                Id = _viewModel.GetNextId("td"),
-                Name = "Border",
-                X = -1000,
-                Y = -1000
-            };
-            _viewModel.Elements.Add(_ghostBorder);
-            
-            if (elems != null)
-            {
-                elems.MainDesigner.Cursor = Cursors.Cross;
-            }
-            else
-            {
-                Mouse.OverrideCursor = Cursors.Cross;
-            }
-        }
-
-        private void CancelBorderPlacement(EditorElements elems)
-        {
-            if (_ghostBorder != null) _viewModel.Elements.Remove(_ghostBorder);
-            _isPlacingBorder = false;
-            _ghostBorder = null;
-            if (elems != null) elems.MainDesigner.Cursor = Cursors.Arrow;
-            Mouse.OverrideCursor = null;
-        }
-
-        private void FinalizeBorderPlacement(Point pos, EditorElements elems)
-        {
-            if (_ghostBorder == null) return;
-
-            TrackViewModel? nearestTrack = null;
-            double minDist = 20; // Snap distance
-            Point snapPoint = pos;
-            double snapAngle = 0;
-
-            foreach (var t in _viewModel.Elements.OfType<TrackViewModel>())
-            {
-                RailmlEditor.Utils.GeometryUtils.GetNearestPointOnTrack(pos, t, out Point nearest, out double dist, out double angle);
-                if (dist < minDist)
-                {
-                    nearestTrack = t;
-                    minDist = dist;
-                    snapPoint = nearest;
-                    snapAngle = angle;
-                }
-            }
-
-            if (nearestTrack != null)
-            {
-                var oldState = _viewModel.TakeSnapshot();
-                _ghostBorder.X = snapPoint.X;
-                _ghostBorder.Y = snapPoint.Y;
-                _ghostBorder.Angle = snapAngle;
-                _ghostBorder.RelatedTrackId = nearestTrack.Id;
-                
-                double dx = _ghostBorder.X - nearestTrack.X;
-                double dy = _ghostBorder.Y - nearestTrack.Y;
-                _ghostBorder.Pos = Math.Round(Math.Sqrt(dx * dx + dy * dy)); 
-            
-                var finalBorder = _ghostBorder;
-                _ghostBorder = null;
-                _isPlacingBorder = false;
-                elems.MainDesigner.Cursor = Cursors.Arrow;
-                
-                _viewModel.AddHistory(oldState);
-                
-                // Force update explorer parent
-                _viewModel.UpdateBorderParent(finalBorder);
-            }
-            else
-            {
-                // Just place it if no track? User said "임의의 track위에 ... 클릭하면 ... 바인딩"
-                // If not on track, maybe do nothing or just cancel?
-                // Let's just keep it following mouse until a track is clicked or right-click to cancel.
-            }
+            _canvasController.HandleMainGridMouseDown(sender, e);
         }
 
         private void MainGrid_MouseMove(object sender, MouseEventArgs e)
         {
-            var elems = GetEditorElements(sender);
-            if (elems == null) return;
-
-            if (_isSelecting)
-            {
-                var curPos = e.GetPosition(elems.OverlayCanvas);
-                var x = Math.Min(curPos.X, _selectionStartPoint.X);
-                var y = Math.Min(curPos.Y, _selectionStartPoint.Y);
-                var w = Math.Abs(curPos.X - _selectionStartPoint.X);
-                var h = Math.Abs(curPos.Y - _selectionStartPoint.Y);
-
-                Canvas.SetLeft(elems.SelectionBox, x);
-                Canvas.SetTop(elems.SelectionBox, y);
-                elems.SelectionBox.Width = w;
-                elems.SelectionBox.Height = h;
-            }
-            else if (_isPlacingBorder && _ghostBorder != null)
-            {
-                var pos = e.GetPosition(elems.MainDesigner);
-                _ghostBorder.X = pos.X;
-                _ghostBorder.Y = pos.Y;
-                _ghostBorder.Angle = 0;
-                
-                // Snapping preview
-                foreach (var t in _viewModel.Elements.OfType<TrackViewModel>())
-                {
-                    RailmlEditor.Utils.GeometryUtils.GetNearestPointOnTrack(pos, t, out Point nearest, out double dist, out double angle);
-                    if (dist < 20)
-                    {
-                        _ghostBorder.X = nearest.X;
-                        _ghostBorder.Y = nearest.Y;
-                        _ghostBorder.Angle = angle;
-                        break;
-                    }
-                }
-            }
-            else if (_isPanning)
-            {
-                var curPos = e.GetPosition(elems.MainGrid);
-                // Divide screen delta by current scale to get logical delta
-                var deltaX = (curPos.X - _panStartPoint.X) / elems.MainScaleTransform.ScaleX;
-                var deltaY = (curPos.Y - _panStartPoint.Y) / elems.MainScaleTransform.ScaleY;
-
-                if (Math.Abs(deltaX) >= 1.0 || Math.Abs(deltaY) >= 1.0)
-                {
-                    double snapX = Math.Round(deltaX); // Snap to logical units? Or keep previous 10px snap?
-                    // User might want to keep the 10px snap even when zoomed. 
-                    // Let's stick to the 10px logical snap but make movement smooth relative to mouse.
-                    
-                    snapX = Math.Round(deltaX / 10.0) * 10.0;
-                    double snapY = Math.Round(deltaY / 10.0) * 10.0;
-
-                    if (snapX != 0 || snapY != 0)
-                    {
-                        foreach (var element in _viewModel.Elements)
-                        {
-                            // Skip bound elements as they will vary with Track
-                            if (element is SignalViewModel s && !string.IsNullOrEmpty(s.RelatedTrackId)) continue;
-                            if (element is TrackCircuitBorderViewModel b && !string.IsNullOrEmpty(b.RelatedTrackId)) continue;
-
-                            element.MoveBy(snapX, snapY);
-                        }
-                        // Update "Last Point" by the snapped amount to avoid drift
-                        _panStartPoint.X += snapX;
-                        _panStartPoint.Y += snapY;
-                    }
-                }
-            }
+            _canvasController.HandleMainGridMouseMove(sender, e);
         }
 
         private void MainGrid_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            var elems = GetEditorElements(sender);
-            if (elems == null) return;
-
-            if (_isSelecting)
-            {
-                _isSelecting = false;
-                elems.SelectionBox.Visibility = Visibility.Collapsed;
-                elems.MainDesigner.ReleaseMouseCapture();
-
-                // Perform Selection Logic
-                Point logicalEnd = e.GetPosition(elems.MainDesigner);
-                Rect selectionRect = new Rect(_selectionStartLogicalPoint, logicalEnd);
-
-                bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
-                if (!isMulti)
-                {
-                    _viewModel.ClearAllSelections();
-                }
-
-                foreach (var element in _viewModel.Elements)
-                {
-                    bool hit = false;
-                    
-                    // 1. Generic Anchor Check (10x10 centered at X, Y for general hit)
-                    Rect anchorBounds = new Rect(element.X - 5, element.Y - 5, 10, 10);
-                    if (selectionRect.IntersectsWith(anchorBounds))
-                    {
-                        hit = true;
-                    }
-
-                    // 2. Type-specific accurate bounds
-                    if (!hit && element is TrackViewModel track)
-                    {
-                        // Check end point
-                        Rect endBounds = new Rect(track.X2 - 5, track.Y2 - 5, 10, 10);
-                        if (selectionRect.IntersectsWith(endBounds))
-                        {
-                            hit = true;
-                        }
-                        
-                        // Check line segment
-                        if (!hit) hit = RailmlEditor.Utils.GeometryUtils.IntersectsLine(selectionRect, new Point(track.X, track.Y), new Point(track.X2, track.Y2));
-
-                        if (track is CurvedTrackViewModel curved)
-                        {
-                            // Check midpoint
-                            Rect midBounds = new Rect(curved.MX - 5, curved.MY - 5, 10, 10);
-                            if (selectionRect.IntersectsWith(midBounds)) hit = true;
-                            
-                            // Check both segments
-                            if (!hit)
-                            {
-                                hit = RailmlEditor.Utils.GeometryUtils.IntersectsLine(selectionRect, new Point(curved.X, curved.Y), new Point(curved.MX, curved.MY)) ||
-                                      RailmlEditor.Utils.GeometryUtils.IntersectsLine(selectionRect, new Point(curved.MX, curved.MY), new Point(curved.X2, curved.Y2));
-                            }
-                        }
-                    }
-                    else if (!hit && element is SwitchViewModel sw)
-                    {
-                        // Tag bounds: (-15, 7) offset, Size 35x12
-                        Rect tagBounds = new Rect(sw.X - 15.0, sw.Y + 7.0, 35, 12);
-                        if (selectionRect.IntersectsWith(tagBounds)) hit = true;
-                    }
-                    else if (!hit && element is SignalViewModel signal)
-                    {
-                        // Signal grid is (0, 0, 20, 10) or (-20, 0, 20, 10) if flipped
-                        Rect sigBounds = signal.IsFlipped 
-                            ? new Rect(signal.X - 20, signal.Y, 20, 10) 
-                            : new Rect(signal.X, signal.Y, 20, 10);
-                        if (selectionRect.IntersectsWith(sigBounds)) hit = true;
-                    }
-                    else if (!hit && element is TrackCircuitBorderViewModel border)
-                    {
-                        // Border is 20x10 centered: (-10, -5, 20, 10)
-                        Rect borderBounds = new Rect(border.X - 10, border.Y - 5, 20, 10);
-                        if (selectionRect.IntersectsWith(borderBounds)) hit = true;
-                    }
-
-                    if (hit) element.IsSelected = true;
-                }
-            }
-            else if (_isPanning)
-            {
-                _isPanning = false;
-                elems.MainDesigner.ReleaseMouseCapture();
-                elems.MainDesigner.Cursor = Cursors.Arrow;
-            }
+            _canvasController.HandleMainGridMouseUp(sender, e);
         }
+
+
+
 
         private void MainGrid_KeyDown(object sender, KeyEventArgs e)
         {
@@ -597,294 +228,47 @@ namespace RailmlEditor
 
         private void Item_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (IsOrInsideThumb(e.OriginalSource as DependencyObject))
-            {
-                e.Handled = true; 
-                return;
-            }
-
             if (sender is FrameworkElement element && element.DataContext is BaseElementViewModel viewModel)
             {
-                if (viewModel is SwitchViewModel)
-                {
-                    // Allow selection but prevent drag
-                     if (e.ChangedButton == MouseButton.Left)
-                    {
-                        bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
-                        if (!viewModel.IsSelected && !isMulti)
-                        {
-                            _viewModel.ClearAllSelections();
-                            viewModel.IsSelected = true;
-                        }
-                        else if (isMulti)
-                        {
-                             viewModel.IsSelected = !viewModel.IsSelected;
-                        }
-                        e.Handled = true;
-                    }
-                    return;
-                }
-                
-
-
-                if (e.ChangedButton == MouseButton.Left)
-                {
-                    if (!_viewModel.IsEditMode)
-                    {
-                        // Allow selection only
-                        _viewModel.SelectedElement = viewModel;
-                         bool isMultiSelect = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
-                        if (!isMultiSelect)
-                        {
-                            _viewModel.ClearAllSelections();
-                            viewModel.IsSelected = true;
-                        }
-                        else
-                        {
-                            viewModel.IsSelected = !viewModel.IsSelected;
-                        }
-                        e.Handled = true;
-                        return;
-                    }
-
-                    _beforeDragSnapshot = _viewModel.TakeSnapshot();
-                    _isDragging = true;
-                    _draggedControl = element;
-                    
-                    var elems = GetEditorElements(sender);
-                    if (elems != null)
-                    {
-                        _startPoint = e.GetPosition(elems.MainDesigner);
-                    }
-                    _viewModel.SuppressTopologyUpdates = true; // Added line
-                    
-                    bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
-                    // If not already selected and multi-select modifier not pressed, select only this.
-                    if (!viewModel.IsSelected && !isMulti)
-                    {
-                        _viewModel.ClearAllSelections();
-                        viewModel.IsSelected = true;
-                    }
-                    else if (isMulti)
-                    {
-                        viewModel.IsSelected = !viewModel.IsSelected;
-                    }
-                    
-                    if (viewModel.IsSelected)
-                    {
-                        _originalPositions.Clear();
-                        foreach (var el in _viewModel.Elements)
-                        {
-                            if (el.IsSelected)
-                            {
-                                 _originalPositions[el] = new Point(el.X, el.Y);
-                            }
-                        }
-                    }
-
-                    _viewModel.SelectedElement = viewModel; // Keep this for property grid focus
-                    
-                    elems?.MainDesigner.Focus();
-                    element.CaptureMouse();
-                    e.Handled = true;
-                }
+                _canvasController.HandleItemMouseDown(sender, e, element, viewModel);
             }
         }
 
         private void Item_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_isDragging && _draggedControl != null)
-            {
-                var elems = GetEditorElements(sender);
-                if (elems == null) return;
-                
-                Point currentPos = e.GetPosition(elems.MainDesigner);
-                // Total Delta from Start
-                double deltaX = currentPos.X - _startPoint.X;
-                double deltaY = currentPos.Y - _startPoint.Y;
+            _canvasController.HandleItemMouseMove(sender, e);
+        }
 
-                // Snap delta to 10px grid if no constraints
-                // But we want to snap individual elements relative to their original position or grid?
-                // Previous logic: snap delta.
-                
-                double snapDeltaX = Math.Round(deltaX / 10.0) * 10.0;
-                double snapDeltaY = Math.Round(deltaY / 10.0) * 10.0;
-
-                foreach (var kvp in _originalPositions)
-                {
-                    var element = kvp.Key;
-                    var orig = kvp.Value;
-                    
-                    // Proposed New Position based on Grid Snap Delta
-                    double proposedX = orig.X + snapDeltaX;
-                    double proposedY = orig.Y + snapDeltaY;
-                    
-                    // Calculate shift from current position (to propagate to X2/Y2)
-                    double shiftX = proposedX - element.X;
-                    double shiftY = proposedY - element.Y;
-                    
-                    // Update Position
-                    element.MoveBy(shiftX, shiftY);
-                }
-                
-                // Now apply Snapping Logic for Signals (Post-Processing)
-                // This must run AFTER position updates to check if we fall into a snap well.
-                foreach (var kvp in _originalPositions)
-                {
-                     var element = kvp.Key;
-                     if (element is SignalViewModel signalVm)
-                     {
-                         // Temporary: Assume unbinding first.
-                         var oldRelated = signalVm.RelatedTrackId;
-                         signalVm.RelatedTrackId = null; 
-                         
-                         foreach (var other in _viewModel.Elements)
-                         {
-                             if (other is TrackViewModel t && other != signalVm)
-                             {
-                                 double distStartSq = Math.Pow(signalVm.X - t.X, 2) + Math.Pow(signalVm.Y - t.Y, 2);
-                                 double distEndSq = Math.Pow(signalVm.X - t.X2, 2) + Math.Pow(signalVm.Y - t.Y2, 2);
-                                 
-                                 // Snap Radius 20px (400 sq)
-                                 bool snapped = false;
-                                 if (signalVm.Direction == "up" && distStartSq < 400.0)
-                                 {
-                                     signalVm.X = t.X;
-                                     signalVm.Y = t.Y - 15;
-                                     signalVm.RelatedTrackId = t.Id;
-                                     signalVm.Pos = 0;
-                                     snapped = true;
-                                 }
-                                 else if (signalVm.Direction == "down" && distEndSq < 400.0)
-                                 {
-                                     signalVm.X = t.X2;
-                                     signalVm.Y = t.Y2 + 5;
-                                     signalVm.RelatedTrackId = t.Id;
-                                     signalVm.Pos = Math.Round(t.Length);
-                                     snapped = true;
-                                 }
-                                 
-                                 if (snapped) break;
-                             }
-                         }
-                     }
-                     else if (element is TrackCircuitBorderViewModel borderVm)
-                     {
-                          TrackViewModel? nearestTrack = null;
-                          double minDist = 10; 
-                          Point snapPos = new Point(borderVm.X, borderVm.Y);
-                          double snapAngle = 0;
-
-                          foreach (var t in _viewModel.Elements.OfType<TrackViewModel>())
-                          {
-                              RailmlEditor.Utils.GeometryUtils.GetNearestPointOnTrack(new Point(borderVm.X, borderVm.Y), t, out Point nearest, out double dist, out double angle);
-                              if (dist < minDist)
-                              {
-                                  minDist = dist;
-                                  nearestTrack = t;
-                                  snapPos = nearest;
-                                  snapAngle = angle;
-                              }
-                          }
-
-                          if (nearestTrack != null)
-                          {
-                              borderVm.RelatedTrackId = nearestTrack.Id;
-                              borderVm.X = snapPos.X;
-                              borderVm.Y = snapPos.Y;
-                              borderVm.Angle = snapAngle;
-                              
-                              double dx = borderVm.X - nearestTrack.X;
-                              double dy = borderVm.Y - nearestTrack.Y;
-                              borderVm.Pos = Math.Round(Math.Sqrt(dx * dx + dy * dy));
-                          }
-                          else
-                          {
-                              borderVm.RelatedTrackId = null;
-                              borderVm.Angle = 0;
-                              borderVm.Pos = 0;
-                          }
-                     }
-                }
-            }
+        private void Item_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+             _canvasController.HandleItemMouseUp(sender, e);
         }
 
 
 
         private void Thumb_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
         {
-            _beforeDragSnapshot = _viewModel.TakeSnapshot();
-            var elems = GetEditorElements(sender);
-            if (elems != null)
-            {
-                _dragStartMousePos = Mouse.GetPosition(elems.MainDesigner);
-            }
-            if (sender is FrameworkElement thumb && thumb.DataContext is TrackViewModel track)
-            {
-                _dragStartElementX = track.X;
-                _dragStartElementY = track.Y;
-                _dragStartElementX2 = track.X2;
-                _dragStartElementY2 = track.Y2;
-                if (track is CurvedTrackViewModel curved)
-                {
-                    _dragStartElementMX = curved.MX;
-                    _dragStartElementMY = curved.MY;
-                }
-            }
+             _canvasController.HandleThumbDragStarted(sender, e);
         }
 
         private void StartThumb_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
         {
-            var elems = GetEditorElements(sender);
-            if (elems == null) return;
-
-            if (sender is FrameworkElement thumb && thumb.DataContext is TrackViewModel track)
-            {
-                Point currentMousePos = Mouse.GetPosition(elems.MainDesigner);
-                double totalDeltaX = (currentMousePos.X - _dragStartMousePos.X);
-                double totalDeltaY = (currentMousePos.Y - _dragStartMousePos.Y);
-
-                track.X = Math.Round((_dragStartElementX + totalDeltaX) / 10.0) * 10.0;
-                track.Y = Math.Round((_dragStartElementY + totalDeltaY) / 10.0) * 10.0;
-            }
+             _canvasController.HandleStartThumbDragDelta(sender, e);
         }
 
         private void EndThumb_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
         {
-             var elems = GetEditorElements(sender);
-             if (elems == null) return;
-
-             if (sender is FrameworkElement thumb && thumb.DataContext is TrackViewModel track)
-            {
-                Point currentMousePos = Mouse.GetPosition(elems.MainDesigner);
-                double totalDeltaX = (currentMousePos.X - _dragStartMousePos.X);
-                double totalDeltaY = (currentMousePos.Y - _dragStartMousePos.Y);
-
-                track.X2 = Math.Round((_dragStartElementX2 + totalDeltaX) / 10.0) * 10.0;
-                track.Y2 = Math.Round((_dragStartElementY2 + totalDeltaY) / 10.0) * 10.0;
-            }
+             _canvasController.HandleEndThumbDragDelta(sender, e);
         }
 
         private void MidThumb_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
         {
-             var elems = GetEditorElements(sender);
-             if (elems == null) return;
-
-             if (sender is FrameworkElement thumb && thumb.DataContext is CurvedTrackViewModel curved)
-             {
-                Point currentMousePos = Mouse.GetPosition(elems.MainDesigner);
-                double totalDeltaX = (currentMousePos.X - _dragStartMousePos.X);
-                double totalDeltaY = (currentMousePos.Y - _dragStartMousePos.Y);
-
-                curved.MX = Math.Round((_dragStartElementMX + totalDeltaX) / 10.0) * 10.0;
-                curved.MY = Math.Round((_dragStartElementMY + totalDeltaY) / 10.0) * 10.0;
-             }
+             _canvasController.HandleMidThumbDragDelta(sender, e);
         }
 
         private void Thumb_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
-             _viewModel.UpdateProximitySwitches();
-             if (_beforeDragSnapshot != null) _viewModel.AddHistory(_beforeDragSnapshot);
+             _canvasController.HandleThumbDragCompleted(sender, e);
         }
 
         private void OnPrincipleTrackSelectionRequested(SwitchBranchInfo info)
@@ -897,14 +281,14 @@ namespace RailmlEditor
             }
             else
             {
-                RollbackMove();
+                RollbackMove(_canvasController.OriginalPositions);
                 info.Callback?.Invoke(null);
             }
         }
 
-        private void RollbackMove()
+        private void RollbackMove(System.Collections.Generic.Dictionary<BaseElementViewModel, Point> originalPositions)
         {
-            foreach (var kvp in _originalPositions)
+            foreach (var kvp in originalPositions)
             {
                 var element = kvp.Key;
                 var orig = kvp.Value;
@@ -912,36 +296,7 @@ namespace RailmlEditor
                 double shiftX = orig.X - element.X;
                 double shiftY = orig.Y - element.Y;
 
-                element.X = orig.X;
-                element.Y = orig.Y;
-
-                if (element is TrackViewModel trackVm)
-                {
-                    trackVm.X2 += shiftX;
-                    trackVm.Y2 += shiftY;
-                    if (trackVm is CurvedTrackViewModel curved)
-                    {
-                        curved.MX += shiftX;
-                        curved.MY += shiftY;
-                    }
-                }
-            }
-        }
-
-        private void Item_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (_isDragging)
-            {
-                _isDragging = false;
-                if (_draggedControl != null)
-                {
-                    _draggedControl.ReleaseMouseCapture();
-                    _draggedControl = null;
-                }
-                
-                _viewModel.SuppressTopologyUpdates = false;
-                _viewModel.UpdateProximitySwitches();
-                if (_beforeDragSnapshot != null) _viewModel.AddHistory(_beforeDragSnapshot);
+                element.MoveBy(shiftX, shiftY);
             }
         }
 
@@ -952,7 +307,7 @@ namespace RailmlEditor
 
         private void MainScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            var elems = GetEditorElements(sender);
+            var elems = _canvasController.GetEditorElements(sender);
             if (elems == null) return;
 
             if (System.Windows.Input.Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
@@ -1010,7 +365,7 @@ namespace RailmlEditor
                 // Drag Init (Delayed)
                 _isTagDragging = false; 
                 _draggedTagSwitch = swVm;
-                var elems = GetEditorElements(sender);
+                var elems = _canvasController.GetEditorElements(sender);
                 if (elems != null)
                 {
                     _tagDragStartPoint = e.GetPosition(elems.MainDesigner);
@@ -1031,7 +386,7 @@ namespace RailmlEditor
         {
             if (_draggedTagSwitch != null && sender is FrameworkElement el)
             {
-                var elems = GetEditorElements(sender);
+                var elems = _canvasController.GetEditorElements(sender);
                 if (elems == null) return;
 
                 if (!_isTagDragging)
