@@ -6,6 +6,10 @@ using RailmlEditor.ViewModels.Elements;
 
 namespace RailmlEditor.Services
 {
+    /// <summary>
+    /// RailML 파일로 저장하기 직전에, 화면 위의 요소들이 어떻게 이어져 있는지를 계산해서 
+    /// RailML 규격의 XML 구조(Connections, Topology)로 변환해주는 전담 건축가(Builder) 클래스입니다.
+    /// </summary>
     public static class RailmlTopologyBuilder
     {
         public static void BuildTopology(Railml railml, DocumentViewModel doc)

@@ -2,9 +2,15 @@ using System;
 
 namespace RailmlEditor.ViewModels.Elements
 {
+    /// <summary>
+    /// 일반 직선 선로(TrackViewModel)의 기능을 물려받아(상속) 만들어진 '곡선 선로' 클래스입니다.
+    /// 직선과 달리 시작점(X, Y)과 끝점(X2, Y2) 외에, 선이 어떻게 휘어질지를 결정하는 '중간 조절점(MX, MY)'을 가지고 있습니다.
+    /// 화면에서 이 조절점을 드래그하면 베지어(Bezier) 곡선 형태로 선이 부드럽게 휘어집니다.
+    /// </summary>
     public class CurvedTrackViewModel : TrackViewModel
     {
         private double _mx;
+        /// <summary>곡선을 만드는 중간 조절점(Control Point)의 X 좌표입니다.</summary>
         public double MX
         {
             get => _mx;
@@ -22,6 +28,7 @@ namespace RailmlEditor.ViewModels.Elements
         }
 
         private double _my;
+        /// <summary>곡선을 만드는 중간 조절점(Control Point)의 Y 좌표입니다.</summary>
         public double MY
         {
             get => _my;

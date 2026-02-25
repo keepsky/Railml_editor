@@ -4,6 +4,10 @@ using System.Windows.Controls;
 
 namespace RailmlEditor.Views
 {
+    /// <summary>
+    /// 상단 메뉴의 "설정(Settings)..."을 눌렀을 때 나타나는 팝업 창입니다.
+    /// 테마(다크/라이트 모드)를 바꾸거나, 선로가 서로 달라붙는(스냅) 민감도 조절 등 환경설정을 담당합니다.
+    /// </summary>
     public partial class SettingsView : Window
     {
         private bool _isInitialized = false;

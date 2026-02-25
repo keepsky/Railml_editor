@@ -9,6 +9,10 @@ using RailmlEditor.Utils;
 
 namespace RailmlEditor.ViewModels.Elements
 {
+    /// <summary>
+    /// 선로의 끝부분 형태를 구별하는 열거형입니다.
+    /// 선로가 중간에 끊긴 경우(OpenEnd), 차단막이가 있는 경우(BufferStop), 다른 선로와 이어지는 경우(Connection)를 나타냅니다.
+    /// </summary>
     public enum TrackNodeType
     {
         None,
@@ -17,16 +21,23 @@ namespace RailmlEditor.ViewModels.Elements
         Connection
     }
 
+    /// <summary>
+    /// 화면에 그려질 가장 흔한 요소인 '선로(Track)' 정보를 담는 클래스입니다.
+    /// 부모 클래스인 BaseElementViewModel이 갖고 있는 기본 X, Y 좌표 외에 
+    /// 선로가 끝나는 지점(X2, Y2)이나 선로의 길이, 방향, 속한 구간(Section) 등의 추가 정보를 여기서 모두 관리합니다.
+    /// </summary>
     public class TrackViewModel : BaseElementViewModel
     {
         public override string TypeName => "Track";
         
         // Collections for ComboBox
+        /// <summary>화면 드롭다운(ComboBox)에서 사용자가 선택할 수 있는 선로의 종류 목록입니다.</summary>
         public System.Collections.Generic.List<string> AvailableTypes { get; } = new System.Collections.Generic.List<string> 
         { 
             "mainTrack", "secondaryTrack", "connectingTrack", "sidingTrack", "stationTrack" 
         };
 
+        /// <summary>이 클래스가 CurvedTrackViewModel(곡선)인지 검사합니다.</summary>
         public bool IsCurved => this is CurvedTrackViewModel;
         
         public System.Collections.Generic.List<string> AvailableMainDirs { get; } = new System.Collections.Generic.List<string> 

@@ -4,6 +4,10 @@ using RailmlEditor.ViewModels.Elements;
 
 namespace RailmlEditor.Utils
 {
+    /// <summary>
+    /// 복잡한 수학이나 기하학 계산(예: "선과 선이 만나는가?", "가장 가까운 점의 거리는 얼마인가?")을 담당하는 유틸리티입니다.
+    /// 마우스 클릭으로 요소를 잡을 때, 정말 근처를 클릭했는지 판단할 때 주로 사용됩니다.
+    /// </summary>
     public static class GeometryUtils
     {
         public static bool IntersectsLine(Rect rect, Point p1, Point p2)

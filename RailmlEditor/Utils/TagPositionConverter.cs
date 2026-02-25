@@ -4,6 +4,10 @@ using System.Windows.Data;
 
 namespace RailmlEditor.Utils
 {
+    /// <summary>
+    /// 곡선 선로 조절점이나 기타 화면 요소에 달린 이름표(Tag)의 위치를 
+    /// 지정된 X, Y 좌표값을 기준으로 적당히 움직여서 보여주기 위해 계산하는 변환기입니다.
+    /// </summary>
     public class TagPositionConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)

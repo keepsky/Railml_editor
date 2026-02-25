@@ -7,6 +7,10 @@ using RailmlEditor.ViewModels.Elements;
 
 namespace RailmlEditor.Views
 {
+    /// <summary>
+    /// 화면 왼쪽(또는 어느 한 쪽)에 나타나는 '트리 뷰(계층형 목록)' 화면을 담당하는 클래스입니다.
+    /// 사용자가 트리의 특정 항목을 클릭(선택)했을 때 어떤 일이 일어날지 처리합니다.
+    /// </summary>
     public partial class ExplorerView : UserControl
     {
         private MainViewModel? _viewModel => DataContext as MainViewModel;

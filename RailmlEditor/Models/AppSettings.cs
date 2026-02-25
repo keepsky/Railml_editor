@@ -4,6 +4,10 @@ using System.Text.Json;
 
 namespace RailmlEditor.Models
 {
+    /// <summary>
+    /// 에디터 전체에서 공통으로 쓰는 환경설정(테마 색상, 선로 스냅 거리 등)을 모아둔 클래스입니다.
+    /// 이 정보는 `appsettings.json` 이라는 파일에 저장되었다가, 앱이 켜질 때 불러와집니다.
+    /// </summary>
     public class AppSettings
     {
         public string Theme { get; set; } = "DarkTheme";

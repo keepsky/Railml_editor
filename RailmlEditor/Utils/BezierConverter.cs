@@ -6,6 +6,10 @@ using System.Windows;
 
 namespace RailmlEditor.Utils
 {
+    /// <summary>
+    /// X, Y 좌표 여러 개를 받아서 한 번에 부드럽게 휘어지는 '베지어 곡선(Bezier Curve)' 그림 정보로 바꿔주는 변환기(Converter)입니다.
+    /// 화면에 곡선 선로를 그릴 때 주로 쓰입니다.
+    /// </summary>
     public class BezierConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)

@@ -6,6 +6,11 @@ namespace RailmlEditor.Models
 {
     // Simplified RailML 2.5 Structure
 
+    /// <summary>
+    /// RailML 2.5 표준 규격에 꼭 맞춰서 C# 코드로 본뜬 '데이터 구조(모델)'입니다.
+    /// 화면(ViewModel)에서 다루던 정보를 이 구조대로 담아 C#의 기본 기능(XmlSerializer)에 넘겨주면, 
+    /// 알아서 완벽한 형태의 XML 파일로 저장해주고 반대로 읽어오기도 합니다.
+    /// </summary>
     [XmlRoot(ElementName = "railml", Namespace = "http://www.railml.org/schemas/2013")]
     public class Railml
     {

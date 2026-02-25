@@ -6,6 +6,10 @@ using RailmlEditor.ViewModels.Elements;
 
 namespace RailmlEditor.ViewModels
 {
+    /// <summary>
+    /// 여러 개의 선로나 신호기를 마우스로 드래그해서 한꺼번에 선택했을 때 표시되는 속성창(Property Window) 전용 뷰모델입니다.
+    /// 선택된 요소들이 가진 공통된 값을 보여주거나, 이 창에서 값을 바꾸면 선택된 모든 요소들에게 일괄적으로 값을 적용(Bulk Edit)해주는 역할을 합니다.
+    /// </summary>
     public class BulkEditViewModel : ObservableObject
     {
         private readonly List<BaseElementViewModel> _elements;
