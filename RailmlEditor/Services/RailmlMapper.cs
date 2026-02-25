@@ -6,8 +6,16 @@ using RailmlEditor.ViewModels.Elements;
 
 namespace RailmlEditor.Services
 {
+    /// <summary>
+    /// RailML 데이터를 파일로 저장(ToRailml)하거나 열기(LoadIntoViewModel)를 수행하는 핵심 총괄 클래스입니다.
+    /// 기존에는 이 클래스 안에서 트랙, 스위치, 신호기 등을 변환하는 모든 로직을 다루어 코드가 1000줄이 넘었으나,
+    /// (리팩터링 4단계) 현재는 그 역할을 각 전담 매퍼(예: TrackMapper)에게 위임하고, 여기서 전체 흐름만 지휘합니다 (Orchestration).
+    /// </summary>
     public static class RailmlMapper
     {
+        /// <summary>
+        /// 화면(ViewModel)에 있는 데이터를 XML 저장용 Railml 객체 덩어리로 변환합니다.
+        /// </summary>
         public static Railml ToRailml(MainViewModel viewModel, DocumentViewModel doc)
         {
             var railml = new Railml

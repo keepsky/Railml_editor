@@ -9,6 +9,12 @@ using RailmlEditor.Controllers;
 
 namespace RailmlEditor
 {
+    /// <summary>
+    /// 사용자가 실제로 보는 창(Window)이자, 버튼 클릭 등 UI 이벤트를 가장 먼저 받아들이는 곳입니다.
+    /// (리팩터링 3단계 완료) 예전에는 마우스를 드래그해서 선로를 옮기는 복잡한 수학 계산까지 여기서 다 했었지만,
+    /// 지금은 CanvasInteractionController(도화지 조작 전담반)를 고용해서 UI 관련 복잡한 처리를 전부 떠넘겼습니다.
+    /// 덕분에 코드가 아주 간결해지고, 디자인이나 레이아웃(View) 역할에만 집중할 수 있게 되었습니다.
+    /// </summary>
     public partial class MainWindow : Window
     {
         private MainViewModel _viewModel;

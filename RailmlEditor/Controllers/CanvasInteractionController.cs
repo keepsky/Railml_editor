@@ -10,6 +10,10 @@ using RailmlEditor.ViewModels.Elements;
 
 namespace RailmlEditor.Controllers
 {
+    /// <summary>
+    /// UI 구성 요소를 담아 전달하기 위한 헬퍼(도우미) 클래스입니다.
+    /// WPF 화면(MainWindow) 컨트롤들을 매번 찾기 번거로우므로, 필요한 요소들만 이 바구니에 담아 컨트롤러로 넘겨줍니다.
+    /// </summary>
     public class EditorElements
     {
         public Grid MainGrid { get; set; } = null!;
@@ -20,6 +24,11 @@ namespace RailmlEditor.Controllers
         public ScaleTransform MainScaleTransform { get; set; } = null!;
     }
 
+    /// <summary>
+    /// (리팩터링 3단계 핵심) 도화지(Canvas) 위에서 벌어지는 마우스 드래그, 화면 이동(Pan), 구역 선택 등 복잡한 UI 상호작용 로직을 전담하는 클래스입니다.
+    /// 예전에는 화면 관련 마우스 이벤트(마우스 누름, 이동, 뗌) 로직이 MainWindow.xaml.cs 안에 전부 섞여 있어서 코드가 매우 길고 복잡했습니다.
+    /// 현재는 이 컨트롤러가 마우스 움직임을 계산해서 요소들에게 "이만큼 움직여라(MoveBy)"라고 명령을 내리는 구조로 깔끔하게 분리되었습니다.
+    /// </summary>
     public class CanvasInteractionController
     {
         private readonly MainViewModel _viewModel;

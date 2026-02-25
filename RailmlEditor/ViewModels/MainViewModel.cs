@@ -14,6 +14,13 @@ using System.Text.Json;
 
 namespace RailmlEditor.ViewModels
 {
+    /// <summary>
+    /// RailML 에디터 앱의 전체 흐름을 꽉 잡고 있는 '사령탑(ViewModel)' 입니다.
+    /// 화면에 그려질 여러 문서들(도화지들), 현재 선택된 요소, 그리고 '저장하기', '복사하기' 등의 메인 명령어들이 이곳에 정의되어 있습니다.
+    /// 
+    /// (리팩터링 2단계 완료) 예전에는 이곳에서 새 요소를 하나하나 직접 찍어냈지만, 
+    /// 지금은 ElementFactoryService 라는 공장에 외주를 주어 생성 로직의 부담을 크게 덜었습니다.
+    /// </summary>
     public class MainViewModel : ObservableObject
     {
         public ObservableCollection<DocumentViewModel> Documents { get; } = new ObservableCollection<DocumentViewModel>();
