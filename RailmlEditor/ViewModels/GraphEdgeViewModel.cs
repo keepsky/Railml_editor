@@ -4,28 +4,28 @@ namespace RailmlEditor.ViewModels
 {
     public class GraphEdgeViewModel : ObservableObject
     {
-        private GraphNodeViewModel _fromNode;
+        private GraphNodeViewModel _fromNode = null!;
         public GraphNodeViewModel FromNode
         {
             get => _fromNode;
             set => SetProperty(ref _fromNode, value);
         }
 
-        private GraphNodeViewModel _toNode;
+        private GraphNodeViewModel _toNode = null!;
         public GraphNodeViewModel ToNode
         {
             get => _toNode;
             set => SetProperty(ref _toNode, value);
         }
 
-        private string _direction; // "up", "down", "none"
+        private string _direction = "none"; // "up", "down", "none"
         public string Direction
         {
             get => _direction;
             set => SetProperty(ref _direction, value);
         }
 
-        private string _label;
+        private string _label = string.Empty;
         public string Label
         {
             get => _label;
@@ -45,7 +45,7 @@ namespace RailmlEditor.ViewModels
 
     public class IntermediateNode
     {
-        public GraphNodeViewModel Node { get; set; }
+        public GraphNodeViewModel? Node { get; set; }
         public double Ratio { get; set; } // 0.0 to 1.0
     }
 }

@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:RailmlEditor"
     xmlns:viewmodels="clr-namespace:RailmlEditor.ViewModels"
+        xmlns:elements="clr-namespace:RailmlEditor.ViewModels.Elements"
     xmlns:utils="clr-namespace:RailmlEditor.Utils" mc:Ignorable="d" d:DesignHeight="600" d:DesignWidth="300">
     <UserControl.Resources>
 
@@ -131,7 +132,7 @@
             </Grid>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewmodels:TrackNodeViewModel}">
+        <DataTemplate DataType="{x:Type elements:TrackNodeViewModel}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
@@ -224,7 +225,7 @@
             </Grid>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewmodels:TrackViewModel}">
+        <DataTemplate DataType="{x:Type elements:TrackViewModel}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
@@ -350,7 +351,7 @@
             </Grid>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewmodels:CurvedTrackViewModel}">
+        <DataTemplate DataType="{x:Type elements:CurvedTrackViewModel}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
@@ -484,7 +485,7 @@
             </Grid>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewmodels:SwitchViewModel}">
+        <DataTemplate DataType="{x:Type elements:SwitchViewModel}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
@@ -614,7 +615,7 @@
             </Grid>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewmodels:SignalViewModel}">
+        <DataTemplate DataType="{x:Type elements:SignalViewModel}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
@@ -711,7 +712,7 @@
             </Grid>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewmodels:RouteViewModel}">
+        <DataTemplate DataType="{x:Type elements:RouteViewModel}">
             <StackPanel>
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -887,7 +888,7 @@
             </StackPanel>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewmodels:TrackCircuitBorderViewModel}">
+        <DataTemplate DataType="{x:Type elements:TrackCircuitBorderViewModel}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
@@ -976,7 +977,7 @@
             </Grid>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewmodels:AreaViewModel}">
+        <DataTemplate DataType="{x:Type elements:AreaViewModel}">
             <StackPanel>
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -1021,7 +1022,7 @@
             </StackPanel>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewmodels:InfrastructureViewModel}">
+        <DataTemplate DataType="{x:Type elements:InfrastructureViewModel}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
@@ -1057,3 +1058,4 @@
         </ScrollViewer>
     </DockPanel>
 </UserControl>
+

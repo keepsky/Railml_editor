@@ -2,14 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using RailmlEditor.ViewModels;
+using RailmlEditor.ViewModels.Elements;
 
 namespace RailmlEditor.Logic
 {
+    /// <summary>
+    /// 선로와 선로가 어떻게 연결되는지(위상 기하학, Topology), 
+    /// 여러 선로가 만나는 곳에 분기기(Switch)를 어떻게 자동으로 만들어줄지를 계산하는 핵심 로직 클래스입니다.
+    /// </summary>
     public class TopologyManager
     {
         // Event to request user selection (e.g. Principle switch branch)
-        public event Action<SwitchBranchInfo> PrincipleTrackSelectionRequested;
+        public event Action<SwitchBranchInfo>? PrincipleTrackSelectionRequested;
 
+        /// <summary>
+        /// 특정 선로(source)를 움직였을 때, 그 양 끝점이 다른 선로나 분기기와 가까워졌는지 확인하고, 
+        /// 가깝다면 서로 연결(Connection)되었다고 설정해주는 메서드입니다.
+        /// </summary>
         public void CheckConnections(TrackViewModel source, IEnumerable<BaseElementViewModel> allElements)
         {
             // Check Begin Node
@@ -95,6 +104,10 @@ namespace RailmlEditor.Logic
             }
         }
 
+        /// <summary>
+        /// 화면에 있는 선로들의 끝점들이 3개 이상 한 지점에 오밀조밀 모였을 때(Cluster), 
+        /// 그 자리에 자동으로 분기기(Switch)를 생성하거나, 더 이상 모여있지 않으면 분기기를 지우는 똑똑한 메서드입니다.
+        /// </summary>
         public void UpdateProximitySwitches(IList<BaseElementViewModel> elements)
         {
             var tracks = elements.OfType<TrackViewModel>().ToList();
@@ -166,7 +179,7 @@ namespace RailmlEditor.Logic
             int maxId = 0;
             foreach (var sw in elements.OfType<SwitchViewModel>())
             {
-                 if (sw.Id.StartsWith("sw") && int.TryParse(sw.Id.Substring(2), out int num))
+                 if (sw.Id != null && sw.Id.StartsWith("sw") && int.TryParse(sw.Id.Substring(2), out int num))
                     if (num > maxId) maxId = num;
             }
 
@@ -301,3 +314,5 @@ namespace RailmlEditor.Logic
         }
     }
 }
+
+

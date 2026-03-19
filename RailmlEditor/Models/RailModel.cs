@@ -1,4 +1,3 @@
-#pragma warning disable
 using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
@@ -7,6 +6,11 @@ namespace RailmlEditor.Models
 {
     // Simplified RailML 2.5 Structure
 
+    /// <summary>
+    /// RailML 2.5 표준 규격에 꼭 맞춰서 C# 코드로 본뜬 '데이터 구조(모델)'입니다.
+    /// 화면(ViewModel)에서 다루던 정보를 이 구조대로 담아 C#의 기본 기능(XmlSerializer)에 넘겨주면, 
+    /// 알아서 완벽한 형태의 XML 파일로 저장해주고 반대로 읽어오기도 합니다.
+    /// </summary>
     [XmlRoot(ElementName = "railml", Namespace = "http://www.railml.org/schemas/2013")]
     public class Railml
     {
@@ -14,10 +18,10 @@ namespace RailmlEditor.Models
         public string Version { get; set; } = "2.5";
 
         [XmlElement(ElementName = "infrastructure")]
-        public Infrastructure Infrastructure { get; set; }
+        public Infrastructure? Infrastructure { get; set; }
 
         [XmlElement(ElementName = "infrastructureVisualizations")]
-        public InfrastructureVisualizations InfrastructureVisualizations { get; set; }
+        public InfrastructureVisualizations? InfrastructureVisualizations { get; set; }
 
         [XmlNamespaceDeclarations]
         public XmlSerializerNamespaces Namespaces { get; set; } = new XmlSerializerNamespaces();
@@ -27,19 +31,19 @@ namespace RailmlEditor.Models
     public class Infrastructure
     {
         [XmlAttribute(AttributeName = "id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         [XmlAttribute(AttributeName = "name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [XmlElement(ElementName = "routes", Namespace = "http://www.sehwa.co.kr/railml")]
-        public Routes Routes { get; set; }
+        public Routes? Routes { get; set; }
 
         [XmlElement(ElementName = "areas", Namespace = "http://www.sehwa.co.kr/railml")]
-        public Areas Areas { get; set; }
+        public Areas? Areas { get; set; }
 
         [XmlElement(ElementName = "tracks")]
-        public Tracks Tracks { get; set; }
+        public Tracks? Tracks { get; set; }
     }
 
     public class Tracks
@@ -51,37 +55,37 @@ namespace RailmlEditor.Models
     public class Track
     {
         [XmlAttribute(AttributeName = "id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         [XmlAttribute(AttributeName = "name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [XmlAttribute(AttributeName = "description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [XmlAttribute(AttributeName = "type")]
-        public string Type { get; set; }
+        public string? Type { get; set; }
 
         [XmlAttribute(AttributeName = "mainDir")]
-        public string MainDir { get; set; }
+        public string? MainDir { get; set; }
 
         [XmlElement(ElementName = "trackTopology")]
-        public TrackTopology TrackTopology { get; set; }
+        public TrackTopology? TrackTopology { get; set; }
 
         [XmlElement(ElementName = "ocsElements")]
-        public OcsElements OcsElements { get; set; }
+        public OcsElements? OcsElements { get; set; }
 
         [XmlAttribute(AttributeName = "code")]
-        public string Code { get; set; }
+        public string? Code { get; set; }
     }
 
     public class OcsElements
     {
         [XmlElement(ElementName = "signals")]
-        public Signals Signals { get; set; }
+        public Signals? Signals { get; set; }
 
         [XmlElement(ElementName = "trainDetectionElements")]
-        public TrainDetectionElements TrainDetectionElements { get; set; }
+        public TrainDetectionElements? TrainDetectionElements { get; set; }
     }
 
     public class TrainDetectionElements
@@ -93,19 +97,19 @@ namespace RailmlEditor.Models
     public class TrackCircuitBorder
     {
         [XmlAttribute(AttributeName = "id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         [XmlAttribute(AttributeName = "name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [XmlAttribute(AttributeName = "pos")]
         public double Pos { get; set; }
 
         [XmlAttribute(AttributeName = "code")]
-        public string Code { get; set; }
+        public string? Code { get; set; }
 
         [XmlAttribute(AttributeName = "description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }
 
     public class Signals
@@ -117,20 +121,20 @@ namespace RailmlEditor.Models
     public class Signal
     {
         [XmlAttribute(AttributeName = "id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         [XmlAttribute(AttributeName = "dir")]
-        public string Dir { get; set; }
+        public string? Dir { get; set; }
 
         [XmlAttribute(AttributeName = "type")]
-        public string Type { get; set; }
+        public string? Type { get; set; }
 
         [XmlAttribute(AttributeName = "function")]
-        public string Function { get; set; }
+        public string? Function { get; set; }
 
         // Mapped to <additionalName name="...">
         [XmlElement(ElementName = "additionalName")]
-        public AdditionalName AdditionalName { get; set; }
+        public AdditionalName? AdditionalName { get; set; }
 
         [XmlAttribute(AttributeName = "pos")]
         public int Pos { get; set; }
@@ -146,30 +150,30 @@ namespace RailmlEditor.Models
 
         // Legacy ScreenPos (Hide from Save)
         [XmlElement(ElementName = "screenPos", Namespace = "http://www.sehwa.co.kr/railml")]
-        public ScreenPos ScreenPos { get; set; }
+        public ScreenPos? ScreenPos { get; set; }
         public bool ShouldSerializeScreenPos() => false;
     }
 
     public class AdditionalName
     {
         [XmlAttribute(AttributeName = "name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
     }
 
     public class TrackTopology
     {
         [XmlElement(ElementName = "trackBegin")]
-        public TrackNode TrackBegin { get; set; }
+        public TrackNode? TrackBegin { get; set; }
 
         [XmlElement(ElementName = "trackEnd")]
-        public TrackNode TrackEnd { get; set; }
+        public TrackNode? TrackEnd { get; set; }
 
         [XmlElement(ElementName = "connections")]
-        public Connections Connections { get; set; }
+        public Connections? Connections { get; set; }
 
         // Legacy CornerPos (Hide from Save)
         [XmlElement(ElementName = "cornerPos", Namespace = "http://www.sehwa.co.kr/railml")]
-        public CornerPos CornerPos { get; set; }
+        public CornerPos? CornerPos { get; set; }
         public bool ShouldSerializeCornerPos() => false;
     }
 
@@ -191,60 +195,60 @@ namespace RailmlEditor.Models
         public double AbsPos { get; set; }
 
         [XmlAttribute(AttributeName = "id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
         
         [XmlElement(ElementName = "connection")]
         public List<Connection> ConnectionList { get; set; } = new List<Connection>();
 
         [XmlElement(ElementName = "bufferStop")]
-        public BufferStop BufferStop { get; set; }
+        public BufferStop? BufferStop { get; set; }
 
         [XmlElement(ElementName = "openEnd")]
-        public OpenEnd OpenEnd { get; set; }
+        public OpenEnd? OpenEnd { get; set; }
 
         // Legacy ScreenPos (Hide from Save)
         [XmlElement(ElementName = "screenPos", Namespace = "http://www.sehwa.co.kr/railml")]
-        public ScreenPos ScreenPos { get; set; }
+        public ScreenPos? ScreenPos { get; set; }
         public bool ShouldSerializeScreenPos() => false;
     }
 
     public class BufferStop
     {
         [XmlAttribute(AttributeName = "id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
         [XmlAttribute(AttributeName = "code")]
-        public string Code { get; set; }
+        public string? Code { get; set; }
         [XmlAttribute(AttributeName = "name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
         [XmlAttribute(AttributeName = "description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }
 
     public class OpenEnd
     {
         [XmlAttribute(AttributeName = "id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
         [XmlAttribute(AttributeName = "code")]
-        public string Code { get; set; }
+        public string? Code { get; set; }
         [XmlAttribute(AttributeName = "name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
         [XmlAttribute(AttributeName = "description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }
 
     public class Connection
     {
         [XmlAttribute(AttributeName = "id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         [XmlAttribute(AttributeName = "ref")]
-        public string Ref { get; set; }
+        public string? Ref { get; set; }
 
         [XmlAttribute(AttributeName = "orientation")]
-        public string Orientation { get; set; }
+        public string? Orientation { get; set; }
 
         [XmlAttribute(AttributeName = "course")]
-        public string Course { get; set; }
+        public string? Course { get; set; }
     }
 
     public class Connections
@@ -259,23 +263,23 @@ namespace RailmlEditor.Models
     public class Switch
     {
         [XmlAttribute(AttributeName = "id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         [XmlAttribute(AttributeName = "pos")]
         public double Pos { get; set; }
 
         [XmlAttribute(AttributeName = "trackContinueCourse")]
-        public string TrackContinueCourse { get; set; }
+        public string? TrackContinueCourse { get; set; }
 
         [XmlAttribute(AttributeName = "normalPosition")]
-        public string NormalPosition { get; set; }
+        public string? NormalPosition { get; set; }
 
         [XmlElement(ElementName = "screenPos", Namespace = "http://www.sehwa.co.kr/railml")]
-        public ScreenPos ScreenPos { get; set; }
+        public ScreenPos? ScreenPos { get; set; }
         public bool ShouldSerializeScreenPos() => false;
 
         [XmlElement(ElementName = "additionalName")]
-        public AdditionalName AdditionalName { get; set; }
+        public AdditionalName? AdditionalName { get; set; }
 
         [XmlElement(ElementName = "connection")]
         public List<Connection> ConnectionList { get; set; } = new List<Connection>();
@@ -291,31 +295,31 @@ namespace RailmlEditor.Models
     public class Route
     {
         [XmlAttribute(AttributeName = "id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         [XmlAttribute(AttributeName = "name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [XmlAttribute(AttributeName = "code")]
-        public string Code { get; set; }
+        public string? Code { get; set; }
 
         [XmlAttribute(AttributeName = "description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [XmlAttribute(AttributeName = "approachPointRef")]
-        public string ApproachPointRef { get; set; }
+        public string? ApproachPointRef { get; set; }
 
         [XmlAttribute(AttributeName = "entryRef")]
-        public string EntryRef { get; set; }
+        public string? EntryRef { get; set; }
 
         [XmlAttribute(AttributeName = "exitRef")]
-        public string ExitRef { get; set; }
+        public string? ExitRef { get; set; }
 
         [XmlAttribute(AttributeName = "overlapEndRef")]
-        public string OverlapEndRef { get; set; }
+        public string? OverlapEndRef { get; set; }
 
         [XmlAttribute(AttributeName = "proceedSpeed")]
-        public string ProceedSpeed { get; set; }
+        public string? ProceedSpeed { get; set; }
 
         [XmlAttribute(AttributeName = "releaseTriggerHead")]
         public bool ReleaseTriggerHead { get; set; }
@@ -324,7 +328,7 @@ namespace RailmlEditor.Models
         public bool ReleaseTriggerHeadSpecified { get; set; }
 
         [XmlAttribute(AttributeName = "releaseTriggerRef")]
-        public string ReleaseTriggerRef { get; set; }
+        public string? ReleaseTriggerRef { get; set; }
 
         [XmlElement(ElementName = "switchAndPosition", Namespace = "http://www.sehwa.co.kr/railml")]
         public List<SwitchAndPosition> SwitchAndPositionList { get; set; } = new List<SwitchAndPosition>();
@@ -333,7 +337,7 @@ namespace RailmlEditor.Models
         public List<SwitchAndPosition> OverlapSwitchAndPositionList { get; set; } = new List<SwitchAndPosition>();
 
         [XmlElement(ElementName = "releaseGroup", Namespace = "http://www.sehwa.co.kr/railml")]
-        public ReleaseGroup ReleaseGroup { get; set; }
+        public ReleaseGroup? ReleaseGroup { get; set; }
     }
 
     public class ReleaseGroup
@@ -345,7 +349,7 @@ namespace RailmlEditor.Models
     public class TrackSectionRef
     {
         [XmlAttribute(AttributeName = "ref")]
-        public string Ref { get; set; }
+        public string? Ref { get; set; }
 
         [XmlAttribute(AttributeName = "flankProtection")]
         public bool FlankProtection { get; set; }
@@ -360,16 +364,16 @@ namespace RailmlEditor.Models
     public class Area
     {
         [XmlAttribute(AttributeName = "id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         [XmlAttribute(AttributeName = "name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [XmlAttribute(AttributeName = "description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [XmlAttribute(AttributeName = "type")]
-        public string Type { get; set; }
+        public string? Type { get; set; }
 
         [XmlElement(ElementName = "isLimitedBy", Namespace = "http://www.sehwa.co.kr/railml")]
         public List<IsLimitedBy> IsLimitedByList { get; set; } = new List<IsLimitedBy>();
@@ -378,16 +382,16 @@ namespace RailmlEditor.Models
     public class IsLimitedBy
     {
         [XmlAttribute(AttributeName = "ref")]
-        public string Ref { get; set; }
+        public string? Ref { get; set; }
     }
 
     public class SwitchAndPosition
     {
         [XmlAttribute(AttributeName = "switchRef")]
-        public string SwitchRef { get; set; }
+        public string? SwitchRef { get; set; }
 
         [XmlAttribute(AttributeName = "switchPosition")]
-        public string SwitchPosition { get; set; }
+        public string? SwitchPosition { get; set; }
     }
 
 
@@ -430,10 +434,10 @@ namespace RailmlEditor.Models
     public class Visualization
     {
         [XmlAttribute(AttributeName = "id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         [XmlAttribute(AttributeName = "infrastructureRef")]
-        public string InfrastructureRef { get; set; }
+        public string? InfrastructureRef { get; set; }
 
         [XmlElement(ElementName = "lineVis")]
         public List<LineVis> LineVisList { get; set; } = new List<LineVis>();
@@ -445,10 +449,10 @@ namespace RailmlEditor.Models
     public class ObjectVis
     {
         [XmlAttribute(AttributeName = "ref")]
-        public string Ref { get; set; }
+        public string? Ref { get; set; }
 
         [XmlElement(ElementName = "position")]
-        public VisualizationPosition Position { get; set; }
+        public VisualizationPosition? Position { get; set; }
     }
 
     public class LineVis
@@ -460,7 +464,7 @@ namespace RailmlEditor.Models
     public class TrackVis
     {
         [XmlAttribute(AttributeName = "ref")]
-        public string Ref { get; set; }
+        public string? Ref { get; set; }
 
         [XmlElement(ElementName = "trackElementVis")]
         public List<TrackElementVis> TrackElementVisList { get; set; } = new List<TrackElementVis>();
@@ -469,10 +473,10 @@ namespace RailmlEditor.Models
     public class TrackElementVis
     {
         [XmlAttribute(AttributeName = "ref")]
-        public string Ref { get; set; }
+        public string? Ref { get; set; }
 
         [XmlElement(ElementName = "position")]
-        public VisualizationPosition Position { get; set; }
+        public VisualizationPosition? Position { get; set; }
     }
 
     public class VisualizationPosition

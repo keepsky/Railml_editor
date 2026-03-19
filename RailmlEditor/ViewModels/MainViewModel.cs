@@ -1,4 +1,4 @@
-#pragma warning disable
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -8,694 +8,68 @@ using System.Windows;
 using System.Windows.Input;
 using RailmlEditor.Models;
 using RailmlEditor.Utils;
+using RailmlEditor.ViewModels.Elements;
 using System.IO;
 using System.Text.Json;
 
 namespace RailmlEditor.ViewModels
 {
-    public abstract class BaseElementViewModel : ObservableObject
-    {
-        private double _x;
-        private double _y;
-        private string _id;
-        private bool _isSelected;
-
-        public virtual double X
-        {
-            get => _x;
-            set => SetProperty(ref _x, value);
-        }
-
-        public virtual double Y
-        {
-            get => _y;
-            set => SetProperty(ref _y, value);
-        }
-
-        public string Id
-        {
-            get => _id;
-            set => SetProperty(ref _id, value);
-        }
-
-        private string? _name;
-        public string? Name
-        {
-            get => _name;
-            set => SetProperty(ref _name, value);
-        }
-
-        public bool IsSelected
-        {
-            get => _isSelected;
-            set => SetProperty(ref _isSelected, value);
-        }
-
-        private bool _showCoordinates;
-        public bool ShowCoordinates
-        {
-            get => _showCoordinates;
-            set => SetProperty(ref _showCoordinates, value);
-        }
-
-        public abstract string TypeName { get; }
-    }
-
-    public enum TrackNodeType
-    {
-        None,
-        BufferStop,
-        OpenEnd,
-        Connection
-    }
-
-    public class TrackViewModel : BaseElementViewModel
-    {
-        public override string TypeName => "Track";
-        
-        // Collections for ComboBox
-        public System.Collections.Generic.List<string> AvailableTypes { get; } = new System.Collections.Generic.List<string> 
-        { 
-            "mainTrack", "secondaryTrack", "connectingTrack", "sidingTrack", "stationTrack" 
-        };
-
-        public bool IsCurved => this is CurvedTrackViewModel;
-        
-
-        public System.Collections.Generic.List<string> AvailableMainDirs { get; } = new System.Collections.Generic.List<string> 
-        { 
-            "up", "down", "none" 
-        };
-
-        public ICommand FlipHorizontallyCommand { get; }
-        public ICommand FlipVerticallyCommand { get; }
-
-        public TrackViewModel()
-        {
-            FlipHorizontallyCommand = new RelayCommand(_ => FlipHorizontally());
-            FlipVerticallyCommand = new RelayCommand(_ => FlipVertically());
-            // This is TrackViewModel... oops. I need to edit MainViewModel!
-            // Wait, I am editing MainViewModel.cs, but scrolling shows TrackViewModel constructor.
-            // I need to find MainViewModel constructor.
-            // Initialize Nodes
-            BeginNode.Role = "Begin";
-            BeginNode.Pos = 0;
-            EndNode.Role = "End";
-            EndNode.Pos = Length;
-            Children.Add(BeginNode);
-            Children.Add(EndNode);
-
-            BeginNode.PropertyChanged += OnNodePropertyChanged;
-            EndNode.PropertyChanged += OnNodePropertyChanged;
-            this.PropertyChanged += OnTrackPropertyChanged;
-        }
-
-        private void OnTrackPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(Id))
-            {
-                if (!string.IsNullOrEmpty(Id))
-                {
-                    string num = System.Text.RegularExpressions.Regex.Match(Id, @"\d+").Value;
-                    BeginNode.Id = "tb" + num;
-                    EndNode.Id = "te" + num;
-                    BeginNode.ConnectionId = "cb" + num;
-                    EndNode.ConnectionId = "ce" + num;
-                }
-            }
-            // Trigger connection check on geometry change
-            if (e.PropertyName == nameof(X) || e.PropertyName == nameof(Y) || 
-                e.PropertyName == nameof(X2) || e.PropertyName == nameof(Y2) ||
-                e.PropertyName == nameof(CurvedTrackViewModel.MX) || e.PropertyName == nameof(CurvedTrackViewModel.MY))
-            {
-                // We need access to the MainViewModel instance or Elements collection to check others.
-                // TrackViewModel doesn't know about MainViewModel.
-                // We must handle this in MainViewModel.Elements_CollectionChanged -> Item.PropertyChanged (already there!)
-            }
-            if (e.PropertyName == nameof(Length))
-            {
-                EndNode.Pos = Length;
-            }
-        }
-
-        private void OnNodePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(TrackNodeViewModel.NodeType))
-            {
-                if (sender == BeginNode && BeginType != BeginNode.NodeType)
-                {
-                    BeginType = BeginNode.NodeType;
-                }
-                else if (sender == EndNode && EndType != EndNode.NodeType)
-                {
-                    EndType = EndNode.NodeType;
-                }
-                
-                // Update ConnectionId when NodeType changes
-                if (!string.IsNullOrEmpty(Id))
-                {
-                    string num = System.Text.RegularExpressions.Regex.Match(Id, @"\d+").Value;
-                    if (sender == BeginNode) BeginNode.ConnectionId = "cb" + num;
-                    else if (sender == EndNode) EndNode.ConnectionId = "ce" + num;
-                }
-            }
-            if (e.PropertyName == nameof(TrackNodeViewModel.ConnectedNodeId) || e.PropertyName == nameof(TrackNodeViewModel.ConnectedTrackId))
-            {
-                var node = sender as TrackNodeViewModel;
-                if (node != null)
-                {
-                    node.ConnectionRef = node.ConnectedNodeId;
-                }
-            }
-        }
-
-        protected virtual void FlipHorizontally()
-        {
-            double tempX = X;
-            X = X2;
-            X2 = tempX;
-            OnPropertyChanged(nameof(X));
-            OnPropertyChanged(nameof(X2));
-            OnPropertyChanged(nameof(Length));
-        }
-
-        protected virtual void FlipVertically()
-        {
-            // By default, do nothing or only for curved tracks if required.
-            // But user said: "Flip Vertically only for code=corner"
-        }
-
-        private string? _description;
-        public string? Description
-        {
-            get => _description;
-            set => SetProperty(ref _description, value);
-        }
-
-        private string? _type;
-        public string? Type
-        {
-            get => _type;
-            set => SetProperty(ref _type, value);
-        }
-
-        private string? _mainDir = "up";
-        public string? MainDir
-        {
-            get => _mainDir;
-            set => SetProperty(ref _mainDir, value);
-        }
-
-        private string? _code;
-        public string? Code
-        {
-            get => _code;
-            set => SetProperty(ref _code, value);
-        }
-        
-        public override double X
-        {
-            get => base.X;
-            set
-            {
-                if (base.X != value)
-                {
-                    double delta = value - base.X;
-                    base.X = value;
-                    OnPropertyChanged(nameof(X));
-                    OnPropertyChanged(nameof(Length));
-
-                    // Move Child Signals and Borders
-                    if (Children != null)
-                    {
-                        foreach (var child in Children)
-                        {
-                            if (child is SignalViewModel signal)
-                            {
-                                signal.X += delta;
-                            }
-                            else if (child is TrackCircuitBorderViewModel border)
-                            {
-                                border.X += delta;
-                            }
-                        }
-                        UpdateBorderAngles();
-                    }
-                }
-            }
-        }
-
-        public override double Y
-        {
-            get => base.Y;
-            set
-            {
-                if (base.Y != value)
-                {
-                    double delta = value - base.Y;
-                    base.Y = value;
-                    OnPropertyChanged(nameof(Y));
-                    OnPropertyChanged(nameof(Length));
-
-                    // Move Child Signals and Borders
-                    if (Children != null)
-                    {
-                        foreach (var child in Children)
-                        {
-                            if (child is SignalViewModel signal)
-                            {
-                                signal.Y += delta;
-                            }
-                            else if (child is TrackCircuitBorderViewModel border)
-                            {
-                                border.Y += delta;
-                            }
-                        }
-                        UpdateBorderAngles();
-                    }
-                }
-            }
-        }
-
-        private double _x2;
-        public virtual double X2
-        {
-            get => _x2;
-            set 
-            {
-                if (SetProperty(ref _x2, value))
-                {
-                    OnPropertyChanged(nameof(Length));
-                    UpdateBorderAngles();
-                }
-            }
-        }
-
-        private double _y2;
-        public virtual double Y2
-        {
-            get => _y2;
-            set 
-            {
-                if (SetProperty(ref _y2, value))
-                {
-                    OnPropertyChanged(nameof(Length));
-                    UpdateBorderAngles();
-                }
-            }
-        }
-
-        private void UpdateBorderAngles()
-        {
-            if (Children == null) return;
-            double angle = Math.Atan2(Y2 - Y, X2 - X) * 180 / Math.PI;
-            foreach (var border in Children.OfType<TrackCircuitBorderViewModel>())
-            {
-                border.Angle = angle;
-            }
-        }
-
-        // Length is now derived or updates X2?
-        // Let's make Length read-only derived, or if set, it updates X2 (assuming horizontal extension).
-        public virtual double Length
-        {
-            get => System.Math.Sqrt(System.Math.Pow(X2 - X, 2) + System.Math.Pow(Y2 - Y, 2));
-            set
-            {
-                // If setting length, assume extending horizontally from X
-                X2 = X + value;
-                Y2 = Y;
-                OnPropertyChanged(nameof(Length));
-            }
-        }
-
-        public ObservableCollection<BaseElementViewModel> Children { get; } = new();
-
-        public TrackNodeViewModel BeginNode { get; } = new TrackNodeViewModel();
-        public TrackNodeViewModel EndNode { get; } = new TrackNodeViewModel();
-
-        // Begin/End Configuration
-        private TrackNodeType _beginType;
-        public TrackNodeType BeginType
-        {
-            get => _beginType;
-            set
-            {
-                if (SetProperty(ref _beginType, value))
-                {
-                    OnBeginTypeChanged();
-                }
-            }
-        }
-
-        private TrackNodeType _endType;
-        public TrackNodeType EndType
-        {
-            get => _endType;
-            set
-            {
-                if (SetProperty(ref _endType, value))
-                {
-                    OnEndTypeChanged();
-                }
-            }
-        }
-
-        // Connection State (to disable fields)
-        private bool _hasBeginConnection;
-        public bool HasBeginConnection
-        {
-            get => _hasBeginConnection;
-            set
-            {
-                if (SetProperty(ref _hasBeginConnection, value))
-                {
-                    OnPropertyChanged(nameof(IsBeginEnabled));
-                }
-            }
-        }
-
-        private bool _hasEndConnection;
-        public bool HasEndConnection
-        {
-            get => _hasEndConnection;
-            set
-            {
-                if (SetProperty(ref _hasEndConnection, value))
-                {
-                    OnPropertyChanged(nameof(IsEndEnabled));
-                }
-            }
-        }
-
-        public bool IsBeginEnabled => !HasBeginConnection;
-        public bool IsEndEnabled => !HasEndConnection;
-
-        // Auto-ID Logic & Children Management
-        private void OnBeginTypeChanged()
-        {
-            BeginNode.NodeType = BeginType;
-            BeginNode.Role = "Begin";
-            
-            if (!Children.Contains(BeginNode)) Children.Insert(0, BeginNode); // Insert at top
-        }
-
-        private void OnEndTypeChanged()
-        {
-            EndNode.NodeType = EndType;
-            EndNode.Role = "End";
-
-            if (!Children.Contains(EndNode)) Children.Add(EndNode); // Add at bottom (or after Begin)
-        }
-
-        private string GenerateId(string prefix)
-        {
-            // Extract number from Track ID
-            var match = System.Text.RegularExpressions.Regex.Match(Id ?? "", @"\d+$");
-            string number = match.Success ? match.Value : "1";
-            return $"{prefix}{number}";
-        }
-
-        public IEnumerable<TrackNodeType> AvailableTrackNodeTypes => System.Enum.GetValues(typeof(TrackNodeType)).Cast<TrackNodeType>();
-    }
-
-    public class SwitchViewModel : BaseElementViewModel
-    {
-        public override string TypeName => "Switch";
-        public double Pos { get; set; }
-
-        private string _trackContinueCourse = "straight";
-        public string TrackContinueCourse
-        {
-            get => _trackContinueCourse;
-            set => SetProperty(ref _trackContinueCourse, value);
-        }
-
-        private string _normalPosition = "straight";
-        public string NormalPosition
-        {
-            get => _normalPosition;
-            set => SetProperty(ref _normalPosition, value);
-        }
-
-        public ObservableCollection<DivergingConnectionViewModel> DivergingConnections { get; } = new();
-
-        public List<string> AvailableCourses { get; } = new() { "straight", "left", "right", "other" };
-
-        // Logic data
-        public string? PrincipleTrackId { get; set; }
-        public string? EnteringTrackId { get; set; }
-        public List<string> DivergingTrackIds { get; } = new();
-        public bool IsScenario1 { get; set; } // true: End -> multiple Begins, false: Begin -> multiple Ends
-    }
-
-    public class DivergingConnectionViewModel : ObservableObject
-    {
-        public string TrackId { get; set; }
-
-        private string _displayName;
-        public string DisplayName
-        {
-            get => _displayName;
-            set => SetProperty(ref _displayName, value);
-        }
-
-        private string _id;
-        public string Id { get => _id; set => SetProperty(ref _id, value); }
-
-        private string _ref;
-        public string Ref { get => _ref; set => SetProperty(ref _ref, value); }
-
-        private string _orientation = "outgoing";
-        public string Orientation { get => _orientation; set => SetProperty(ref _orientation, value); }
-
-        private TrackViewModel? _targetTrack;
-        public TrackViewModel? TargetTrack
-        {
-            get => _targetTrack;
-            set
-            {
-                if (_targetTrack != null) _targetTrack.PropertyChanged -= Track_PropertyChanged;
-                _targetTrack = value;
-                if (_targetTrack != null)
-                {
-                    _targetTrack.PropertyChanged += Track_PropertyChanged;
-                    UpdateDisplayName();
-                }
-            }
-        }
-
-        private void Track_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(BaseElementViewModel.Name) || e.PropertyName == nameof(BaseElementViewModel.Id))
-            {
-                UpdateDisplayName();
-            }
-        }
-
-        private void UpdateDisplayName()
-        {
-            if (TargetTrack != null)
-            {
-                DisplayName = $"{TargetTrack.Id}({TargetTrack.Name ?? "unnamed"})";
-            }
-        }
-
-        private string _course = "straight";
-        public string Course
-        {
-            get => _course;
-            set => SetProperty(ref _course, value);
-        }
-
-        public List<string> AvailableCourses { get; } = new() { "straight", "left", "right" };
-    }
-
-    public class SwitchBranchInfo
-    {
-        public SwitchViewModel Switch { get; set; }
-        public List<TrackViewModel> Candidates { get; set; }
-        public Action<TrackViewModel?> Callback { get; set; }
-    }
-
-    public class SignalViewModel : BaseElementViewModel
-    {
-        public override string TypeName => "Signal";
-        
-        // Collections for ComboBox
-        public System.Collections.Generic.List<string> AvailableTypes { get; } = new System.Collections.Generic.List<string> 
-        { 
-            "main", "distant", "repeater", "shunting" 
-        };
-
-        public System.Collections.Generic.List<string> AvailableFunctions { get; } = new System.Collections.Generic.List<string> 
-        { 
-            "exit", "home", "blocking" 
-        };
-
-        private string? _type;
-        public string? Type
-        {
-            get => _type;
-            set => SetProperty(ref _type, value);
-        }
-
-        private string? _function;
-        public string? Function
-        {
-            get => _function;
-            set => SetProperty(ref _function, value);
-        }
-        
-        private string? _relatedTrackId;
-        public string? RelatedTrackId
-        {
-            get => _relatedTrackId;
-            set => SetProperty(ref _relatedTrackId, value);
-        }
-
-        private double _pos;
-        public double Pos
-        {
-            get => _pos;
-            set => SetProperty(ref _pos, value);
-        }
-
-        public System.Collections.Generic.List<string> AvailableDirections { get; } = new System.Collections.Generic.List<string> { "up", "down" };
-        
-        private string _direction = "up";
-        public string Direction
-        {
-            get => _direction;
-            set 
-            {
-                if (SetProperty(ref _direction, value))
-                {
-                    OnPropertyChanged(nameof(IsFlipped));
-                }
-            }
-        }
-
-        public bool IsFlipped
-        {
-            get => _direction == "down";
-            set => Direction = value ? "down" : "up";
-        }
-    }
-
-
-    public class SwitchPositionViewModel : ObservableObject
-    {
-        private string _switchRef;
-        public string SwitchRef { get => _switchRef; set => SetProperty(ref _switchRef, value); }
-
-        private string _switchPosition = "normal";
-        public string SwitchPosition { get => _switchPosition; set => SetProperty(ref _switchPosition, value); }
-
-        public List<string> AvailablePositions { get; } = new() { "normal", "reverse" };
-
-        public ICommand RemoveCommand { get; set; }
-    }
-
-    public class RouteViewModel : BaseElementViewModel
-    {
-        public override string TypeName => "Route";
-
-        private string _code;
-        public string Code { get => _code; set => SetProperty(ref _code, value); }
-
-        private string _description;
-        public string Description { get => _description; set => SetProperty(ref _description, value); }
-
-        private string _approachPointRef;
-        public string ApproachPointRef { get => _approachPointRef; set => SetProperty(ref _approachPointRef, value); }
-
-        private string _entryRef;
-        public string EntryRef { get => _entryRef; set => SetProperty(ref _entryRef, value); }
-
-        private string _exitRef;
-        public string ExitRef { get => _exitRef; set => SetProperty(ref _exitRef, value); }
-
-        private string _overlapEndRef;
-        public string OverlapEndRef { get => _overlapEndRef; set => SetProperty(ref _overlapEndRef, value); }
-
-        private string _proceedSpeed = "R";
-        public string ProceedSpeed { get => _proceedSpeed; set => SetProperty(ref _proceedSpeed, value); }
-
-        private bool _releaseTriggerHead;
-        public bool ReleaseTriggerHead { get => _releaseTriggerHead; set => SetProperty(ref _releaseTriggerHead, value); }
-
-        private string _releaseTriggerRef;
-        public string ReleaseTriggerRef { get => _releaseTriggerRef; set => SetProperty(ref _releaseTriggerRef, value); }
-
-        public ObservableCollection<SwitchPositionViewModel> SwitchAndPositions { get; } = new();
-        public ObservableCollection<SwitchPositionViewModel> OverlapSwitchAndPositions { get; } = new();
-        public ObservableCollection<ReleaseSectionViewModel> ReleaseSections { get; } = new();
-
-        public ICommand AddSwitchPositionCommand { get; }
-        public ICommand AddOverlapSwitchPositionCommand { get; }
-        public ICommand AddReleaseSectionCommand { get; }
-
-        public List<string> AvailableProceedSpeeds { get; } = new() { "R", "YY", "Y", "YG", "G" };
-
-        public RouteViewModel()
-        {
-            AddSwitchPositionCommand = new RelayCommand(_ => SwitchAndPositions.Add(new SwitchPositionViewModel { RemoveCommand = new RelayCommand(p => SwitchAndPositions.Remove(p as SwitchPositionViewModel)) }));
-            AddOverlapSwitchPositionCommand = new RelayCommand(_ => OverlapSwitchAndPositions.Add(new SwitchPositionViewModel { RemoveCommand = new RelayCommand(p => OverlapSwitchAndPositions.Remove(p as SwitchPositionViewModel)) }));
-            AddReleaseSectionCommand = new RelayCommand(_ => ReleaseSections.Add(new ReleaseSectionViewModel { RemoveCommand = new RelayCommand(p => ReleaseSections.Remove(p as ReleaseSectionViewModel)) }));
-        }
-
-        public override double X { get => 0; set { } }
-        public override double Y { get => 0; set { } }
-    }
-
-    public class ReleaseSectionViewModel : ObservableObject
-    {
-        private string _trackRef;
-        public string TrackRef { get => _trackRef; set => SetProperty(ref _trackRef, value); }
-
-        private bool _flankProtection;
-        public bool FlankProtection { get => _flankProtection; set => SetProperty(ref _flankProtection, value); }
-
-        public ICommand RemoveCommand { get; set; }
-
-        public List<bool> AvailableProtections { get; } = new() { true, false };
-    }
-
-    public class InfrastructureViewModel : BaseElementViewModel
-    {
-        public override string TypeName => "Infrastructure";
-        public ObservableCollection<CategoryViewModel> Categories { get; } = new();
-
-        public override double X { get => 0; set { } }
-        public override double Y { get => 0; set { } }
-    }
-
-    public class CategoryViewModel : ObservableObject
-    {
-        public string Title { get; set; }
-        public ObservableCollection<BaseElementViewModel> Items { get; } = new ObservableCollection<BaseElementViewModel>();
-    }
-
+    /// <summary>
+    /// RailML 에디터 앱의 전체 흐름을 꽉 잡고 있는 '사령탑(ViewModel)' 입니다.
+    /// 화면에 그려질 여러 문서들(도화지들), 현재 선택된 요소, 그리고 '저장하기', '복사하기' 등의 메인 명령어들이 이곳에 정의되어 있습니다.
+    /// 
+    /// (리팩터링 2단계 완료) 예전에는 이곳에서 새 요소를 하나하나 직접 찍어냈지만, 
+    /// 지금은 ElementFactoryService 라는 공장에 외주를 주어 생성 로직의 부담을 크게 덜었습니다.
+    /// </summary>
     public class MainViewModel : ObservableObject
     {
-        public ObservableCollection<BaseElementViewModel> Elements { get; } = new ObservableCollection<BaseElementViewModel>();
-        public ObservableCollection<BaseElementViewModel> SelectedElements { get; } = new ObservableCollection<BaseElementViewModel>();
+        public ObservableCollection<DocumentViewModel> Documents { get; } = new ObservableCollection<DocumentViewModel>();
+
+        private DocumentViewModel? _activeDocument;
+        public DocumentViewModel? ActiveDocument
+        {
+            get => _activeDocument;
+            set
+            {
+                if (SetProperty(ref _activeDocument, value))
+                {
+                    if (_activeDocument != null)
+                    {
+                        foreach (var doc in Documents)
+                        {
+                            doc.IsActive = (doc == _activeDocument);
+                        }
+                    }
+                    OnActiveDocumentChanged();
+                }
+            }
+        }
+
+        // Forward properties for compatibility, or update bindings to use ActiveDocument.Elements
+        public ObservableCollection<BaseElementViewModel>? Elements => ActiveDocument?.Elements;
+        public ObservableCollection<BaseElementViewModel>? SelectedElements => ActiveDocument?.SelectedElements;
+        public UndoRedoManager? History => ActiveDocument?.History;
 
         public ObservableCollection<InfrastructureViewModel> TreeRoots { get; } = new ObservableCollection<InfrastructureViewModel>();
         
-        private InfrastructureViewModel _activeInfrastructure;
+        private InfrastructureViewModel _activeInfrastructure = null!;
         public InfrastructureViewModel ActiveInfrastructure
         {
             get => _activeInfrastructure;
             set => SetProperty(ref _activeInfrastructure, value);
         }
 
-        private BaseElementViewModel? _selectedElement;
         public BaseElementViewModel? SelectedElement
         {
-            get => _selectedElement;
-            set => SetProperty(ref _selectedElement, value);
+            get => ActiveDocument?.SelectedElement;
+            set
+            {
+                if (ActiveDocument != null)
+                {
+                    ActiveDocument.SelectedElement = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         private BulkEditViewModel? _bulkEdit;
@@ -735,32 +109,32 @@ namespace RailmlEditor.ViewModels
             }
         }
 
-        public UndoRedoManager History { get; } = new();
+        public ICommand NewProjectCommand { get; }
+        public ICommand OpenProjectCommand { get; }
+        public ICommand SaveProjectCommand { get; }
+        public ICommand SaveAsProjectCommand { get; }
+        public ICommand CreateAreaCommand { get; }
+
+        public event Action? RequestUpdateTitle;
 
         private readonly RailmlEditor.Logic.TopologyManager _topologyManager = new RailmlEditor.Logic.TopologyManager();
 
         public MainViewModel()
         {
             InitializeInfrastructure();
-            Elements.CollectionChanged += Elements_CollectionChanged;
             _topologyManager.PrincipleTrackSelectionRequested += info => PrincipleTrackSelectionRequested?.Invoke(info);
 
-            History.StateChanged += (s, e) => { 
-                (UndoCommand as RelayCommand)?.RaiseCanExecuteChanged();
-                (RedoCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            };
-
-            UndoCommand = new RelayCommand(_ => History.Undo(), _ => History.CanUndo && IsEditMode);
-            RedoCommand = new RelayCommand(_ => History.Redo(), _ => History.CanRedo && IsEditMode);
+            UndoCommand = new RelayCommand(_ => History?.Undo(), _ => History?.CanUndo == true && IsEditMode);
+            RedoCommand = new RelayCommand(_ => History?.Redo(), _ => History?.CanRedo == true && IsEditMode);
 
             SelectCommand = new RelayCommand(param => 
             {
-                if (param is BaseElementViewModel vm)
+                if (param is BaseElementViewModel vm && ActiveDocument != null)
                 {
                     bool isMulti = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
                     if (!isMulti)
                     {
-                        foreach (var el in Elements) el.IsSelected = (el == vm);
+                        foreach (var el in ActiveDocument.Elements) el.IsSelected = (el == vm);
                     }
                     else
                     {
@@ -769,9 +143,9 @@ namespace RailmlEditor.ViewModels
                 }
             });
 
-            DeleteCommand = new RelayCommand(_ => DeleteSelected(), _ => IsEditMode);
-            CopyCommand = new RelayCommand(_ => CopySelected()); // Copy is allowed in read-only
-            PasteCommand = new RelayCommand(_ => PasteElements(), _ => IsEditMode);
+            DeleteCommand = new RelayCommand(_ => DeleteSelected(), _ => IsEditMode && ActiveDocument != null);
+            CopyCommand = new RelayCommand(_ => CopySelected(), _ => ActiveDocument != null); 
+            PasteCommand = new RelayCommand(_ => PasteElements(), _ => IsEditMode && ActiveDocument != null);
 
             OpenTemplatesCommand = new RelayCommand(_ => 
             {
@@ -780,12 +154,175 @@ namespace RailmlEditor.ViewModels
                 win.ShowDialog();
             });
 
-            // Test Data
-            // Test Data Removed
+            NewProjectCommand = new RelayCommand(_ => NewProject());
+            OpenProjectCommand = new RelayCommand(_ => OpenProject());
+            SaveProjectCommand = new RelayCommand(_ => SaveProject(), _ => ActiveDocument != null);
+            SaveAsProjectCommand = new RelayCommand(_ => SaveAsProject(), _ => ActiveDocument != null);
+            CreateAreaCommand = new RelayCommand(_ => CreateAreaFromSelectedBorders(), _ => ActiveDocument != null);
 
             LoadCustomTemplates();
+            
+            // Create initial empty document
+            NewProject();
         }
 
+        private void OnActiveDocumentChanged()
+        {
+            OnPropertyChanged(nameof(Elements));
+            OnPropertyChanged(nameof(SelectedElements));
+            OnPropertyChanged(nameof(History));
+            OnPropertyChanged(nameof(SelectedElement));
+            
+            // Hook up collection changed if needed, or rely on UI binding directly to ActiveDocument.Elements
+            if (ActiveDocument != null)
+            {
+                // Re-evaluate commands
+                (UndoCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (RedoCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (DeleteCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (CopyCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (PasteCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (SaveProjectCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (SaveAsProjectCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (CreateAreaCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        public void AddElement(string type, System.Windows.Point position)
+        {
+            var oldState = TakeSnapshot();
+            BaseElementViewModel? newElement = null;
+
+            // Try single elements first
+            newElement = RailmlEditor.Services.ElementFactoryService.CreateElement(type, position, GetNextId);
+
+            // If not found, check if it's a template
+            if (newElement == null)
+            {
+                switch (type)
+                {
+                    case "Single": AddDoubleTrack("single.railml", position); break;
+                    case "SingleR": AddDoubleTrack("singleR.railml", position); break;
+                    case "SingleU": AddDoubleTrack("singleU.railml", position); break;
+                    case "SingleRU": AddDoubleTrack("singleRU.railml", position); break;
+                    case "Double": AddDoubleTrack("double.railml", position); break;
+                    case "DoubleR": AddDoubleTrack("doubleR.railml", position); break;
+                    case "Cross": AddDoubleTrack("cross.railml", position); break;
+                }
+            }
+            
+            if (newElement != null)
+            {
+                Elements.Add(newElement);
+                if (newElement is TrackViewModel) UpdateProximitySwitches();
+                AddHistory(oldState);
+            }
+        }
+
+        private int _untitledCounter = 1;
+
+        private void NewProject()
+        {
+            var newDoc = new DocumentViewModel(this) { InitialTitle = $"notitle-{_untitledCounter++}.railml" };
+            Documents.Add(newDoc);
+            ActiveDocument = newDoc;
+        }
+
+        private void OpenProject()
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog();
+            dialog.Filter = "RailML Files (*.xml;*.railml)|*.xml;*.railml|All Files (*.*)|*.*";
+            if (dialog.ShowDialog() == true)
+            {
+                // Check if already open
+                var existing = Documents.FirstOrDefault(d => d.FilePath == dialog.FileName);
+                if (existing != null)
+                {
+                    ActiveDocument = existing;
+                    return;
+                }
+
+                var newDoc = new DocumentViewModel(this) { FilePath = dialog.FileName };
+                var service = new Services.RailmlService();
+                try
+                {
+                    service.Load(dialog.FileName, this, newDoc); // Need to modify RailmlService to support loading into specific doc
+                    newDoc.IsDirty = false;
+                    Documents.Add(newDoc);
+                    ActiveDocument = newDoc;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error loading file: {ex.Message}");
+                }
+            }
+        }
+
+        private void SaveProject()
+        {
+            if (ActiveDocument != null)
+            {
+                SaveDocument(ActiveDocument);
+            }
+        }
+
+        public bool SaveDocument(DocumentViewModel doc)
+        {
+            if (string.IsNullOrEmpty(doc.FilePath))
+            {
+                return SaveAsDocument(doc);
+            }
+
+            var service = new Services.RailmlService();
+            try
+            {
+                service.Save(doc.FilePath, this, doc); // Modify RailmlService to save a specific doc
+                doc.IsDirty = false;
+                MessageBox.Show($"File {doc.Title} saved successfully.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving file: {ex.Message}");
+                return false;
+            }
+        }
+
+        private void SaveAsProject()
+        {
+            if (ActiveDocument != null)
+            {
+                SaveAsDocument(ActiveDocument);
+            }
+        }
+
+        public bool SaveAsDocument(DocumentViewModel doc)
+        {
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.FileName = "railway"; 
+            dlg.DefaultExt = ".railml"; 
+            dlg.Filter = "RailML documents (.railml)|*.railml"; 
+
+            if (dlg.ShowDialog() == true)
+            {
+                doc.FilePath = dlg.FileName;
+                var service = new Services.RailmlService();
+                try
+                {
+                    service.Save(doc.FilePath, this, doc);
+                    doc.IsDirty = false;
+                    MessageBox.Show($"File {doc.Title} saved successfully.");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error saving file: {ex.Message}");
+                    return false;
+                }
+            }
+            return false;
+        }
 
         private void DeleteSelected()
         {
@@ -806,7 +343,8 @@ namespace RailmlEditor.ViewModels
             _clipboard.Clear();
             foreach (var el in SelectedElements)
             {
-                _clipboard.Add(CloneElement(el));
+                var c = CloneElement(el);
+                if (c != null) _clipboard.Add(c);
             }
         }
 
@@ -822,20 +360,13 @@ namespace RailmlEditor.ViewModels
             foreach (var el in _clipboard)
             {
                 var clone = CloneElement(el);
+                if (clone == null) continue;
                 
                 // Offset position
-                clone.X += 20;
-                clone.Y += 20;
+                clone.MoveBy(20, 20);
                 
                 if (clone is TrackViewModel track)
                 {
-                    track.X2 += 20;
-                    track.Y2 += 20;
-                    if (track is CurvedTrackViewModel curved)
-                    {
-                        curved.MX += 20;
-                        curved.MY += 20;
-                    }
                     clone.Id = GetNextId("tr");
                 }
                 else if (clone is SignalViewModel signal)
@@ -855,19 +386,8 @@ namespace RailmlEditor.ViewModels
             // Update clipboard for next paste (cumulative offset)
             for (int i = 0; i < _clipboard.Count; i++)
             {
-                _clipboard[i].X += 20;
-                _clipboard[i].Y += 20;
-                if (_clipboard[i] is TrackViewModel t)
-                {
-                    t.X2 += 20;
-                    t.Y2 += 20;
-                    if (t is CurvedTrackViewModel c)
-                    {
-                        c.MX += 20;
-                        c.MY += 20;
-                    }
-                }
-                else if (_clipboard[i] is SwitchViewModel sw)
+                _clipboard[i].MoveBy(20, 20);
+                if (_clipboard[i] is SwitchViewModel sw)
                 {
                     // Sw coordinates already handled by base property increment in PasteElements if needed
                 }
@@ -927,10 +447,12 @@ namespace RailmlEditor.ViewModels
             var service = new RailmlEditor.Services.RailmlService();
             System.Collections.Generic.List<BaseElementViewModel> snippet = new System.Collections.Generic.List<BaseElementViewModel>();
 
+            if (ActiveDocument == null) return;
+
             if (CustomTemplates.ContainsKey(templateKey) && !string.IsNullOrWhiteSpace(CustomTemplates[templateKey]))
             {
                 // Use custom template
-                snippet = service.LoadSnippetFromXml(CustomTemplates[templateKey], this);
+                snippet = service.LoadSnippetFromXml(CustomTemplates[templateKey], this, ActiveDocument);
             }
             else
             {
@@ -947,15 +469,24 @@ namespace RailmlEditor.ViewModels
                     var searchDirs = new[] { workingDir, currentDir };
                     foreach (var baseDir in searchDirs)
                     {
-                        string probeRoot = baseDir;
+                        string? probeRoot = baseDir;
                         for (int i = 0; i < 5; i++)
                         {
+                            if (probeRoot == null) break;
                             string probe = System.IO.Path.Combine(probeRoot, filePath);
                             if (System.IO.File.Exists(probe))
                             {
                                 candidate = probe;
                                 break;
                             }
+                            
+                            string templateProbe = System.IO.Path.Combine(probeRoot, "template", filePath);
+                            if (System.IO.File.Exists(templateProbe))
+                            {
+                                candidate = templateProbe;
+                                break;
+                            }
+                            
                             probeRoot = System.IO.Path.GetDirectoryName(probeRoot);
                             if (string.IsNullOrEmpty(probeRoot)) break;
                         }
@@ -964,13 +495,25 @@ namespace RailmlEditor.ViewModels
                     
                     if (candidate != null) finalPath = candidate;
                 }
-                snippet = service.LoadSnippet(finalPath, this);
+                
+                try
+                {
+                    if (ActiveDocument != null)
+                    {
+                        snippet = service.LoadSnippet(finalPath, this, ActiveDocument);
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    MessageBox.Show($"Failed to load template '{finalPath}':\n{ex.Message}", "Template Load Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Diagnostics.Debug.WriteLine($"Template load failed: {ex}");
+                }
             }
 
-            if (snippet.Count > 0)
+            if (snippet.Count > 0 && ActiveDocument != null)
             {
                 // Deselect current
-                foreach (var el in Elements) el.IsSelected = false;
+                foreach (var el in ActiveDocument.Elements) el.IsSelected = false;
 
                 if (targetPos.HasValue)
                 {
@@ -1017,21 +560,10 @@ namespace RailmlEditor.ViewModels
                         
                         foreach (var el in snippet)
                         {
-                            el.X += dx;
-                            el.Y += dy;
-                            if (el is TrackViewModel t)
+                            el.MoveBy(dx, dy);
+                            if (el is SwitchViewModel sw)
                             {
-                                t.X2 += dx;
-                                t.Y2 += dy;
-                                if (t is CurvedTrackViewModel c)
-                                {
-                                    c.MX += dx;
-                                    c.MY += dy;
-                                }
-                            }
-                            else if (el is SwitchViewModel sw)
-                            {
-                                // Sw coordinates already handled by base property increment above
+                                // Sw coordinates already handled by MoveBy
                             }
                         }
                     }
@@ -1047,7 +579,7 @@ namespace RailmlEditor.ViewModels
             }
         }
 
-        private BaseElementViewModel CloneElement(BaseElementViewModel el)
+        private BaseElementViewModel? CloneElement(BaseElementViewModel el)
         {
             if (el is CurvedTrackViewModel curved)
             {
@@ -1159,11 +691,11 @@ namespace RailmlEditor.ViewModels
                     ReleaseTriggerRef = r.ReleaseTriggerRef
                 };
                 foreach (var s in r.SwitchAndPositions)
-                    nr.SwitchAndPositions.Add(new SwitchPositionViewModel { SwitchRef = s.SwitchRef, SwitchPosition = s.SwitchPosition, RemoveCommand = new RelayCommand(p => nr.SwitchAndPositions.Remove(p as SwitchPositionViewModel)) });
+                    nr.SwitchAndPositions.Add(new SwitchPositionViewModel { SwitchRef = s.SwitchRef, SwitchPosition = s.SwitchPosition, RemoveCommand = new RelayCommand(p => { if (p is SwitchPositionViewModel vm) nr.SwitchAndPositions.Remove(vm); }) });
                 foreach (var s in r.OverlapSwitchAndPositions)
-                    nr.OverlapSwitchAndPositions.Add(new SwitchPositionViewModel { SwitchRef = s.SwitchRef, SwitchPosition = s.SwitchPosition, RemoveCommand = new RelayCommand(p => nr.OverlapSwitchAndPositions.Remove(p as SwitchPositionViewModel)) });
+                    nr.OverlapSwitchAndPositions.Add(new SwitchPositionViewModel { SwitchRef = s.SwitchRef, SwitchPosition = s.SwitchPosition, RemoveCommand = new RelayCommand(p => { if (p is SwitchPositionViewModel vm) nr.OverlapSwitchAndPositions.Remove(vm); }) });
                 foreach (var s in r.ReleaseSections)
-                    nr.ReleaseSections.Add(new ReleaseSectionViewModel { TrackRef = s.TrackRef, FlankProtection = s.FlankProtection, RemoveCommand = new RelayCommand(p => nr.ReleaseSections.Remove(p as ReleaseSectionViewModel)) });
+                    nr.ReleaseSections.Add(new ReleaseSectionViewModel { TrackRef = s.TrackRef, FlankProtection = s.FlankProtection, RemoveCommand = new RelayCommand(p => { if (p is ReleaseSectionViewModel vm) nr.ReleaseSections.Remove(vm); }) });
                  nr.ShowCoordinates = r.ShowCoordinates;
                 return nr;
             }
@@ -1190,7 +722,7 @@ namespace RailmlEditor.ViewModels
 
         public List<BaseElementViewModel> TakeSnapshot()
         {
-            return Elements.Select(el => CloneElement(el)).ToList();
+            return Elements.Select(el => CloneElement(el)).Where(e => e != null).Cast<BaseElementViewModel>().ToList();
         }
 
         public void AddHistory(List<BaseElementViewModel> oldState)
@@ -1212,10 +744,13 @@ namespace RailmlEditor.ViewModels
             foreach (var el in state)
             {
                 var clone = CloneElement(el);
-                Elements.Add(clone);
-                if (selectedIds.Contains(clone.Id))
+                if (clone != null)
                 {
-                    clone.IsSelected = true; // This will trigger Element_PropertyChanged and add to SelectedElements
+                    Elements.Add(clone);
+                    if (selectedIds.Contains(clone.Id))
+                    {
+                        clone.IsSelected = true; // This will trigger Element_PropertyChanged and add to SelectedElements
+                    }
                 }
             }
             Elements.CollectionChanged += Elements_CollectionChanged;
@@ -1238,7 +773,7 @@ namespace RailmlEditor.ViewModels
             TreeRoots.Add(ActiveInfrastructure);
         }
 
-        private void Elements_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void Elements_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
              if (e.Action == NotifyCollectionChangedAction.Reset)
              {
@@ -1271,7 +806,7 @@ namespace RailmlEditor.ViewModels
             {
                 if (e.PropertyName == nameof(SignalViewModel.RelatedTrackId))
                 {
-                    UpdateTrackChildrenBinding(sender as BaseElementViewModel);
+                    if (sender is BaseElementViewModel vm) UpdateTrackChildrenBinding(vm);
                 }
             }
             else if (sender is TrackViewModel track)
@@ -1429,7 +964,7 @@ namespace RailmlEditor.ViewModels
              }
         }
 
-        private void Element_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void Element_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(BaseElementViewModel.IsSelected))
             {
@@ -1549,3 +1084,4 @@ namespace RailmlEditor.ViewModels
         }
     }
 }
+

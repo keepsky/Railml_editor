@@ -1,10 +1,10 @@
-#pragma warning disable
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Xml.Linq;
 using RailmlEditor.Utils;
+using RailmlEditor.ViewModels.Elements;
 
 namespace RailmlEditor.ViewModels
 {
@@ -25,7 +25,7 @@ namespace RailmlEditor.ViewModels
         private class TrackPositionNode
         {
             public double Pos { get; set; }
-            public GraphNodeViewModel Node { get; set; }
+            public GraphNodeViewModel? Node { get; set; }
         }
 
         public void BuildGraph(IEnumerable<BaseElementViewModel> allElements)
@@ -103,8 +103,9 @@ namespace RailmlEditor.ViewModels
                                 double dBegin = Math.Sqrt(Math.Pow(trk.X - sw.X, 2) + Math.Pow(trk.Y - sw.Y, 2));
                                 double dEnd = Math.Sqrt(Math.Pow(trk.X2 - sw.X, 2) + Math.Pow(trk.Y2 - sw.Y, 2));
 
-                                if (dBegin < 5.0) pos = 0;
-                                else if (dEnd < 5.0) pos = trk.Length;
+                                double tolerance = RailmlEditor.Models.AppSettings.Instance.NodeMappingTolerance;
+                                if (dBegin < tolerance) pos = 0;
+                                else if (dEnd < tolerance) pos = trk.Length;
                                 else 
                                 {
                                     // Mid-track or use sw.Pos if applicable (only if Principle?)
@@ -244,9 +245,10 @@ namespace RailmlEditor.ViewModels
                             double dBegin = Math.Sqrt(Math.Pow(trk.X - sw.X, 2) + Math.Pow(trk.Y - sw.Y, 2));
                             double dEnd = Math.Sqrt(Math.Pow(trk.X2 - sw.X, 2) + Math.Pow(trk.Y2 - sw.Y, 2));
 
-                            if (dBegin < 5.0) pos = 0;
-                            else if (dEnd < 5.0) pos = trk.Length;
-                            else 
+                            double tolerance = RailmlEditor.Models.AppSettings.Instance.NodeMappingTolerance;
+                            if (dBegin < tolerance) pos = 0;
+                            else if (dEnd < tolerance) pos = trk.Length;
+                            else
                             {
                                 if (tid == sw.PrincipleTrackId || tid == sw.EnteringTrackId) pos = sw.Pos;
                                 else pos = (dBegin < dEnd) ? 0 : trk.Length;
@@ -365,7 +367,7 @@ namespace RailmlEditor.ViewModels
                     // Return the terminal node if it exists
                     if (onTrackNodes.TryGetValue(track.Id, out var nodes))
                     {
-                        var termNode = nodes.FirstOrDefault(n => Math.Abs(n.Pos) < 0.001 && n.Node.Type == "Terminal");
+                        var termNode = nodes.FirstOrDefault(n => Math.Abs(n.Pos) < 0.001 && n.Node?.Type == "Terminal");
                         if (termNode != null && termNode.Node != startNode) return termNode.Node;
                     }
                 }
@@ -407,7 +409,7 @@ namespace RailmlEditor.ViewModels
                     // Return the terminal node if it exists
                     if (onTrackNodes.TryGetValue(track.Id, out var nodes))
                     {
-                        var termNode = nodes.FirstOrDefault(n => Math.Abs(n.Pos - track.Length) < 0.001 && n.Node.Type == "Terminal");
+                        var termNode = nodes.FirstOrDefault(n => Math.Abs(n.Pos - track.Length) < 0.001 && n.Node?.Type == "Terminal");
                         if (termNode != null && termNode.Node != startNode) return termNode.Node;
                     }
                 }
@@ -431,3 +433,8 @@ namespace RailmlEditor.ViewModels
         }
     }
 }
+
+
+
+
+

@@ -2,9 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using RailmlEditor.ViewModels.Elements;
 
 namespace RailmlEditor.ViewModels
 {
+    /// <summary>
+    /// 여러 개의 선로나 신호기를 마우스로 드래그해서 한꺼번에 선택했을 때 표시되는 속성창(Property Window) 전용 뷰모델입니다.
+    /// 선택된 요소들이 가진 공통된 값을 보여주거나, 이 창에서 값을 바꾸면 선택된 모든 요소들에게 일괄적으로 값을 적용(Bulk Edit)해주는 역할을 합니다.
+    /// </summary>
     public class BulkEditViewModel : ObservableObject
     {
         private readonly List<BaseElementViewModel> _elements;
@@ -72,7 +77,7 @@ namespace RailmlEditor.ViewModels
         public string? Direction
         {
             get => GetCommonValue(e => (e as SignalViewModel)?.Direction);
-            set { SetCommonValue((e, v) => { if (e is SignalViewModel s) s.Direction = v; }, value); OnPropertyChanged(); }
+            set { SetCommonValue((e, v) => { if (e is SignalViewModel s) s.Direction = v ?? string.Empty; }, value); OnPropertyChanged(); }
         }
 
         // Helper for showing/hiding sections in Property Panel
@@ -87,3 +92,4 @@ namespace RailmlEditor.ViewModels
         public List<string>? Directions => (_elements.FirstOrDefault(e => e is SignalViewModel) as SignalViewModel)?.AvailableDirections;
     }
 }
+

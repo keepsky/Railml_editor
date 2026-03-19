@@ -4,9 +4,10 @@ using System.Windows;
 
 namespace RailmlEditor;
 
-/// <summary>
-/// Interaction logic for App.xaml
-/// </summary>
+    /// <summary>
+    /// 프로그램이 가장 먼저 실행될 때 시작되는 진입점(Entry Point)입니다.
+    /// 앱이 켜질 때 설정 파일(ConfigService)을 읽어오고, 저장된 테마(다크/라이트)를 적용하는 역할을 합니다.
+    /// </summary>
     public partial class App : Application
     {
         protected override void OnStartup(StartupEventArgs e)
