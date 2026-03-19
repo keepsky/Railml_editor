@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using RailmlEditor.Models;
 using RailmlEditor.ViewModels;
@@ -538,12 +538,22 @@ namespace RailmlEditor.Services
         {
             doc.Elements.Clear();
             if (railml == null) return;
+            
+            if (doc.ActiveInfrastructure == null)
+            {
+                doc.ActiveInfrastructure = new InfrastructureViewModel();
+                doc.TreeRoots.Add(doc.ActiveInfrastructure);
+            }
+
             if (railml?.Infrastructure != null)
             {
-                viewModel.ActiveInfrastructure.Id = railml.Infrastructure.Id ?? "inf001";
-                viewModel.ActiveInfrastructure.Name = railml.Infrastructure.Name ?? "Default Infrastructure";
+                doc.ActiveInfrastructure.Id = railml.Infrastructure.Id ?? "inf001";
+                doc.ActiveInfrastructure.Name = railml.Infrastructure.Name ?? "Default Infrastructure";
+                
+                // Update the global one too just in case it's still bound somewhere
+                viewModel.ActiveInfrastructure.Id = doc.ActiveInfrastructure.Id;
+                viewModel.ActiveInfrastructure.Name = doc.ActiveInfrastructure.Name;
             }
-            viewModel.Elements.Clear();
 
             var context = new Mappers.MappingContext(viewModel, doc) { Railml = railml };
             var trackMapper = new Mappers.TrackMapper();
